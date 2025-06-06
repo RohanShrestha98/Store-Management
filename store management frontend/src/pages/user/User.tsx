@@ -163,7 +163,7 @@ export default function User() {
           isLoading={isLoading}
           isError={isError}
           columns={columns}
-          data={data?.rows ?? []}
+          data={data?.data ?? []}
           currentPage={1}
           totalPage={1}
           emptyMessage="Oops! No User available right now."

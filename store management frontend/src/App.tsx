@@ -31,6 +31,7 @@ function App() {
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/category" element={<Category />} />
           <Route path="/add-category" element={<AddCategory />} />
+          <Route path="/edit-category/:id" element={<AddCategory />} />
           <Route path="/risk" element={<RiskTable />} />
           <Route path="/risk-details" element={<Users />} />
           <Route path="/settings" element={<Settings />} />

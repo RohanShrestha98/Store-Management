@@ -58,7 +58,8 @@ const getUserClockInDetails = async (req, res) => {
   console.log("staffId", staffId);
   try {
     const [rows] = await connection.query(`SELECT * FROM ${staffId}`);
-    res.status(200).json({ success: true, rows });
+    const data = rows;
+    res.status(200).json({ success: true, data });
   } catch (err) {
     console.error("Error retrieving users:", err);
     res.status(500).send("Error retrieving users");

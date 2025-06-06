@@ -36,7 +36,8 @@ const createStore = async (req, res) => {
 const getStore = async (req, res) => {
   try {
     const [rows] = await connection.query("SELECT * FROM store");
-    statusHandeler(res, 200, true, rows);
+    const data = rows;
+    return res.status(200).json({ success: true, data });
   } catch (err) {
     console.error("Error retrieving store:", err);
     statusHandeler(res, 500, false, "Error retrieving store");

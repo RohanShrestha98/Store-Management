@@ -30,6 +30,7 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
       icon: <LuLayoutDashboard />,
       link: "/category",
       subLink: "/add-category",
+      subSubLink: "/edit-category",
     },
     {
       id: 1,

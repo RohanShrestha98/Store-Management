@@ -1,7 +1,7 @@
 import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
-import { useUserData } from "@/hooks/useQueryData";
+import { useCategoryData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
@@ -19,7 +19,13 @@ export default function Category() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
-  const { data, isLoading, isError } = useUserData(searchText, pageSize, page);
+  const { data, isLoading, isError } = useCategoryData(
+    searchText,
+    pageSize,
+    page
+  );
+
+  console.log("data", data);
 
   const columns = useMemo(
     () => [
@@ -30,22 +36,8 @@ export default function Category() {
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.firstName,
-        id: "firstName",
-        cell: (info) => {
-          return (
-            <div className="flex items-center gap-1">
-              {" "}
-              <p className="flex items-center gap-1">
-                {info?.row?.original?.firstName === ""
-                  ? "-"
-                  : info?.row?.original?.firstName + " "}
-                {info?.row?.original?.lastName}
-              </p>
-            </div>
-          );
-        },
-        // info.getValue(),
+        accessorFn: (row) => row?.name,
+        id: "name",
         header: () => <span>Name</span>,
         footer: (props) => props.column.id,
       },
@@ -106,13 +98,21 @@ export default function Category() {
         accessorFn: (row) => row,
         id: "action",
         cell: (info) => {
+          const data = info?.cell?.row?.original;
           return (
             <div className="flex gap-2 text-base justify-center">
-              <FiEdit2 className="text-[#4365a7] cursor-pointer" />
+              <FiEdit2
+                onClick={() =>
+                  navigate(`/edit-category/${data?.id}`, {
+                    state: data,
+                  })
+                }
+                className="text-[#4365a7] cursor-pointer"
+              />
               <DeleteModal
                 asChild
-                desc={"Are you sure you want to delete this User"}
-                title={"Delete User"}
+                desc={"Are you sure you want to delete this Category"}
+                title={"Delete Category"}
                 id={info?.row?.original?.id}
               >
                 <FaRegTrashCan className="text-red-600 cursor-pointer" />

@@ -37,8 +37,10 @@ export const useAuthMutation = () => useMutate(["login"], "api/user/login");
 export const useAuthSignupMutation = () =>
   useMutate(["signup"], "api/user/sign-up");
 
-export const useUserMutation = () =>
-  useMutate(["user"], "api/v1/user/", "multipart/form-data");
+export const useCategoryMutation = () =>
+  useMutate(["category"], "api/category/");
+
+export const useUserMutation = () => useMutate(["user"], "api/user/");
 
 export const useChangePasswordMutation = () =>
   useMutate(
@@ -55,9 +57,6 @@ export const useRiskMutation = () =>
 
 export const useCourseMutation = () =>
   useMutate(["course"], "api/v3/course/", "multipart/form-data");
-
-export const useCategoryMutation = () =>
-  useMutate(["category"], "api/v3/course-group/", "multipart/form-data");
 
 export const useSubjectMutation = () =>
   useMutate(["subject"], "api/v3/subject/", "multipart/form-data");

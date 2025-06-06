@@ -22,9 +22,12 @@ export const useQueryData = (
 };
 
 export const useUserData = (searchText = "", pageSize = "10", page = 1) =>
+  useQueryData(["user", searchText, pageSize, page], `api/user/`);
+
+export const useCategoryData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(
-    ["user", searchText, pageSize, page],
-    `api/user/?page=${page}&&search=${searchText}&&pageSize=${pageSize}`
+    ["category", searchText, pageSize, page],
+    `api/category/?page=${page}&&search=${searchText}&&pageSize=${pageSize}`
   );
 
 export const useNotificationData = (

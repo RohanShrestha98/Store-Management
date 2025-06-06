@@ -43,8 +43,12 @@ const SignUp = () => {
   });
 
   const onSubmitHandler = async (data) => {
+    const postData = {
+      ...data,
+      isVerified: false,
+    };
     try {
-      const result = await authMutation.mutateAsync(["post", "", data]);
+      await authMutation.mutateAsync(["post", "", postData]);
       toast.success("Signup successfully");
       navigate("/login");
       reset();

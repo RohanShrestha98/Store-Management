@@ -15,7 +15,8 @@ export default function Navbar() {
     " "
   );
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useNotificationData();
+  // const { data, isLoading, isError } = useNotificationData();
+  const data = [{ data: [] }];
 
   const { user } = useAuthStore();
   const [showNotification, setShowNotification] = useState(false);

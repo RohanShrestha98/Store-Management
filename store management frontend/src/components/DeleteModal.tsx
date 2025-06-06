@@ -9,6 +9,7 @@ import {
   useUserMutation,
   useNotificationMutation,
   useRiskMutation,
+  useCategoryMutation,
 } from "@/hooks/useMutateData";
 import "react-quill/dist/quill.snow.css";
 import { useLocation } from "react-router-dom";
@@ -22,12 +23,15 @@ export default function DeleteModal({ asChild, children, title, desc, id }) {
   const userMutation = useUserMutation();
   const notificationMutation = useNotificationMutation();
   const riskMutation = useRiskMutation();
+  const categoryMutation = useCategoryMutation();
 
   const deleteMutation =
     pathname === "notification"
       ? notificationMutation
       : pathname === "risk"
       ? riskMutation
+      : pathname === "category"
+      ? categoryMutation
       : pathname === "user" && userMutation;
 
   const handleDelete = async () => {

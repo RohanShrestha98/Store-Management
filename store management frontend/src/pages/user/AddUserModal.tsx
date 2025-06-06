@@ -29,16 +29,16 @@ export default function AddUserModal({
   const [error, setError] = useState("");
 
   const fieldSchema = Yup.object().shape({
-    firstname: Yup.string()
+    firstName: Yup.string()
       .required("Required")
       .max(36, "Must be 36 characters or less"),
-    lastname: Yup.string()
+    lastName: Yup.string()
       .required("Required")
       .max(36, "Must be 36 characters or less"),
     email: Yup.string().required("Required"),
-    phonenumber: Yup.string().required("Required"),
-    username: Yup.string().required("Required"),
-    // password: Yup.string().required("Required"),
+    phoneNumber: Yup.string().required("Required"),
+    address: Yup.string().required("Required"),
+    password: Yup.string().required("Required"),
   });
 
   const {
@@ -50,10 +50,10 @@ export default function AddUserModal({
     mode: "onChange",
     resolver: yupResolver(fieldSchema),
     defaultValues: {
-      firstname: editData?.firstName ?? "",
-      lastname: editData?.lastName ?? "",
-      username: editData?.username ?? "",
-      phonenumber: editData?.phoneNumber ?? "",
+      firstName: editData?.firstName ?? "",
+      lastName: editData?.lastName ?? "",
+      phoneNumber: editData?.phoneNumber ?? "",
+      address: editData?.address ?? "",
       email: editData?.email ?? "",
       role: editData?.role?.title ?? "",
     },
@@ -61,10 +61,10 @@ export default function AddUserModal({
 
   useEffect(() => {
     reset({
-      firstname: editData?.firstName ?? "",
-      lastname: editData?.lastName ?? "",
-      username: editData?.username ?? "",
-      phonenumber: editData?.phoneNumber ?? "",
+      firstName: editData?.firstName ?? "",
+      lastName: editData?.lastName ?? "",
+      phoneNumber: editData?.phoneNumber ?? "",
+      address: editData?.address ?? "",
       email: editData?.email ?? "",
       role: editData?.role?.title ?? "",
     });
@@ -83,10 +83,9 @@ export default function AddUserModal({
     const postData = {
       ...data,
       isVerified: true,
-      RoleID: selectedRole ?? editData?.role?.id,
     };
     try {
-      const response = await userMutation.mutateAsync([
+      await userMutation.mutateAsync([
         `${edit ? "patch" : "post"}`,
         edit ? `update/${editData?.id}` : "create/",
         postData,
@@ -95,7 +94,7 @@ export default function AddUserModal({
       setOpen(false);
       reset();
       setError();
-      toast.success(`User ${edit ? "updated" : "added"} successfully`);
+      toast.success(`Staff ${edit ? "updated" : "added"} successfully`);
     } catch (err) {
       console.log("err", err);
       setError(err?.response?.data?.errors);
@@ -129,87 +128,77 @@ export default function AddUserModal({
       <DialogTrigger asChild={asChild}>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]  min-w-[500px] bg-[#FAFAFA]">
         <DialogTitle className="text-[#22244D] font-medium text-base">
-          {edit ? "Edit" : "Add"} User
+          {edit ? "Edit" : "Add"} Staff
         </DialogTitle>
         <form onSubmit={handleSubmit(onSubmitHandler)}>
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-2">
-              <div className="">
-                <InputField
-                  register={register}
-                  name="firstname"
-                  placeholder="Enter First Name"
-                  className="w-full text-sm text-gray-500"
-                  defaultValue=""
-                  required
-                  label="First Name"
-                />
-                <p className="text-red-600 text-xs">
-                  {errors?.firstname?.message ?? error?.firstname}
-                </p>
-              </div>
+              <InputField
+                register={register}
+                name="firstName"
+                placeholder="Enter First Name"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                required
+                label="First Name"
+                error={errors?.firstname?.message ?? error?.firstname}
+              />
+              <InputField
+                register={register}
+                name="lastName"
+                placeholder="Enter Last Name"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                required
+                label="Last Name"
+                error={errors?.lastname?.message ?? error?.lastname}
+              />
+              <InputField
+                register={register}
+                required
+                name="email"
+                type="email"
+                placeholder="Enter email"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                label="Email"
+                error={errors?.email?.message ?? error?.email}
+              />
+              <InputField
+                register={register}
+                required
+                name="password"
+                type="password"
+                placeholder="Enter password"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                label="Password"
+                error={errors?.password?.message ?? error?.password}
+              />
+              <InputField
+                register={register}
+                name="address"
+                placeholder="Enter user address"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                required
+                error={errors?.address?.message ?? error?.address}
+                label="Address"
+              />
 
-              <div className="">
-                <InputField
-                  register={register}
-                  name="lastname"
-                  placeholder="Enter Last Name"
-                  className="w-full text-sm text-gray-500"
-                  defaultValue=""
-                  required
-                  label="Last Name"
-                />
-                <p className="text-red-600 text-xs">
-                  {errors?.lastname?.message ?? error?.lastname}
-                </p>
-              </div>
-              <div className="">
-                <InputField
-                  register={register}
-                  name="username"
-                  placeholder="Enter user Name"
-                  className="w-full text-sm text-gray-500"
-                  defaultValue=""
-                  required
-                  label="User Name"
-                />
-                <p className="text-red-600 text-xs">
-                  {errors?.username?.message ?? error?.username}
-                </p>
-              </div>
-              <div className="">
-                <InputField
-                  register={register}
-                  required
-                  name="email"
-                  type="email"
-                  placeholder="Enter email"
-                  className="w-full text-sm text-gray-500"
-                  defaultValue=""
-                  label="Email"
-                />
-                <p className="text-red-600 text-xs">
-                  {errors?.email?.message ?? error?.email}
-                </p>
-              </div>
-              {!edit && (
-                <div className="">
-                  <InputField
-                    register={register}
-                    required
-                    name="password"
-                    type="password"
-                    placeholder="Enter password"
-                    className="w-full text-sm text-gray-500"
-                    defaultValue=""
-                    label="Password"
-                  />
-                  <p className="text-red-600 text-xs">
-                    {errors?.password?.message ?? error?.password}
-                  </p>
-                </div>
-              )}
-              <div>
+              <InputField
+                register={register}
+                name="phoneNumber"
+                placeholder="Enter phone number"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                required={true}
+                type="number"
+                label="Phone number"
+                error={errors?.phonenumber?.message ?? error?.phonenumber}
+              />
+
+              {/* <div>
                 <CustomSelect
                   options={roleOptions}
                   label={""}
@@ -223,22 +212,28 @@ export default function AddUserModal({
                   {hasSubmittedClick && !selectedRole && "Required"}
                   {error?.role}
                 </p>
-              </div>
-              <div className="">
-                <InputField
-                  register={register}
-                  name="phonenumber"
-                  placeholder="Enter phone number"
-                  className="w-full text-sm text-gray-500"
-                  defaultValue=""
-                  required={true}
-                  type="number"
-                  label="Phone number"
-                />
-                <p className="text-red-600 text-xs">
-                  {errors?.phonenumber?.message ?? error?.phonenumber}
-                </p>
-              </div>
+              </div> */}
+              <InputField
+                register={register}
+                name="staffId"
+                placeholder="Enter staff id"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                required={true}
+                label="Staff ID"
+                error={errors?.staffId?.message}
+              />
+              <InputField
+                register={register}
+                name="payPerHour"
+                placeholder="Enter pay per hour"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                required={true}
+                type="number"
+                label="Pay per hour"
+                error={errors?.payPerHour?.message}
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 w-full mt-10 gap-2">
@@ -251,7 +246,7 @@ export default function AddUserModal({
             />
             <Button
               type="submit"
-              buttonName={`${edit ? "Edit" : "Add"} User`}
+              buttonName={`${edit ? "Edit" : "Add"} Staff`}
               handleButtonClick={() => {
                 setHasSubmittedClick(true);
               }}

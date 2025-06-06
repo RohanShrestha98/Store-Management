@@ -54,6 +54,77 @@ const signUp = async (req, res) => {
   }
 };
 
+const createUser = async (req, res) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phoneNumber,
+    address,
+    staffId,
+    payPerHour,
+    isVerified,
+  } = req.body;
+  if (
+    !firstName ||
+    !lastName ||
+    !phoneNumber ||
+    !address ||
+    !email ||
+    !password
+  ) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const connect = await createConnection();
+
+    const [rows] = await connect.execute(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+    const [rowsPhone] = await connect.execute(
+      "SELECT * FROM users WHERE phoneNumber = ?",
+      [phoneNumber]
+    );
+    if (rows.length > 0) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    if (rowsPhone.length > 0) {
+      return res.status(400).json({ message: "Phone number already exists" });
+    }
+
+    await connect.execute(
+      "INSERT INTO users (firstName, lastName, email, password, phoneNumber, address, staffId, payPerHour, isVerified) VALUES (?, ?, ?, ?, ?, ? , ?, ?, ?)",
+      [
+        firstName,
+        lastName,
+        email,
+        hashedPassword,
+        phoneNumber,
+        address,
+        staffId,
+        payPerHour,
+        isVerified,
+      ]
+    );
+
+    await connect.end();
+
+    return res
+      .status(201)
+      .json({ success: true, message: "Staff added successfull" });
+  } catch (error) {
+    console.error("Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
 const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -112,7 +183,8 @@ const getUsers = async (req, res) => {
     const [rows] = await connection.query(
       "SELECT id, firstName, lastName, staffId, email, phoneNumber, address, storeId, payPerHour, days, shift FROM users"
     );
-    return res.status(200).json({ success: true, rows });
+    const data = rows;
+    return res.status(200).json({ success: true, data });
   } catch (err) {
     console.error("Error retrieving users:", err);
     return res.status(500).send({
@@ -160,6 +232,7 @@ const updateUser = async (req, res) => {
     shift,
     days,
     storeId,
+    isVerified,
   } = req.body;
   const query =
     "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, payPerHour = ?, shift = ?, days = ?, storeId = ?  WHERE id = ?";
@@ -176,6 +249,7 @@ const updateUser = async (req, res) => {
       staffId ?? userData?.staffId,
       email ?? userData?.email,
       phoneNumber ?? userData?.phoneNumber,
+      isVerified,
       address,
       payPerHour,
       shift,
@@ -199,6 +273,7 @@ module.exports = {
   signUp,
   login,
   getUsers,
+  createUser,
   updateUser,
   deleteUser,
 };

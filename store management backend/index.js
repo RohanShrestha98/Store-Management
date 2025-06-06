@@ -14,6 +14,7 @@ app.use(cors());
 // Routes
 const userRoute = require("./routes/user");
 const storeRoute = require("./routes/store");
+const categoryRoute = require("./routes/category");
 const userClockInRoute = require("./routes/userClockIn");
 
 const mysql = require("mysql2");
@@ -42,6 +43,7 @@ app.get("/", function (req, res) {
 
 app.use("/api/user", userRoute);
 app.use("/api/store", storeRoute);
+app.use("/api/category", categoryRoute);
 app.use("/api/clock-in", userClockInRoute);
 
 const PORT = process.env.PORT;

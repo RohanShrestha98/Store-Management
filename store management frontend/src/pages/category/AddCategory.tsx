@@ -11,23 +11,22 @@ import {
   smallLetter,
 } from "../../utils/capitalizeFirstLetter";
 import ChooseImage from "@/components/ChooseImage";
-import { Button } from "@/components/ui/button";
 import InputField from "@/ui/InputField";
 import KeywordSelect from "@/components/KeywordSelect";
 import CustomSelect from "@/ui/CustomSelect";
 import { CiImageOn } from "react-icons/ci";
+import Button from "@/ui/Button";
 
 export default function AddCategory() {
   const location = useLocation();
   const editData = location.state;
   const edit = location.state;
   const [selectedImage, setSelectedImage] = useState();
-  const [value, setValue] = useState(edit ? editData?.description : "");
   const [tags, setTags] = useState(edit ? editData?.tags : []);
   const [brands, setBrands] = useState(edit ? editData?.brands : []);
 
   const fieldSchema = Yup.object().shape({
-    title: Yup.string()
+    name: Yup.string()
       .required("Required")
       .max(36, "Must be 36 characters or less"),
   });
@@ -42,7 +41,7 @@ export default function AddCategory() {
     mode: "onChange",
     resolver: yupResolver(fieldSchema),
     defaultValues: {
-      title: editData?.title,
+      name: editData?.name,
     },
   });
   const formValue = watch();
@@ -53,15 +52,15 @@ export default function AddCategory() {
   const onSubmitHandler = async (data) => {
     const postData = {
       ...data,
-      description: value,
-      thumbnail: selectedImage && selectedImage,
+      file: selectedImage && selectedImage,
       tags: tags,
       brands: brands,
     };
+    console.log("postData", postData);
     try {
       await categoryMutation.mutateAsync([
         edit ? "patch" : "post",
-        edit ? `update/${editData?._id}` : "create/",
+        edit ? `update/${editData?.id}` : "create/",
         postData,
       ]);
       toast.success(`Category ${edit ? "edited" : "added"} successfully`);
@@ -78,7 +77,6 @@ export default function AddCategory() {
 
   const handleClear = (e) => {
     e.preventDefault();
-    setValue(edit ? editData?.description : "");
     setSelectedImage();
     reset();
   };
@@ -93,7 +91,7 @@ export default function AddCategory() {
           <div className="grid grid-cols-2 gap-2">
             <InputField
               register={register}
-              name="title"
+              name="name"
               placeholder="Enter Category Name"
               className="w-full text-sm text-gray-500"
               defaultValue=""
@@ -123,15 +121,19 @@ export default function AddCategory() {
           />
         </div>
         <div className="flex items-center justify-end">
-          <div className="grid grid-cols-2 w-full mt-10 gap-2 md:w-1/2">
+          <div className="grid  grid-cols-2 w-1/2 border mt-10 gap-2 md:w-full">
             <Button
               buttonName={"Clear"}
+              noFill
+              danger
+              className={"w-full"}
               handleButtonClick={(e) => {
                 e.preventDefault();
                 handleClear(e);
               }}
             />
             <Button
+              className={"w-full "}
               handleButtonClick={() => {}}
               buttonName={`${edit ? "Edit" : "Add"} Category`}
             />
@@ -173,7 +175,7 @@ export default function AddCategory() {
             return (
               <InputField
                 disabled
-                placeholder={`Enter ${smallLetter(item)}`}
+                placeholder={`Enter ${smallLetter(item)} details`}
                 className="w-full text-sm bg-gray-200"
                 label={capitalizeFirstLetter(item)}
               />

@@ -10,6 +10,7 @@ export default function InputField({
   isSearchPagination,
   setIsFilter,
   name = "",
+  error,
   setSearchText = () => {},
 }) {
   return (
@@ -34,6 +35,7 @@ export default function InputField({
         className={`flex h-8 w-[220px] border border-gray-300 rounded-lg bg-white px-3 py-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-gray-700 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
                    ${className} w-full`}
       />
+      <p className="text-red-600 text-xs">{error}</p>
     </div>
   );
 }
