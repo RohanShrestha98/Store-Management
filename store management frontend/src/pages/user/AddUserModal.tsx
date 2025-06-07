@@ -38,7 +38,13 @@ export default function AddUserModal({
     email: Yup.string().required("Required"),
     phoneNumber: Yup.string().required("Required"),
     address: Yup.string().required("Required"),
-    password: Yup.string().required("Required"),
+    staffId: Yup.string().required("Required"),
+    password: Yup.string().when(`${edit}`, {
+      is: false,
+      then: (schema) => schema.required("Required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    payPerHour: Yup.string().required("Required"),
   });
 
   const {
@@ -55,6 +61,8 @@ export default function AddUserModal({
       phoneNumber: editData?.phoneNumber ?? "",
       address: editData?.address ?? "",
       email: editData?.email ?? "",
+      staffId: editData?.staffId ?? "",
+      payPerHour: editData?.payPerHour ?? "",
       role: editData?.role?.title ?? "",
     },
   });
@@ -66,6 +74,8 @@ export default function AddUserModal({
       phoneNumber: editData?.phoneNumber ?? "",
       address: editData?.address ?? "",
       email: editData?.email ?? "",
+      staffId: editData?.staffId ?? "",
+      payPerHour: editData?.payPerHour ?? "",
       role: editData?.role?.title ?? "",
     });
     setError();
@@ -164,17 +174,20 @@ export default function AddUserModal({
                 label="Email"
                 error={errors?.email?.message ?? error?.email}
               />
-              <InputField
-                register={register}
-                required
-                name="password"
-                type="password"
-                placeholder="Enter password"
-                className="w-full text-sm text-gray-500"
-                defaultValue=""
-                label="Password"
-                error={errors?.password?.message ?? error?.password}
-              />
+              {!edit && (
+                <InputField
+                  register={register}
+                  required
+                  name="password"
+                  type="password"
+                  placeholder="Enter password"
+                  className="w-full text-sm text-gray-500"
+                  defaultValue=""
+                  label="Password"
+                  error={errors?.password?.message ?? error?.password}
+                />
+              )}
+
               <InputField
                 register={register}
                 name="address"

@@ -10,6 +10,7 @@ import { CiBoxList } from "react-icons/ci";
 import { FiUsers } from "react-icons/fi";
 import { TbReportSearch } from "react-icons/tb";
 import SideBarItems from "./SideBarItems";
+import { LuStore } from "react-icons/lu";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function Sidebar({ hideSidebar, setHideSidebar }) {
@@ -42,10 +43,17 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
 
     {
       id: 3,
-      name: "Users",
+      name: "Staff",
       // visiable: role == 1 ? false : true,
       icon: <FiUsers />,
       link: "/user",
+    },
+    {
+      id: 3,
+      name: "Store",
+      // visiable: role == 1 ? false : true,
+      icon: <LuStore />,
+      link: "/store",
     },
     {
       id: 1,

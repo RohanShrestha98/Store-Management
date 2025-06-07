@@ -14,6 +14,7 @@ import Product from "./pages/product/Product";
 import AddProduct from "./pages/product/AddProduct";
 import Category from "./pages/category/Category";
 import AddCategory from "./pages/category/AddCategory";
+import Store from "./pages/store/Store";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route element={<BaseLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/user" element={<User />} />
+          <Route path="/store" element={<Store />} />
           <Route path="/product" element={<Product />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/category" element={<Category />} />

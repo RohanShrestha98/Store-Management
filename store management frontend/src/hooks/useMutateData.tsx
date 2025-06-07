@@ -42,6 +42,8 @@ export const useCategoryMutation = () =>
 
 export const useUserMutation = () => useMutate(["user"], "api/user/");
 
+export const useStoreMutation = () => useMutate(["store"], "api/store/");
+
 export const useChangePasswordMutation = () =>
   useMutate(
     ["change_password"],
