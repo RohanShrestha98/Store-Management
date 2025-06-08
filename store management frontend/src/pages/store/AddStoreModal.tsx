@@ -5,7 +5,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Button from "@/ui/Button";
-import CustomSelect from "@/ui/CustomSelect";
 import InputField from "@/ui/InputField";
 import { useForm } from "react-hook-form";
 import { useStoreMutation } from "@/hooks/useMutateData";
@@ -13,6 +12,8 @@ import { useEffect, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
+import formatTime from "@/utils/formatTime";
+import SelectTime from "@/utils/selectTime";
 
 export default function AddStoreModal({
   asChild,
@@ -20,13 +21,11 @@ export default function AddStoreModal({
   edit = false,
   editData,
 }) {
-  console.log("editData", editData);
-  const [selectedRole, setSelectedRole] = useState(
-    edit ? editData?.role?.title : ""
-  );
   const [open, setOpen] = useState(false);
   const [hasSubmittedClick, setHasSubmittedClick] = useState(false);
   const [error, setError] = useState("");
+  const [selectedOpenTime, setSelectedOpenTime] = useState();
+  const [selectedCloseTime, setSelectedCloseTime] = useState();
 
   const fieldSchema = Yup.object().shape({
     name: Yup.string()
@@ -62,7 +61,6 @@ export default function AddStoreModal({
 
   const handleClear = (e) => {
     e.preventDefault();
-    setSelectedRole("");
     reset();
   };
 
@@ -71,8 +69,8 @@ export default function AddStoreModal({
   const onSubmitHandler = async (data) => {
     const postData = {
       ...data,
-      open: [],
-      close: [],
+      open: selectedOpenTime,
+      close: selectedCloseTime,
     };
     try {
       await storeMutation.mutateAsync([
@@ -90,38 +88,16 @@ export default function AddStoreModal({
       setError(err?.response?.data?.errors);
     }
   };
-  const roleOptions = [
-    {
-      value: 1,
-      label: "Admin",
-    },
-    {
-      value: 2,
-      label: "Analyst",
-    },
-    {
-      value: 3,
-      label: "Mid Level Analyst",
-    },
-    {
-      value: 4,
-      label: "Executive Level Analyst",
-    },
-    {
-      value: 5,
-      label: "ISO",
-    },
-  ];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild={asChild}>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]  min-w-[500px] bg-[#FAFAFA]">
+      <DialogContent className="sm:max-w-[425px]  min-w-[580px] bg-[#FAFAFA]">
         <DialogTitle className="text-[#22244D] font-medium text-base">
           {edit ? "Edit" : "Add"} Store
         </DialogTitle>
         <form onSubmit={handleSubmit(onSubmitHandler)}>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             <div className="grid grid-cols-2 gap-2">
               <InputField
                 register={register}
@@ -135,16 +111,6 @@ export default function AddStoreModal({
               />
               <InputField
                 register={register}
-                name="address"
-                placeholder="Enter store address"
-                className="w-full text-sm text-gray-500"
-                defaultValue=""
-                required
-                label="Address"
-                error={errors?.lastname?.message ?? error?.lastname}
-              />
-              <InputField
-                register={register}
                 required
                 name="store_number"
                 placeholder="Enter store number"
@@ -154,6 +120,25 @@ export default function AddStoreModal({
                 error={errors?.store_number?.message ?? error?.store_number}
               />
             </div>
+            <InputField
+              register={register}
+              name="address"
+              placeholder="Enter store address"
+              className="w-full text-sm text-gray-500"
+              defaultValue=""
+              required
+              label="Address"
+              error={errors?.lastname?.message ?? error?.lastname}
+            />
+            <SelectTime
+              label={"Store Open Time"}
+              setSelectedTime={setSelectedOpenTime}
+            />
+            <SelectTime
+              defaultTime="22:00"
+              label={"Store Close Time"}
+              setSelectedTime={setSelectedCloseTime}
+            />
           </div>
           <div className="grid grid-cols-2 w-full mt-10 gap-2">
             <Button

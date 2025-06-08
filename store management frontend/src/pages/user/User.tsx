@@ -20,7 +20,6 @@ export default function User() {
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
   const { data, isLoading, isError } = useUserData(searchText, pageSize, page);
-  console.log("data", data);
 
   const columns = useMemo(
     () => [

@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
+import { useStoreData } from "@/hooks/useQueryData";
 
 export default function AddUserModal({
   asChild,
@@ -21,12 +22,14 @@ export default function AddUserModal({
   editData,
 }) {
   console.log("editData", editData);
-  const [selectedRole, setSelectedRole] = useState(
+  const [selectedStore, setSelectedStore] = useState(
     edit ? editData?.role?.title : ""
   );
   const [open, setOpen] = useState(false);
   const [hasSubmittedClick, setHasSubmittedClick] = useState(false);
   const [error, setError] = useState("");
+  const { data, isLoading, isError } = useStoreData();
+  console.log("data", data);
 
   const fieldSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -63,7 +66,6 @@ export default function AddUserModal({
       email: editData?.email ?? "",
       staffId: editData?.staffId ?? "",
       payPerHour: editData?.payPerHour ?? "",
-      role: editData?.role?.title ?? "",
     },
   });
 
@@ -76,14 +78,13 @@ export default function AddUserModal({
       email: editData?.email ?? "",
       staffId: editData?.staffId ?? "",
       payPerHour: editData?.payPerHour ?? "",
-      role: editData?.role?.title ?? "",
     });
     setError();
   }, [editData, reset, open]);
 
   const handleClear = (e) => {
     e.preventDefault();
-    setSelectedRole("");
+    setSelectedStore("");
     reset();
   };
 
@@ -93,6 +94,7 @@ export default function AddUserModal({
     const postData = {
       ...data,
       isVerified: true,
+      store_number: selectedStore,
     };
     try {
       await userMutation.mutateAsync([
@@ -110,28 +112,13 @@ export default function AddUserModal({
       setError(err?.response?.data?.errors);
     }
   };
-  const roleOptions = [
-    {
-      value: 1,
-      label: "Admin",
-    },
-    {
-      value: 2,
-      label: "Analyst",
-    },
-    {
-      value: 3,
-      label: "Mid Level Analyst",
-    },
-    {
-      value: 4,
-      label: "Executive Level Analyst",
-    },
-    {
-      value: 5,
-      label: "ISO",
-    },
-  ];
+
+  const storeOptions = data?.data?.map((item) => {
+    return {
+      label: item?.name,
+      value: item?.store_number,
+    };
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -211,21 +198,21 @@ export default function AddUserModal({
                 error={errors?.phonenumber?.message ?? error?.phonenumber}
               />
 
-              {/* <div>
+              <div>
                 <CustomSelect
-                  options={roleOptions}
+                  options={storeOptions}
                   label={""}
-                  placeholder={edit ? editData?.role?.title : "Select role"}
-                  setSelectedField={setSelectedRole}
+                  placeholder={edit ? editData?.store?.name : "Select store"}
+                  setSelectedField={setSelectedStore}
                   className={"w-full text-sm text-gray-500"}
-                  labelName={"Role"}
+                  labelName={"Store"}
                   required={true}
                 />
                 <p className="text-red-600 text-xs">
-                  {hasSubmittedClick && !selectedRole && "Required"}
-                  {error?.role}
+                  {hasSubmittedClick && !selectedStore && "Required"}
+                  {error?.store}
                 </p>
-              </div> */}
+              </div>
               <InputField
                 register={register}
                 name="staffId"

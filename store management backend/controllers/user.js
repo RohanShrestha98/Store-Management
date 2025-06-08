@@ -231,11 +231,11 @@ const updateUser = async (req, res) => {
     payPerHour,
     shift,
     days,
-    storeId,
+    store_number,
     isVerified,
   } = req.body;
   const query =
-    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, payPerHour = ?, shift = ?, days = ?, storeId = ?  WHERE id = ?";
+    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, payPerHour = ?, shift = ?, days = ?, store_number = ?  WHERE id = ?";
 
   try {
     const [rows] = await connection.execute(
@@ -254,7 +254,7 @@ const updateUser = async (req, res) => {
       payPerHour,
       shift,
       days,
-      storeId,
+      store_number,
       userId,
     ]);
     if (result.affectedRows === 0) {

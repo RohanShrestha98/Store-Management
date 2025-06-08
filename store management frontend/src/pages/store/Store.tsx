@@ -11,8 +11,7 @@ import { LuStore } from "react-icons/lu";
 import { MdOutlineDashboard } from "react-icons/md";
 import { BsGraphUpArrow } from "react-icons/bs";
 import truncateText from "@/utils/truncateText";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import dropdownMenu from "@/utils/dropdownMenu";
+import Loading from "@/assets/AllSvg";
 
 export default function Store() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,15 +45,6 @@ export default function Store() {
     },
   ];
 
-  const options = [
-    {
-      label: "Edit",
-    },
-    {
-      label: "Edit",
-    },
-  ];
-
   useEffect(() => {
     const searchQuery = {
       searchText: searchText,
@@ -80,14 +70,13 @@ export default function Store() {
       <div className="py-6 px-4 rounded-xl bg-white border h-[78vh] overflow-auto">
         <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
-            console.log("item", item);
             return (
               <div className="border border-gray-300 pt-3 pb-2 bg-[#f0edfa] px-2 mb-2 relative rounded-xl">
                 <div className="absolute px-2 rounded-[4px] font-medium skew-x-[-12deg] right-0 top-[-14px] bg-black text-xs text-[#C9BCF7]">
                   # {item?.store_number}
                 </div>
                 <p className="text-sm flex justify-between items-center font-semibold text-gray-600">
-                  <div className="flex gap-1 items-center ">
+                  <div className="flex gap-1 items-center line-clamp-1">
                     <LuStore /> {truncateText(item?.name, 30)}
                   </div>
                   <div className="flex gap-1 text-base mb-2">
@@ -110,7 +99,7 @@ export default function Store() {
                     </DeleteModal>
                   </div>
                 </p>
-                <p className="text-xs font-medium text-gray-600">
+                <p className="text-xs font-medium text-gray-600 line-clamp-1">
                   {truncateText(item?.address, 40)}
                 </p>
                 <div className="grid grid-flow-col grid-rows-2 gap-1 mt-2 text-xs font-semibold text-gray-600">
@@ -129,6 +118,8 @@ export default function Store() {
             );
           })}
         </div>
+        {isLoading && <Loading />}
+        {isError && <p className="flex items-center justify-center">Error</p>}
       </div>
     </div>
   );
