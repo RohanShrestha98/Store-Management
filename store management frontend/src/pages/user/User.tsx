@@ -144,7 +144,7 @@ export default function User() {
         <AddUserModal asChild>
           <div>
             <TopButton
-              buttonName={"Add User"}
+              buttonName={"Add Staff"}
               className={""}
               handleButtonClick={""}
             />

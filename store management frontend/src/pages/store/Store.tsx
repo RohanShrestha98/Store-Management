@@ -1,6 +1,5 @@
-import SearchPagination from "@/components/SearchPagination";
-import { ReactTable } from "../../components/Table";
-import { useEffect, useMemo, useState } from "react";
+import { HiOutlineUsers } from "react-icons/hi2";
+import { useEffect, useState } from "react";
 import TopButton from "@/components/TopButton";
 import { useStoreData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
@@ -8,6 +7,12 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
 import { useSearchParams } from "react-router-dom";
 import AddStoreModal from "./AddStoreModal";
+import { LuStore } from "react-icons/lu";
+import { MdOutlineDashboard } from "react-icons/md";
+import { BsGraphUpArrow } from "react-icons/bs";
+import truncateText from "@/utils/truncateText";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import dropdownMenu from "@/utils/dropdownMenu";
 
 export default function Store() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,61 +25,36 @@ export default function Store() {
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
   const { data, isLoading, isError } = useStoreData(searchText, pageSize, page);
 
-  const columns = useMemo(
-    () => [
-      {
-        accessorFn: (row, index) => index + 1,
-        id: "id",
-        header: () => <span>S.N.</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row?.name,
-        id: "name",
-        // info.getValue(),
-        header: () => <span>Name</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row?.address,
-        id: "address",
-        // info.getValue(),
-        header: () => <span>Address</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row?.store_number,
-        id: "store_number",
-        // info.getValue(),
-        header: () => <span>Store Number</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row,
-        id: "action",
-        cell: (info) => {
-          return (
-            <div className="flex gap-2 text-base justify-center">
-              <AddStoreModal asChild edit editData={info?.row?.original}>
-                <FiEdit2 className="text-[#4365a7] cursor-pointer" />
-              </AddStoreModal>
-              <DeleteModal
-                asChild
-                desc={"Are you sure you want to delete this User"}
-                title={"Delete User"}
-                id={info?.row?.original?.id}
-              >
-                <FaRegTrashCan className="text-red-600 cursor-pointer" />
-              </DeleteModal>
-            </div>
-          );
-        },
-        header: () => <span className="flex justify-center">Action</span>,
-        footer: (props) => props.column.id,
-      },
-    ],
-    []
-  );
+  const storeDetailOptions = [
+    {
+      id: 1,
+      name: "Product",
+      icon: <MdOutlineDashboard size={16} />,
+      className: "row-span-2 ",
+    },
+    {
+      id: 2,
+      name: "Staff",
+      icon: <HiOutlineUsers size={16} />,
+      className: "col-span-2",
+    },
+    {
+      id: 3,
+      name: "Sales",
+      icon: <BsGraphUpArrow size={14} />,
+      className: "col-span-2",
+    },
+  ];
+
+  const options = [
+    {
+      label: "Edit",
+    },
+    {
+      label: "Edit",
+    },
+  ];
+
   useEffect(() => {
     const searchQuery = {
       searchText: searchText,
@@ -97,23 +77,58 @@ export default function Store() {
           </div>
         </AddStoreModal>
       </div>
-      <div>
-        <SearchPagination
-          totalPage={data?.totalPage}
-          setPage={setPage}
-          page={page}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-        />
-        <ReactTable
-          isLoading={isLoading}
-          isError={isError}
-          columns={columns}
-          data={data?.data ?? []}
-          currentPage={1}
-          totalPage={1}
-          emptyMessage="Oops! No Store available right now."
-        />
+      <div className="py-6 px-4 rounded-xl bg-white border h-[78vh] overflow-auto">
+        <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
+          {data?.data?.map((item) => {
+            console.log("item", item);
+            return (
+              <div className="border border-gray-300 pt-3 pb-2 bg-[#f0edfa] px-2 mb-2 relative rounded-xl">
+                <div className="absolute px-2 rounded-[4px] font-medium skew-x-[-12deg] right-0 top-[-14px] bg-black text-xs text-[#C9BCF7]">
+                  # {item?.store_number}
+                </div>
+                <p className="text-sm flex justify-between items-center font-semibold text-gray-600">
+                  <div className="flex gap-1 items-center ">
+                    <LuStore /> {truncateText(item?.name, 30)}
+                  </div>
+                  <div className="flex gap-1 text-base mb-2">
+                    <AddStoreModal asChild edit editData={item}>
+                      <FiEdit2
+                        size={12}
+                        className="text-[#4365a7] cursor-pointer"
+                      />
+                    </AddStoreModal>
+                    <DeleteModal
+                      asChild
+                      desc={"Are you sure you want to delete this Store"}
+                      title={"Delete Store"}
+                      id={item?.id}
+                    >
+                      <FaRegTrashCan
+                        size={12}
+                        className="text-red-600 cursor-pointer"
+                      />
+                    </DeleteModal>
+                  </div>
+                </p>
+                <p className="text-xs font-medium text-gray-600">
+                  {truncateText(item?.address, 40)}
+                </p>
+                <div className="grid grid-flow-col grid-rows-2 gap-1 mt-2 text-xs font-semibold text-gray-600">
+                  {storeDetailOptions?.map((option) => {
+                    return (
+                      <div
+                        className={`${option?.className} cursor-pointer border flex flex-col gap-[2px] py-2  items-center justify-center rounded-[8px] border-gray-300 bg-white hover:bg-[#e2dbf9] hover:border-gray-400 `}
+                      >
+                        {option?.icon}
+                        {option?.name}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
