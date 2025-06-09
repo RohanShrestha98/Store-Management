@@ -1,13 +1,16 @@
 import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
-import { useUserData } from "@/hooks/useQueryData";
+import { useProductData, useUserData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import Button from "@/ui/Button";
+import { useUploadMutation } from "@/hooks/useMutateData";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 export default function Product() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,7 +22,11 @@ export default function Product() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
-  const { data, isLoading, isError } = useUserData(searchText, pageSize, page);
+  const { data, isLoading, isError } = useProductData(
+    searchText,
+    pageSize,
+    page
+  );
 
   const columns = useMemo(
     () => [
@@ -30,22 +37,8 @@ export default function Product() {
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.firstName,
-        id: "firstName",
-        cell: (info) => {
-          return (
-            <div className="flex items-center gap-1">
-              {" "}
-              <p className="flex items-center gap-1">
-                {info?.row?.original?.firstName === ""
-                  ? "-"
-                  : info?.row?.original?.firstName + " "}
-                {info?.row?.original?.lastName}
-              </p>
-            </div>
-          );
-        },
-        // info.getValue(),
+        accessorFn: (row) => row?.name,
+        id: "name",
         header: () => <span>Name</span>,
         footer: (props) => props.column.id,
       },
@@ -135,6 +128,35 @@ export default function Product() {
     setSearchParams(searchQuery);
   }, [page, pageSize, searchText]);
 
+  const uploadMutation = useUploadMutation();
+
+  const [files, setFiles] = useState();
+
+  const handleUpload = async () => {
+    const formData = new FormData();
+    for (let i = 0; i < files?.length; i++) {
+      formData.append("files", files[i]);
+    }
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3001/api/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("res", res);
+
+      toast.success("Upload Success");
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    }
+  };
+
   return (
     <div className="p-4 flex flex-col gap-4">
       <div className="flex justify-end items-center">
@@ -143,6 +165,14 @@ export default function Product() {
           icon={<FaPlus />}
           handleButtonClick={() => navigate("/add-product")}
         />
+      </div>
+      <div>
+        <input
+          type="file"
+          multiple
+          onChange={(e) => setFiles(e?.target?.files)}
+        />
+        <button onClick={handleUpload}>Upload to Drive</button>
       </div>
       <div>
         <SearchPagination

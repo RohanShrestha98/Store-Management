@@ -32,7 +32,7 @@ export default function AddStoreModal({
       .required("Required")
       .max(36, "Must be 36 characters or less"),
     address: Yup.string().required("Required"),
-    store_number: Yup.string().required("Required"),
+    storeNumber: Yup.string().required("Required"),
   });
 
   const {
@@ -46,7 +46,7 @@ export default function AddStoreModal({
     defaultValues: {
       name: editData?.name ?? "",
       address: editData?.address ?? "",
-      store_number: editData?.store_number ?? "",
+      storeNumber: editData?.storeNumber ?? "",
     },
   });
 
@@ -54,7 +54,7 @@ export default function AddStoreModal({
     reset({
       name: editData?.name ?? "",
       address: editData?.address ?? "",
-      store_number: editData?.store_number ?? "",
+      storeNumber: editData?.storeNumber ?? "",
     });
     setError();
   }, [editData, reset, open]);
@@ -112,12 +112,12 @@ export default function AddStoreModal({
               <InputField
                 register={register}
                 required
-                name="store_number"
+                name="storeNumber"
                 placeholder="Enter store number"
                 className="w-full text-sm text-gray-500"
                 defaultValue=""
                 label="Store number"
-                error={errors?.store_number?.message ?? error?.store_number}
+                error={errors?.storeNumber?.message ?? error?.storeNumber}
               />
             </div>
             <InputField

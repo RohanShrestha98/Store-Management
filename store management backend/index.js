@@ -2,22 +2,20 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
-const fileUpload = require("express-fileupload");
+const mysql = require("mysql2");
 const cors = require("cors");
 
 app.use(bodyParser.json());
-app.use(fileUpload());
-app.use(express.static("uploads"));
+app.use("/uploads", express.static("uploads"));
 app.use(cors());
 
 // Routes
 const userRoute = require("./routes/user");
 const storeRoute = require("./routes/store");
 const categoryRoute = require("./routes/category");
+const productRoute = require("./routes/product");
+const fileUploadRoute = require("./routes/fileUpload");
 const userClockInRoute = require("./routes/userClockIn");
-
-const mysql = require("mysql2");
 
 const connection = mysql.createConnection({
   host: process.env.DB_URL,
@@ -44,6 +42,8 @@ app.get("/", function (req, res) {
 app.use("/api/user", userRoute);
 app.use("/api/store", storeRoute);
 app.use("/api/category", categoryRoute);
+app.use("/api/product", productRoute);
+app.use("/api/upload", fileUploadRoute);
 app.use("/api/clock-in", userClockInRoute);
 
 const PORT = process.env.PORT;

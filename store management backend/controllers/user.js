@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const { connection, createConnection } = require("../database");
 const jwt = require("jsonwebtoken");
+const { nullCheckHandler } = require("../helper/nullCheckHandler");
+const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 
 const signUp = async (req, res) => {
   const { firstName, lastName, email, password, phoneNumber, address } =
@@ -127,22 +129,18 @@ const createUser = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "email, and password are required" });
-  }
+  const requiredFields = { email, password };
+  requiredFieldHandler(res, requiredFields);
+
+  const [rows] = await connection.execute(
+    "SELECT * FROM users WHERE email = ?",
+    [email]
+  );
+  const userData = rows?.[0];
+
   try {
-    const [rows] = await connection.execute(
-      "SELECT * FROM users WHERE email = ?",
-      [email]
-    );
-    const userData = rows?.[0];
-    if (email !== userData?.email) {
-      return res
-        .status(400)
-        .send({ success: false, message: "Email not found" });
-    }
+    nullCheckHandler(res, "users", "email", email);
+
     const comparePassword = await bcrypt.compareSync(
       password,
       userData?.password
@@ -163,6 +161,7 @@ const login = async (req, res) => {
       return res.status(200).json({
         success: true,
         data: { ...data, access: accessToken },
+        userData: userData,
       });
     } else {
       return res
@@ -231,11 +230,11 @@ const updateUser = async (req, res) => {
     payPerHour,
     shift,
     days,
-    store_number,
+    storeNumber,
     isVerified,
   } = req.body;
   const query =
-    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, payPerHour = ?, shift = ?, days = ?, store_number = ?  WHERE id = ?";
+    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, payPerHour = ?, shift = ?, days = ?, storeNumber = ?  WHERE id = ?";
 
   try {
     const [rows] = await connection.execute(
@@ -254,7 +253,7 @@ const updateUser = async (req, res) => {
       payPerHour,
       shift,
       days,
-      store_number,
+      storeNumber,
       userId,
     ]);
     if (result.affectedRows === 0) {

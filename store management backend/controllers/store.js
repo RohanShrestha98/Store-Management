@@ -1,27 +1,27 @@
 const { connection, createConnection } = require("../database");
+const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
 
 const createStore = async (req, res) => {
-  const { name, address, store_number, open, close } = req.body;
+  const { name, address, storeNumber, open, close } = req.body;
+  const requiredFields = { name, address, storeNumber, open, close };
 
-  if (!name || !address || !store_number || !open || !close) {
-    return statusHandeler(res, 400, false, "All fields are required");
-  }
+  requiredFieldHandler(res, requiredFields);
 
   try {
     const connect = await createConnection();
 
     const [rows] = await connect.execute(
-      "SELECT * FROM store WHERE store_number = ?",
-      [store_number]
+      "SELECT * FROM store WHERE storeNumber = ?",
+      [storeNumber]
     );
     if (rows.length > 0) {
       return statusHandeler(res, 400, false, "Store number already exists");
     }
 
     await connect.execute(
-      "INSERT INTO store (name, address, store_number, open, close) VALUES (?, ?, ?, ?, ?)",
-      [name, address, store_number, open, close]
+      "INSERT INTO store (name, address, storeNumber, open, close) VALUES (?, ?, ?, ?, ?)",
+      [name, address, storeNumber, open, close]
     );
 
     await connect.end();
@@ -70,9 +70,9 @@ const deleteStore = async (req, res) => {
 
 const updateStore = async (req, res) => {
   const storeId = req.params.id;
-  const { name, address, store_number, open, close } = req.body;
+  const { name, address, storeNumber, open, close } = req.body;
   const query =
-    "UPDATE store SET name = ?, address = ?, store_number = ?, open = ?, close = ? WHERE id = ?";
+    "UPDATE store SET name = ?, address = ?, storeNumber = ?, open = ?, close = ? WHERE id = ?";
 
   try {
     const [rows] = await connection.query("SELECT * FROM store WHERE id = ?", [
@@ -82,7 +82,7 @@ const updateStore = async (req, res) => {
     const [result] = await connection.execute(query, [
       name ?? storeData?.name,
       address ?? storeData?.address,
-      store_number ?? storeData?.store_number,
+      storeNumber ?? storeData?.storeNumber,
       open ?? storeData?.open,
       close ?? storeData?.close,
       storeId,

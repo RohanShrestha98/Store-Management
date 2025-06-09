@@ -1,26 +1,13 @@
-const multer = require("multer");
 const { connection, createConnection } = require("../database");
+const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Destination folder for uploaded files
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.name); // Keep original filename
-  },
-});
-
-const upload = multer({ storage: storage });
-
-const uploadDocument = upload.single("file");
 
 const createCategory = async (req, res) => {
   const { name, tags, brands } = req.body;
 
-  if (!name || !tags) {
-    return statusHandeler(res, 400, false, "All fields are required");
-  }
+  const requiredFields = { name, tags };
+
+  requiredFieldHandler(res, requiredFields);
 
   try {
     const connect = await createConnection();
@@ -117,7 +104,6 @@ const updateCategory = async (req, res) => {
 
 module.exports = {
   createCategory,
-  uploadDocument,
   getCategory,
   updateCategory,
   deleteCategory,

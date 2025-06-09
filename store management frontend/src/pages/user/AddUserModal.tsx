@@ -116,7 +116,7 @@ export default function AddUserModal({
   const storeOptions = data?.data?.map((item) => {
     return {
       label: item?.name,
-      value: item?.store_number,
+      value: item?.storeNumber,
     };
   });
 

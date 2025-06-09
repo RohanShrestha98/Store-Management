@@ -26,9 +26,9 @@ export default function AddCategory() {
   const [brands, setBrands] = useState(edit ? editData?.brands : []);
 
   const fieldSchema = Yup.object().shape({
-    name: Yup.string()
-      .required("Required")
-      .max(36, "Must be 36 characters or less"),
+    // name: Yup.string()
+    //   .required("Required")
+    //   .max(36, "Must be 36 characters or less"),
   });
 
   const {
@@ -53,8 +53,8 @@ export default function AddCategory() {
     const postData = {
       ...data,
       file: selectedImage && selectedImage,
-      tags: tags,
-      brands: brands,
+      tags: tags && tags,
+      brands: brands && brands,
     };
     console.log("postData", postData);
     try {
@@ -84,7 +84,7 @@ export default function AddCategory() {
   return (
     <div className="flex justify-between gap-6 items-start p-6">
       <form
-        className="w-3/5 bg-white p-6 rounded-md"
+        className="w-3/5 bg-white p-6 rounded-md h-[82vh] overflow-auto flex flex-col justify-between"
         onSubmit={handleSubmit(onSubmitHandler)}
       >
         <div className="flex flex-col gap-4">
@@ -95,8 +95,7 @@ export default function AddCategory() {
               placeholder="Enter Category Name"
               className="w-full text-sm text-gray-500"
               defaultValue=""
-              required
-              error={errors?.title?.message}
+              error={errors?.name?.message}
               label="Category Name"
             />
             <ChooseImage
@@ -113,7 +112,7 @@ export default function AddCategory() {
           />
           <KeywordSelect
             title={
-              "Enter the field you want add as an feature in this category"
+              "Enter the field you want add as an specification in this category"
             }
             id="catagory_inputfield "
             tags={tags}
@@ -140,7 +139,7 @@ export default function AddCategory() {
           </div>
         </div>
       </form>
-      <div className="w-2/5 flex flex-col items-center gap-2 h-[70vh] overflow-auto bg-white py-4 px-4">
+      <div className="w-2/5 flex flex-col items-center gap-2 h-[82vh] overflow-auto bg-white py-4 px-4">
         <p className="font-medium">Preview Category Form</p>
         <div className="flex flex-col items-center gap-1">
           <div className="rounded-full  bg-gray-200 border-2 border-gray-200">
