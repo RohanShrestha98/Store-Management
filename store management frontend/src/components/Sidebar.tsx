@@ -9,6 +9,7 @@ import { DiAsterisk } from "react-icons/di";
 import { CiBoxList } from "react-icons/ci";
 import { FiUsers } from "react-icons/fi";
 import { TbReportSearch } from "react-icons/tb";
+import { LuSquareUser } from "react-icons/lu";
 import SideBarItems from "./SideBarItems";
 import { LuStore } from "react-icons/lu";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -49,11 +50,17 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
       link: "/user",
     },
     {
-      id: 3,
+      id: 4,
       name: "Store",
       // visiable: role == 1 ? false : true,
       icon: <LuStore />,
       link: "/store",
+    },
+    {
+      id: 5,
+      name: "Vendor",
+      icon: <LuSquareUser />,
+      link: "/vendor",
     },
     {
       id: 1,
@@ -61,9 +68,6 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
       icon: <IoNotificationsOutline />,
       link: "/notification",
     },
-    { id: 2, name: "Risk Table", icon: <DiAsterisk />, link: "/risk" },
-
-    // { id: 4, name: "Task", icon: <GoTasklist />, link: "/task" },
     {
       id: 5,
       name: "Risk Details",

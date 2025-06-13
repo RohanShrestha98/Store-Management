@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 
 export default function CustomSelect({
+  id,
   options,
   label,
   isSearchPagination,
@@ -49,7 +50,7 @@ export default function CustomSelect({
                   return (
                     <SelectItem
                       disabled={item?.label === "No Options"}
-                      value={item?.value.toString()}
+                      value={item?.value?.toString()}
                     >
                       {item?.label}
                     </SelectItem>

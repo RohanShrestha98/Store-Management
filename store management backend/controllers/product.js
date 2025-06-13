@@ -18,6 +18,7 @@ const createProduct = async (req, res) => {
     storeNumber,
     barCode,
     specification,
+    images,
   } = req.body;
 
   const requiredFields = {
@@ -31,6 +32,7 @@ const createProduct = async (req, res) => {
     storeNumber,
     barCode,
     specification,
+    images,
   };
   const requiredError = requiredFieldHandler(res, requiredFields);
   if (requiredError) return;
@@ -56,7 +58,7 @@ const createProduct = async (req, res) => {
     const connect = await createConnection();
 
     await connect.execute(
-      "INSERT INTO product ( name, costPrice, sellingPrice, quantity, discountPercentage, offer, vendor,description, categoryId, brand, storeNumber, barCode, specification, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO product ( name, costPrice, sellingPrice, quantity, discountPercentage, offer, vendor,description, categoryId, brand, storeNumber, barCode, specification, images, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?)",
       [
         name,
         costPrice,
@@ -71,13 +73,14 @@ const createProduct = async (req, res) => {
         storeNumber,
         barCode,
         specification,
+        images,
         req.user.id,
       ]
     );
 
     await connect.end();
 
-    return res.status(201).json("Product created successfull");
+    return statusHandeler(res, 201, true, "Product created successfull");
   } catch (error) {
     console.error("Error:", error);
     return statusHandeler(res, 500, false, "Internal Server error");

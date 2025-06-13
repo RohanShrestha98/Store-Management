@@ -44,6 +44,32 @@ const getCategory = async (req, res) => {
   }
 };
 
+const getCategoryName = async (req, res) => {
+  try {
+    const [rows] = await connection.query("SELECT id, name FROM category");
+    const data = rows;
+    return res.status(200).json({ success: true, data });
+  } catch (err) {
+    console.error("Error retrieving category:", err);
+    statusHandeler(res, 500, false, "Error retrieving category");
+  }
+};
+
+const getCategoryDetailsById = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const [rows] = await connection.query(
+      "SELECT * FROM category where id = ?",
+      [id]
+    );
+    const data = rows;
+    return res.status(200).json({ success: true, data });
+  } catch (err) {
+    console.error("Error retrieving store:", err);
+    statusHandeler(res, 500, false, "Error retrieving category");
+  }
+};
+
 const deleteCategory = async (req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM category WHERE id = ?";
@@ -107,4 +133,6 @@ module.exports = {
   getCategory,
   updateCategory,
   deleteCategory,
+  getCategoryName,
+  getCategoryDetailsById,
 };

@@ -36,6 +36,20 @@ export const useCategoryData = (searchText = "", pageSize = "10", page = 1) =>
     `api/category/?page=${page}&&search=${searchText}&&pageSize=${pageSize}`
   );
 
+export const useCategoryNameData = () =>
+  useQueryData(["category-name"], `api/category/name-list/`);
+
+export const useCategoryDetailsData = (id) =>
+  useQueryData(
+    ["category-details", id],
+    `api/category/details/${id}`,
+    "",
+    !!id
+  );
+
+export const useVendorData = (searchText = "", pageSize = "10", page = 1) =>
+  useQueryData(["vendor", searchText, pageSize, page], `api/vendor/`);
+
 export const useNotificationData = (
   searchText = "",
   selectedField = "",

@@ -1,12 +1,12 @@
 import { HiOutlineUsers } from "react-icons/hi2";
 import { useEffect, useState } from "react";
 import TopButton from "@/components/TopButton";
-import { useStoreData } from "@/hooks/useQueryData";
+import { useStoreData, useVendorData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
 import { useSearchParams } from "react-router-dom";
-import AddStoreModal from "./AddStoreModal";
+import AddVendorModal from "./AddVendorModal";
 import { LuStore } from "react-icons/lu";
 import { MdOutlineDashboard } from "react-icons/md";
 import { BsGraphUpArrow } from "react-icons/bs";
@@ -14,7 +14,7 @@ import truncateText from "@/utils/truncateText";
 import Loading from "@/assets/AllSvg";
 import EmptyPage from "@/components/EmptyPage";
 
-export default function Store() {
+export default function Vendor() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
@@ -23,7 +23,11 @@ export default function Store() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
-  const { data, isLoading, isError } = useStoreData(searchText, pageSize, page);
+  const { data, isLoading, isError } = useVendorData(
+    searchText,
+    pageSize,
+    page
+  );
 
   const storeDetailOptions = [
     {
@@ -58,39 +62,36 @@ export default function Store() {
   return (
     <div className="p-4 flex flex-col gap-4">
       <div className="flex justify-end items-center">
-        <AddStoreModal asChild>
+        <AddVendorModal asChild>
           <div>
             <TopButton
-              buttonName={"Add Store"}
+              buttonName={"Add Vendor"}
               className={""}
               handleButtonClick={""}
             />
           </div>
-        </AddStoreModal>
+        </AddVendorModal>
       </div>
-      <div className="py-6 px-4 rounded-xl bg-white border h-[78vh] overflow-auto">
+      <div className="p-4 rounded-xl bg-white border h-[78vh] overflow-auto">
         <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
             return (
-              <div className="border border-gray-300 pt-3 pb-2 bg-[#f0edfa] px-2 mb-2 relative rounded-xl">
-                <div className="absolute px-2 rounded-[4px] font-medium skew-x-[-12deg] right-0 top-[-14px] bg-black text-xs text-[#C9BCF7]">
-                  # {item?.store_number}
-                </div>
+              <div className="border border-gray-300 bg-[#f0edfa] p-2 mb-2 relative rounded-xl">
                 <p className="text-sm flex justify-between items-center font-semibold text-gray-600">
                   <div className="flex gap-1 items-center line-clamp-1">
                     <LuStore /> {truncateText(item?.name, 30)}
                   </div>
                   <div className="flex gap-1 text-base mb-2">
-                    <AddStoreModal asChild edit editData={item}>
+                    <AddVendorModal asChild edit editData={item}>
                       <FiEdit2
                         size={12}
                         className="text-[#4365a7] cursor-pointer"
                       />
-                    </AddStoreModal>
+                    </AddVendorModal>
                     <DeleteModal
                       asChild
-                      desc={"Are you sure you want to delete this Store"}
-                      title={"Delete Store"}
+                      desc={"Are you sure you want to delete this Vendor"}
+                      title={"Delete Vendor"}
                       id={item?.id}
                     >
                       <FaRegTrashCan
@@ -123,7 +124,7 @@ export default function Store() {
         {isError && <p className="flex items-center justify-center">Error</p>}
         {data?.data?.length == 0 && (
           <div className="w-full flex justify-center  pt-16 pb-20">
-            <EmptyPage message={"Oops! No store available right now."} />
+            <EmptyPage message={"Oops! No vendor available right now."} />
           </div>
         )}
       </div>

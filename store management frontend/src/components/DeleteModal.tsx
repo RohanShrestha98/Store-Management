@@ -7,10 +7,10 @@ import {
 import Button from "@/ui/Button";
 import {
   useUserMutation,
-  useNotificationMutation,
-  useRiskMutation,
   useCategoryMutation,
   useStoreMutation,
+  useProductMutation,
+  useVendorMutation,
 } from "@/hooks/useMutateData";
 import "react-quill/dist/quill.snow.css";
 import { useLocation } from "react-router-dom";
@@ -22,20 +22,20 @@ export default function DeleteModal({ asChild, children, title, desc, id }) {
   const [open, setOpen] = useState(false);
   const pathname = loaction?.pathname?.slice(1);
   const userMutation = useUserMutation();
-  const notificationMutation = useNotificationMutation();
-  const riskMutation = useRiskMutation();
   const categoryMutation = useCategoryMutation();
   const storeMutation = useStoreMutation();
+  const productMutation = useProductMutation();
+  const vendorMutation = useVendorMutation();
 
   const deleteMutation =
-    pathname === "notification"
-      ? notificationMutation
-      : pathname === "risk"
-      ? riskMutation
-      : pathname === "store"
+    pathname === "store"
       ? storeMutation
       : pathname === "category"
       ? categoryMutation
+      : pathname === "product"
+      ? productMutation
+      : pathname === "vendor"
+      ? vendorMutation
       : pathname === "user" && userMutation;
 
   const handleDelete = async () => {

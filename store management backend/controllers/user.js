@@ -7,16 +7,16 @@ const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const signUp = async (req, res) => {
   const { firstName, lastName, email, password, phoneNumber, address } =
     req.body;
-  if (
-    !firstName ||
-    !lastName ||
-    !phoneNumber ||
-    !address ||
-    !email ||
-    !password
-  ) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
+  const requiredFields = {
+    firstName,
+    lastName,
+    phoneNumber,
+    address,
+    email,
+    password,
+  };
+
+  requiredFieldHandler(res, requiredFields);
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -68,16 +68,17 @@ const createUser = async (req, res) => {
     payPerHour,
     isVerified,
   } = req.body;
-  if (
-    !firstName ||
-    !lastName ||
-    !phoneNumber ||
-    !address ||
-    !email ||
-    !password
-  ) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
+
+  const requiredFields = {
+    firstName,
+    lastName,
+    phoneNumber,
+    address,
+    email,
+    password,
+  };
+
+  requiredFieldHandler(res, requiredFields);
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -93,10 +94,12 @@ const createUser = async (req, res) => {
       [phoneNumber]
     );
     if (rows.length > 0) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({ email: "Email already exists" });
     }
     if (rowsPhone.length > 0) {
-      return res.status(400).json({ message: "Phone number already exists" });
+      return res
+        .status(400)
+        .json({ phoneNumber: "Phone number already exists" });
     }
 
     await connect.execute(
