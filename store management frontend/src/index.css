@@ -24,15 +24,9 @@
   }
 }
 
-.quill {
-  max-width: 462px;
-}
-
 .ql-snow {
   background-color: white;
 }
 .ql-editor:focus {
   border: 1px solid rgb(88, 88, 88);
 }
-
-

@@ -1,4 +1,3 @@
-import ChooseImage from "@/components/ChooseImage";
 import { useProductMutation } from "@/hooks/useMutateData";
 import {
   useCategoryDetailsData,
@@ -9,6 +8,10 @@ import {
 import Button from "@/ui/Button";
 import CustomSelect from "@/ui/CustomSelect";
 import InputField from "@/ui/InputField";
+import {
+  capitalizeFirstLetter,
+  smallLetter,
+} from "@/utils/capitalizeFirstLetter";
 import { convertToSelectOptions } from "@/utils/convertToSelectOptions";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
@@ -16,6 +19,8 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import { PiCalendarBlank } from "react-icons/pi";
+import ReactQuill from "react-quill";
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -50,15 +55,13 @@ export default function AddProduct() {
     isError: storeIsError,
   } = useStoreData();
 
-  console.log("categoryDetsilsData", categoryDetsilsData);
-
   const fieldSchema = Yup.object().shape({
     name: Yup.string()
       .required("Required")
       .max(36, "Must be 36 characters or less"),
     costPrice: Yup.string().required("Required"),
     sellingPrice: Yup.string().required("Required"),
-    discountPercentage: Yup.string(),
+    tax: Yup.string(),
     quantity: Yup.string().required("Required"),
   });
 
@@ -75,7 +78,7 @@ export default function AddProduct() {
       name: editData?.name,
       costPrice: editData?.costPrice,
       sellingPrice: editData?.sellingPrice,
-      discountPercentage: editData?.discountPercentage,
+      tax: editData?.tax,
       quantity: editData?.quantity,
     },
   });
@@ -89,7 +92,6 @@ export default function AddProduct() {
       barCode: "1234",
       images: selectedImage && selectedImage,
     };
-    console.log("postData", postData);
     try {
       await productMutation.mutateAsync([
         edit ? "patch" : "post",
@@ -115,9 +117,6 @@ export default function AddProduct() {
     reset();
   };
   // const okey = [
-  //   vendor,
-  //   categoryId,
-  //   storeNumber,
   //   specification,
   //   images,
   // ];
@@ -169,12 +168,12 @@ export default function AddProduct() {
       type: "number",
     },
     {
-      registerName: "discountPercentage",
-      placeHolder: "Enter discount (%)",
+      registerName: "tax",
+      placeHolder: "Enter tax (%)",
       className: "",
       defaultValue: "",
-      error: errors?.discountPercentage?.message ?? error?.discountPercentage,
-      label: "Discount (%)",
+      error: errors?.tax?.message ?? error?.tax,
+      label: "Tax (%)",
       type: "number",
     },
   ];
@@ -208,7 +207,8 @@ export default function AddProduct() {
       label: "Category",
     },
   ];
-  console.log("selected", selectedCategory);
+
+  console.log("categoryDetsilsData", categoryDetsilsData);
 
   if (
     vendorIsError ||
@@ -221,10 +221,10 @@ export default function AddProduct() {
   return (
     <div className="flex justify-between gap-6 items-start p-6">
       <form
-        className="w-2/3 bg-white p-6 rounded-md h-[82vh] overflow-auto flex flex-col justify-between"
+        className="w-2/3 no-scrollbar bg-white p-6 rounded-md h-[82vh] overflow-auto flex flex-col justify-between"
         onSubmit={handleSubmit(onSubmitHandler)}
       >
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full shadow-[inset_0_-6px_6px_-3px_rgba(0,0,0,0.2)] overflow-auto no-scrollbar">
           <div className="grid grid-cols-2 gap-x-2 sm:grid-cols-1">
             {productNameFields?.map((item) => {
               return (
@@ -273,9 +273,46 @@ export default function AddProduct() {
               );
             })}
           </div>
+          <p className="text-[#344054] leading-5 font-medium text-sm border-b-[3px] border-[#C9BCF7] w-[100px]">
+            Specifications
+          </p>
+          <div
+            className={`${
+              !categoryDetsilsData?.data &&
+              "border border-dashed border-gray-400 h-full min-h-[140px]"
+            } `}
+          >
+            {categoryDetsilsData?.data ? (
+              <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+                {categoryDetsilsData?.data?.[0]?.specification?.map((item) => {
+                  return (
+                    <InputField
+                      register={register}
+                      name={smallLetter(item)}
+                      placeholder={`Enter ${item} details`}
+                      className={`w-full text-sm text-gray-500 ${item?.className}`}
+                      defaultValue={item?.defaultValue}
+                      error={item?.error}
+                      label={capitalizeFirstLetter(item)}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="h-full w-full  text-center gap-1 text-xs font-medium text-gray-500 flex flex-col items-center justify-center">
+                <PiCalendarBlank className="border p-[6px] rounded-full bg-gray-100 w-[36px] h-[36px]" />
+                Choose category to get <br />
+                specification fields
+              </div>
+            )}
+          </div>
+          <p className="text-[#344054] leading-5 font-medium text-sm ">
+            Description
+          </p>
+          <ReactQuill className="h-[110px] w-full " />
         </div>
         <div className="flex items-center justify-end">
-          <div className="grid  grid-cols-2 w-1/2 border mt-10 gap-2 md:w-full">
+          <div className="grid  grid-cols-2 w-1/2 border mt-6 gap-2 md:w-full">
             <Button
               buttonName={"Clear"}
               noFill
@@ -289,7 +326,7 @@ export default function AddProduct() {
             <Button
               className={"w-full "}
               handleButtonClick={() => {}}
-              buttonName={`${edit ? "Edit" : "Add"} Category`}
+              buttonName={`${edit ? "Edit" : "Add"} Product`}
             />
           </div>
         </div>

@@ -74,7 +74,7 @@ export default function Store() {
             return (
               <div className="border border-gray-300 pt-3 pb-2 bg-[#f0edfa] px-2 mb-2 relative rounded-xl">
                 <div className="absolute px-2 rounded-[4px] font-medium skew-x-[-12deg] right-0 top-[-14px] bg-black text-xs text-[#C9BCF7]">
-                  # {item?.store_number}
+                  # {item?.storeNumber}
                 </div>
                 <p className="text-sm flex justify-between items-center font-semibold text-gray-600">
                   <div className="flex gap-1 items-center line-clamp-1">

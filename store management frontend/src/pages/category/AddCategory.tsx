@@ -22,8 +22,12 @@ export default function AddCategory() {
   const editData = location.state;
   const edit = location.state;
   const [selectedImage, setSelectedImage] = useState();
-  const [tags, setTags] = useState(edit ? editData?.tags : []);
+  const [specification, setSpecification] = useState(
+    edit ? editData?.specification : []
+  );
   const [brands, setBrands] = useState(edit ? editData?.brands : []);
+
+  console.log("editData", editData);
 
   const fieldSchema = Yup.object().shape({
     // name: Yup.string()
@@ -53,7 +57,7 @@ export default function AddCategory() {
     const postData = {
       ...data,
       file: selectedImage && selectedImage,
-      tags: tags && tags,
+      specification: specification && specification,
       brands: brands && brands,
     };
     console.log("postData", postData);
@@ -92,6 +96,7 @@ export default function AddCategory() {
             <InputField
               register={register}
               name="name"
+              required
               placeholder="Enter Category Name"
               className="w-full text-sm text-gray-500"
               defaultValue=""
@@ -115,8 +120,8 @@ export default function AddCategory() {
               "Enter the field you want add as an specification in this category"
             }
             id="catagory_inputfield "
-            tags={tags}
-            setTags={setTags}
+            tags={specification}
+            setTags={setSpecification}
           />
         </div>
         <div className="flex items-center justify-end">
@@ -170,7 +175,7 @@ export default function AddCategory() {
             labelName={"Brands"}
             setSelectedField={setSelectedBrand}
           />
-          {tags?.map((item) => {
+          {specification?.map((item) => {
             return (
               <InputField
                 disabled

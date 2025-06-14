@@ -3,9 +3,9 @@ const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
 
 const createCategory = async (req, res) => {
-  const { name, tags, brands } = req.body;
+  const { name, specification, brands } = req.body;
 
-  const requiredFields = { name, tags };
+  const requiredFields = { name, specification };
 
   requiredFieldHandler(res, requiredFields);
 
@@ -20,8 +20,8 @@ const createCategory = async (req, res) => {
       return statusHandeler(res, 400, false, "Category name already exists");
     }
     await connect.execute(
-      "INSERT INTO category ( name, tags, brands) VALUES (?, ?, ?)",
-      [name, tags, brands]
+      "INSERT INTO category ( name, specification, brands, createdBy) VALUES (?, ?, ?, ?)",
+      [name, specification, brands, req.user.id]
     );
 
     await connect.end();
@@ -96,9 +96,9 @@ const deleteCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   const id = req.params.id;
-  const { name, brands, tags } = req.body;
+  const { name, brands, specification } = req.body;
   const query =
-    "UPDATE category SET name = ?, brands = ?, tags = ? WHERE id = ?";
+    "UPDATE category SET name = ?, brands = ?, specification = ? WHERE id = ?";
 
   try {
     const [rows] = await connection.query(
@@ -108,8 +108,8 @@ const updateCategory = async (req, res) => {
     const data = rows?.[0];
     const [result] = await connection.execute(query, [
       name ?? data?.name,
-      tags ?? data?.tags,
       brands ?? data?.brands,
+      specification ?? data?.specification,
       id,
     ]);
 
