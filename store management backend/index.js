@@ -40,7 +40,7 @@ app.get("/", function (req, res) {
   });
 });
 
-app.use("/api/upload", fileUploadRoute);
+app.use("", fileUploadRoute);
 app.use("/api/clock-in", userClockInRoute);
 app.use("/api/user", userRoute);
 app.use("/api/store", storeRoute);

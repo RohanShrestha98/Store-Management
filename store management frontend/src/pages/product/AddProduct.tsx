@@ -21,14 +21,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { PiCalendarBlank } from "react-icons/pi";
 import ReactQuill from "react-quill";
+import MultiSelectImage from "@/components/MultiSelectImage";
+import { defaultSelect } from "@/utils/defaultSelect";
 
 export default function AddProduct() {
   const navigate = useNavigate();
   const location = useLocation();
-  const editData = location.state;
   const edit = location.state;
-  const [selectedImage, setSelectedImage] = useState();
+  const [files, setFiles] = useState();
   const [selectedVendor, setSelectedVendor] = useState();
+  const [description, setDesccription] = useState(edit?.description);
   const [selectedStore, setSelectedStore] = useState();
   const [selectedCategory, setSelectedCategory] = useState();
   const [error, setError] = useState();
@@ -70,36 +72,49 @@ export default function AddProduct() {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm({
     mode: "onChange",
     resolver: yupResolver(fieldSchema),
     defaultValues: {
-      name: editData?.name,
-      costPrice: editData?.costPrice,
-      sellingPrice: editData?.sellingPrice,
-      tax: editData?.tax,
-      quantity: editData?.quantity,
+      name: edit?.name,
+      costPrice: edit?.costPrice,
+      sellingPrice: edit?.sellingPrice,
+      tax: edit?.tax,
+      quantity: edit?.quantity,
     },
   });
-  const formValue = watch();
   const productMutation = useProductMutation();
-  const [selectedBrand, setSelectedBrand] = useState();
 
   const onSubmitHandler = async (data) => {
-    const postData = {
-      ...data,
-      barCode: "1234",
-      images: selectedImage && selectedImage,
-    };
+    const specification = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (key.endsWith("_specification")) {
+        const specKey = key.replace("_specification", "");
+        specification[specKey] = value;
+      }
+    }
+    const formData = new FormData();
+    formData.append("barCode", "1234");
+    formData.append("description", description);
+    formData.append("vendor", selectedVendor);
+    formData.append("storeNumber", selectedStore);
+    formData.append("specification", JSON.stringify(specification));
+    formData.append("categoryId", selectedCategory);
+    Object.entries(data).forEach(([key, value]) => {
+      if (!key.endsWith("_specification")) {
+        formData.append(key, value);
+      }
+    });
+    files && files.forEach((file) => formData.append("images", file));
+
     try {
       await productMutation.mutateAsync([
         edit ? "patch" : "post",
-        edit ? `update/${editData?.id}` : "create/",
-        postData,
+        edit ? `update/${edit?.id}` : "create/",
+        formData,
       ]);
-      toast.success(`Category ${edit ? "edited" : "added"} successfully`);
-      navigate("/category");
+      toast.success(`Product ${edit ? "edited" : "added"} successfully`);
+      navigate("/product");
       reset();
     } catch (err) {
       console.log("err", err);
@@ -107,19 +122,13 @@ export default function AddProduct() {
     }
   };
 
-  const brandOptions = []?.map((item) => {
-    return { label: item, value: item };
-  });
+  console.log("edit", edit);
 
   const handleClear = (e) => {
     e.preventDefault();
-    setSelectedImage();
+    setFiles();
     reset();
   };
-  // const okey = [
-  //   specification,
-  //   images,
-  // ];
   const productNameFields = [
     {
       registerName: "name",
@@ -128,14 +137,6 @@ export default function AddProduct() {
       defaultValue: "",
       error: errors?.name?.message ?? error?.name,
       label: "Product Name",
-    },
-    {
-      registerName: "description",
-      placeHolder: "Enter product description",
-      className: "",
-      defaultValue: "",
-      error: "",
-      label: "Description",
     },
   ];
 
@@ -181,9 +182,9 @@ export default function AddProduct() {
   const productSelectFields = [
     {
       placeHolder: "Select vendor",
-      options: convertToSelectOptions(vendorData?.data),
+      options: convertToSelectOptions(vendorData?.data, true),
       className: "",
-      defaultValue: "",
+      defaultValue: defaultSelect(vendorData?.data, edit?.vendor, true),
       setSelectedField: setSelectedVendor,
       error: errors?.vendor?.message ?? error?.vendor,
       label: "Vendor",
@@ -192,7 +193,7 @@ export default function AddProduct() {
       placeHolder: "Select store",
       options: convertToSelectOptions(storeData?.data),
       className: "",
-      defaultValue: "",
+      defaultValue: defaultSelect(storeData?.data, edit?.storeNumber),
       setSelectedField: setSelectedStore,
       error: error?.store,
       label: "Store",
@@ -201,14 +202,12 @@ export default function AddProduct() {
       placeHolder: "Select category",
       options: convertToSelectOptions(categoryData?.data),
       className: "",
-      defaultValue: "",
+      defaultValue: defaultSelect(categoryData?.data, edit?.categoryId),
       setSelectedField: setSelectedCategory,
       error: error?.category,
       label: "Category",
     },
   ];
-
-  console.log("categoryDetsilsData", categoryDetsilsData);
 
   if (
     vendorIsError ||
@@ -226,13 +225,34 @@ export default function AddProduct() {
       >
         <div className="flex flex-col gap-2 w-full shadow-[inset_0_-6px_6px_-3px_rgba(0,0,0,0.2)] overflow-auto no-scrollbar">
           <div className="grid grid-cols-2 gap-x-2 sm:grid-cols-1">
+            {edit ? (
+              <div>
+                <p className="text-[#344054] leading-5 font-medium text-sm mb-1">
+                  Images
+                </p>
+                <div className="flex items-center gap-2 ">
+                  {edit?.images?.map((item) => {
+                    return (
+                      <img
+                        className="w-12 h-12 border border-gray-200 rounded-lg p-[2px]"
+                        src={item}
+                        alt=""
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <MultiSelectImage setFiles={setFiles} files={files} />
+            )}
+
             {productNameFields?.map((item) => {
               return (
                 <InputField
                   register={register}
                   name={item?.registerName}
                   placeholder={item?.placeHolder}
-                  className={`w-full text-sm text-gray-500 ${item?.className}`}
+                  className={`w-full text-sm text-gray-500 min-h-12 ${item?.className}`}
                   defaultValue={item?.defaultValue}
                   error={item?.error}
                   label={item?.label}
@@ -258,15 +278,19 @@ export default function AddProduct() {
           </div>
           <div className="grid grid-cols-3 md:grid-cols-2 gap-x-2">
             {productSelectFields?.map((item, id) => {
+              console.log("item", item);
               return (
                 <div>
                   <CustomSelect
                     id={id}
+                    defaultValue={item?.defaultValue}
                     options={item?.options}
                     placeholder={item?.placeHolder}
                     className={`w-full text-sm text-gray-500 ${item?.className}`}
                     labelName={item?.label}
-                    setSelectedField={item?.setSelectedField}
+                    setSelectedField={
+                      item?.setSelectedField ?? item?.defaultValue
+                    }
                   />
                   <p className="text-red-600 text-xs">{error}</p>
                 </div>
@@ -288,7 +312,7 @@ export default function AddProduct() {
                   return (
                     <InputField
                       register={register}
-                      name={smallLetter(item)}
+                      name={`${smallLetter(item)}_specification`}
                       placeholder={`Enter ${item} details`}
                       className={`w-full text-sm text-gray-500 ${item?.className}`}
                       defaultValue={item?.defaultValue}
@@ -309,7 +333,11 @@ export default function AddProduct() {
           <p className="text-[#344054] leading-5 font-medium text-sm ">
             Description
           </p>
-          <ReactQuill className="h-[110px] w-full " />
+          <ReactQuill
+            className="h-[110px] w-full "
+            value={description}
+            onChange={setDesccription}
+          />
         </div>
         <div className="flex items-center justify-end">
           <div className="grid  grid-cols-2 w-1/2 border mt-6 gap-2 md:w-full">

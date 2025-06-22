@@ -41,6 +41,12 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
       link: "/product",
       subLink: "/add-product",
     },
+    {
+      id: 5,
+      name: "User Product",
+      icon: <LuSquareUser />,
+      link: "/user-product",
+    },
 
     {
       id: 3,

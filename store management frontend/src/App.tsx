@@ -16,6 +16,7 @@ import Category from "./pages/category/Category";
 import AddCategory from "./pages/category/AddCategory";
 import Store from "./pages/store/Store";
 import Vendor from "./pages/vendor/Vendor";
+import UserProduct from "./pages/userside/UserProduct";
 
 function App() {
   return (
@@ -33,10 +34,12 @@ function App() {
           <Route path="/vendor" element={<Vendor />} />
           <Route path="/product" element={<Product />} />
           <Route path="/add-product" element={<AddProduct />} />
+          <Route path="/edit-product/:id" element={<AddProduct />} />
           <Route path="/category" element={<Category />} />
           <Route path="/add-category" element={<AddCategory />} />
           <Route path="/edit-category/:id" element={<AddCategory />} />
           <Route path="/risk-details" element={<Users />} />
+          <Route path="/user-product" element={<UserProduct />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/notification" element={<Notification />} />
         </Route>

@@ -11,6 +11,7 @@ import {
 export default function CustomSelect({
   id,
   options,
+  defaultValue,
   label,
   isSearchPagination,
   placeholder,
@@ -39,7 +40,7 @@ export default function CustomSelect({
         <SelectTrigger
           className={`w-[180px] border rounded-lg bg-white focus-visible:border-gray-700 ${className}`}
         >
-          <SelectValue defaultValue={placeholder} placeholder={placeholder} />
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent className="bg-white ">
           <SelectGroup>

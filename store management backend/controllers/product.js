@@ -9,7 +9,7 @@ const createProduct = async (req, res) => {
     costPrice,
     sellingPrice,
     quantity,
-    discountPercentage,
+    tax,
     offer,
     vendor,
     description,
@@ -18,8 +18,12 @@ const createProduct = async (req, res) => {
     storeNumber,
     barCode,
     specification,
-    images,
   } = req.body;
+
+  const uploadedFiles = req.files || [];
+  const images = uploadedFiles.map((file) => {
+    return `http://localhost:3001/uploads/${encodeURIComponent(file.filename)}`;
+  });
 
   const requiredFields = {
     name,
@@ -32,10 +36,8 @@ const createProduct = async (req, res) => {
     storeNumber,
     barCode,
     specification,
-    images,
   };
-  const requiredError = requiredFieldHandler(res, requiredFields);
-  if (requiredError) return;
+  requiredFieldHandler(res, requiredFields);
 
   const categoryError = await nullCheckHandler(
     res,
@@ -58,29 +60,29 @@ const createProduct = async (req, res) => {
     const connect = await createConnection();
 
     await connect.execute(
-      "INSERT INTO product ( name, costPrice, sellingPrice, quantity, discountPercentage, offer, vendor,description, categoryId, brand, storeNumber, barCode, specification, images, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO product (name, costPrice, sellingPrice, quantity, tax, offer, vendor, description, categoryId, brand, storeNumber, barCode, specification, images, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         name,
         costPrice,
         sellingPrice,
         quantity,
-        discountPercentage,
-        offer,
+        tax ?? 0,
+        offer ?? 0,
         vendor,
         description,
         categoryId,
-        brand,
+        brand ?? "No brand",
         storeNumber,
         barCode,
         specification,
-        images,
-        req.user.id,
+        JSON.stringify(images),
+        req.user?.id,
       ]
     );
 
     await connect.end();
 
-    return statusHandeler(res, 201, true, "Product created successfull");
+    return statusHandeler(res, 201, true, "Product created successfully");
   } catch (error) {
     console.error("Error:", error);
     return statusHandeler(res, 500, false, "Internal Server error");
@@ -97,7 +99,23 @@ const getProduct = async (req, res) => {
     return res.status(200).json({ success: true, data });
   } catch (err) {
     console.error("Error retrieving store:", err);
-    statusHandeler(res, 500, false, "Error retrieving category");
+    statusHandeler(res, 500, false, "Error retrieving store");
+  }
+};
+
+const getProductForUser = async (req, res) => {
+  const storeNumber = req.params.id;
+
+  try {
+    const [rows] = await connection.query(
+      "SELECT id, images, offer, name, categoryId, createdBy, vendor, quantity, sellingPrice FROM product where storeNumber = ?",
+      [storeNumber]
+    );
+    const data = rows;
+    return res.status(200).json({ success: true, data });
+  } catch (err) {
+    console.error("Error retrieving store:", err);
+    statusHandeler(res, 500, false, "Error retrieving store");
   }
 };
 
@@ -160,6 +178,7 @@ const updateCategory = async (req, res) => {
 };
 
 module.exports = {
+  getProductForUser,
   createProduct,
   getProduct,
   updateCategory,

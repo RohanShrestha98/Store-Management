@@ -40,7 +40,8 @@ export const useAuthSignupMutation = () =>
 export const useCategoryMutation = () =>
   useMutate(["category"], "api/category/");
 
-export const useProductMutation = () => useMutate(["product"], "api/product/");
+export const useProductMutation = () =>
+  useMutate(["product"], "api/product/", "multipart/form-data");
 
 export const useUserMutation = () => useMutate(["user"], "api/user/");
 

@@ -30,6 +30,17 @@ export const useStoreData = (searchText = "", pageSize = "10", page = 1) =>
 export const useProductData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(["product", searchText, pageSize, page], `api/product/`);
 
+export const useProductForUserData = (
+  searchText = "",
+  pageSize = 10,
+  page = 1,
+  storeNumber
+) =>
+  useQueryData(
+    ["product-for-user", searchText, pageSize, page, storeNumber],
+    `api/product/store/${storeNumber}`
+  );
+
 export const useCategoryData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(
     ["category", searchText, pageSize, page],

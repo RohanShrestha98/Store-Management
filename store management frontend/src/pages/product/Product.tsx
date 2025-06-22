@@ -1,16 +1,14 @@
 import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
-import { useProductData, useUserData } from "@/hooks/useQueryData";
+import { useProductData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import Button from "@/ui/Button";
-import { useUploadMutation } from "@/hooks/useMutateData";
-import toast from "react-hot-toast";
-import axios from "axios";
+import truncateText from "@/utils/truncateText";
 
 export default function Product() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,80 +30,85 @@ export default function Product() {
     () => [
       {
         accessorFn: (row, index) => index + 1,
-        id: "id",
+        id: "sn",
         header: () => <span>S.N.</span>,
+        footer: (props) => props.column.id,
+      },
+      {
+        accessorFn: (row) => row?.images?.[0],
+        id: "image",
+        cell: (info) => (
+          <div>
+            <img
+              src={
+                info?.row?.original?.images?.[0] ??
+                "http://localhost:3001/uploads/laptop3.jpg"
+              }
+              alt="product"
+              className="h-10 w-10 object-contain rounded"
+            />
+          </div>
+        ),
+        header: () => <span>Image</span>,
         footer: (props) => props.column.id,
       },
       {
         accessorFn: (row) => row?.name,
         id: "name",
-        header: () => <span>Name</span>,
+        cell: (info) => <p>{truncateText(info?.row?.original?.name, 50)}</p>,
+        header: () => <span>Product Name</span>,
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.email,
-        id: "email",
-        cell: (info) => {
-          return (
-            <p>
-              {info?.row?.original?.email === ""
-                ? "-"
-                : info?.row?.original?.email}
-            </p>
-          );
-        },
-        header: () => <span>Email</span>,
+        accessorFn: (row) => row?.vendor,
+        id: "vendor",
+        header: () => <span>Vendor</span>,
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.phone,
-        id: "phone",
-        cell: (info) => {
-          return (
-            <p>
-              {info?.row?.original?.phoneNumber === ""
-                ? "-"
-                : info?.row?.original?.phoneNumber}
-            </p>
-          );
-        },
-        header: () => <span>Phone Number</span>,
+        accessorFn: (row) => row?.costPrice,
+        id: "costPrice",
+        cell: (info) => (
+          <p className="font-semibold">${info?.row?.original?.costPrice}</p>
+        ),
+        header: () => <span>Cost Price</span>,
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.isVerified,
-        id: "isVerified",
-        cell: (info) => {
-          return (
-            <p
-              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-medium text-white bg-[#027A48]
-                  `}
-            >
-              {"Verified"}
-            </p>
-          );
-        },
-        // info.getValue(),
-        header: () => <span>Verified</span>,
+        accessorFn: (row) => row?.sellingPrice,
+        id: "sellingPrice",
+        cell: (info) => (
+          <p className="font-semibold">${info?.row?.original?.sellingPrice}</p>
+        ),
+        header: () => <span>Selling Price</span>,
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.role?.title,
-        id: "role",
-        header: () => <span>Role</span>,
+        accessorFn: (row) => row?.quantity,
+        id: "quantity",
+        header: () => <span>Qty</span>,
         footer: (props) => props.column.id,
       },
+
       {
         accessorFn: (row) => row,
         id: "action",
         cell: (info) => {
+          const data = info?.cell?.row?.original;
           return (
             <div className="flex gap-2 text-base justify-center">
-              <FiEdit2 className="text-[#4365a7] cursor-pointer" />
+              <FiEdit2
+                onClick={() =>
+                  navigate(`/edit-product/${data?.id}`, {
+                    state: data,
+                  })
+                }
+                className="text-[#4365a7] cursor-pointer"
+              />
               <DeleteModal
                 asChild
-                desc={"Are you sure you want to delete this User"}
-                title={"Delete User"}
+                desc="Are you sure you want to delete this Product?"
+                title="Delete Product"
                 id={info?.row?.original?.id}
               >
                 <FaRegTrashCan className="text-red-600 cursor-pointer" />
@@ -128,35 +131,6 @@ export default function Product() {
     setSearchParams(searchQuery);
   }, [page, pageSize, searchText]);
 
-  const uploadMutation = useUploadMutation();
-
-  const [files, setFiles] = useState();
-
-  const handleUpload = async () => {
-    const formData = new FormData();
-    for (let i = 0; i < files?.length; i++) {
-      formData.append("files", files[i]);
-    }
-
-    try {
-      const res = await axios.post(
-        "http://localhost:3001/api/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("res", res);
-
-      toast.success("Upload Success");
-    } catch (err) {
-      console.error(err);
-      alert("Upload failed");
-    }
-  };
-
   return (
     <div className="p-4 flex flex-col gap-4">
       <div className="flex justify-end items-center">
@@ -166,14 +140,7 @@ export default function Product() {
           handleButtonClick={() => navigate("/add-product")}
         />
       </div>
-      <div>
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setFiles(e?.target?.files)}
-        />
-        <button onClick={handleUpload}>Upload to Drive</button>
-      </div>
+
       <div>
         <SearchPagination
           totalPage={data?.totalPage}
@@ -189,7 +156,7 @@ export default function Product() {
           data={data?.data ?? []}
           currentPage={1}
           totalPage={1}
-          emptyMessage="Oops! No User available right now."
+          emptyMessage="Oops! No Product available right now."
         />
       </div>
     </div>

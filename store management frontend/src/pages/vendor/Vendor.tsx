@@ -36,17 +36,17 @@ export default function Vendor() {
       icon: <MdOutlineDashboard size={16} />,
       className: "row-span-2 ",
     },
-    {
-      id: 2,
-      name: "Staff",
-      icon: <HiOutlineUsers size={16} />,
-      className: "col-span-2",
-    },
+    // {
+    //   id: 2,
+    //   name: "Staff",
+    //   icon: <HiOutlineUsers size={16} />,
+    //   className: "col-span-2",
+    // },
     {
       id: 3,
       name: "Sales",
       icon: <BsGraphUpArrow size={14} />,
-      className: "col-span-2",
+      className: "row-span-2",
     },
   ];
 
@@ -104,11 +104,11 @@ export default function Vendor() {
                 <p className="text-xs font-medium text-gray-600 line-clamp-1">
                   {truncateText(item?.address, 40)}
                 </p>
-                <div className="grid grid-flow-col grid-rows-2 gap-1 mt-2 text-xs font-semibold text-gray-600">
+                <div className="grid grid-cols-2 gap-1 mt-2 text-xs font-semibold text-gray-600">
                   {storeDetailOptions?.map((option) => {
                     return (
                       <div
-                        className={`${option?.className} cursor-pointer border flex flex-col gap-[2px] py-2  items-center justify-center rounded-[8px] border-gray-300 bg-white hover:bg-[#e2dbf9] hover:border-gray-400 `}
+                        className={`cursor-pointer border flex flex-col gap-[2px] py-3  items-center justify-center rounded-[8px] border-gray-300 bg-white hover:bg-[#e2dbf9] hover:border-gray-400 `}
                       >
                         {option?.icon}
                         {option?.name}
