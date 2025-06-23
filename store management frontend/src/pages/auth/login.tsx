@@ -37,8 +37,8 @@ const Login = () => {
       const result = await authMutation.mutateAsync(["post", "", data]);
       setUser({
         token: result?.data?.access,
-        refresh: result?.data?.refresh,
-        data: result?.data?.user,
+        refresh: result?.data?.access,
+        data: result?.data,
       });
       toast.success("Login successfully");
       navigate("/");

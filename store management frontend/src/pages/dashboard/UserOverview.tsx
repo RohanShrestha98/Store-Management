@@ -46,9 +46,6 @@ export default function UserOverview() {
   );
   const closedLength = data?.data?.filter((item) => item?.status == "closed");
 
-  console.log("closedLength", closedLength);
-  console.log("data", data?.data);
-
   const data01 = [
     { name: "Identified", value: identifiedLength?.length },
     { name: "Evaluated", value: evaluatedLength?.length },

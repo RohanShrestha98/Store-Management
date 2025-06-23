@@ -27,8 +27,6 @@ export default function AddCategory() {
   );
   const [brands, setBrands] = useState(edit ? editData?.brands : []);
 
-  console.log("editData", editData);
-
   const fieldSchema = Yup.object().shape({
     // name: Yup.string()
     //   .required("Required")
@@ -60,7 +58,6 @@ export default function AddCategory() {
       specification: specification && specification,
       brands: brands && brands,
     };
-    console.log("postData", postData);
     try {
       await categoryMutation.mutateAsync([
         edit ? "patch" : "post",

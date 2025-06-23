@@ -27,5 +27,6 @@ router.post(
 );
 // router.patch("/update/:id", productControler.updateCategory);
 router.delete("/delete/:id", productControler.deleteProduct);
+router.get("/bar-code/", productControler.getProductByBarcode);
 
 module.exports = router;

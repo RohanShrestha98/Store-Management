@@ -2,6 +2,8 @@ import { useProductMutation } from "@/hooks/useMutateData";
 import {
   useCategoryDetailsData,
   useCategoryNameData,
+  useProductDataByBarcode,
+  useProductForUserData,
   useStoreData,
   useVendorData,
 } from "@/hooks/useQueryData";
@@ -14,7 +16,7 @@ import {
 } from "@/utils/capitalizeFirstLetter";
 import { convertToSelectOptions } from "@/utils/convertToSelectOptions";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -23,17 +25,28 @@ import { PiCalendarBlank } from "react-icons/pi";
 import ReactQuill from "react-quill";
 import MultiSelectImage from "@/components/MultiSelectImage";
 import { defaultSelect } from "@/utils/defaultSelect";
+import BarcodeScanner from "@/components/BarcodeScanner";
+import { MdOutlineQrCodeScanner } from "react-icons/md";
+import Loading from "@/assets/AllSvg";
+import { IoCalendarClearOutline } from "react-icons/io5";
+import truncateText from "@/utils/truncateText";
+import { FiEdit2 } from "react-icons/fi";
 
 export default function AddProduct() {
   const navigate = useNavigate();
   const location = useLocation();
   const edit = location.state;
   const [files, setFiles] = useState();
+  const [open, setOpen] = useState(edit ? false : true);
+  const [done, setDone] = useState(false);
+  const [scannedBarCode, setScannedBarCode] = useState();
   const [selectedVendor, setSelectedVendor] = useState();
-  const [description, setDesccription] = useState(edit?.description);
+
   const [selectedStore, setSelectedStore] = useState();
   const [selectedCategory, setSelectedCategory] = useState();
   const [error, setError] = useState();
+  const { data, isLoading, isError } = useProductForUserData("", 10, 1, done);
+
   const {
     data: vendorData,
     isLoading: vendorIsLoading,
@@ -57,10 +70,29 @@ export default function AddProduct() {
     isError: storeIsError,
   } = useStoreData();
 
+  const [debouncedBarCode, setDebouncedBarCode] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedBarCode(scannedBarCode);
+    }, 500);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [scannedBarCode]);
+
+  const {
+    data: productDetsilsData,
+    isLoading: productDetailsIsLoading,
+    isError: productDetailsIsError,
+  } = useProductDataByBarcode(debouncedBarCode);
+
+  const scannedBarCodeData = productDetsilsData?.data?.[0];
+
+  const [description, setDesccription] = useState(edit?.description);
+
   const fieldSchema = Yup.object().shape({
-    name: Yup.string()
-      .required("Required")
-      .max(36, "Must be 36 characters or less"),
+    name: Yup.string().required("Required"),
     costPrice: Yup.string().required("Required"),
     sellingPrice: Yup.string().required("Required"),
     tax: Yup.string(),
@@ -72,6 +104,7 @@ export default function AddProduct() {
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
     mode: "onChange",
     resolver: yupResolver(fieldSchema),
@@ -83,18 +116,44 @@ export default function AddProduct() {
       quantity: edit?.quantity,
     },
   });
+
+  useEffect(() => {
+    if (scannedBarCodeData && !edit) {
+      const specFields = {};
+      const spec = scannedBarCodeData?.specification ?? {};
+      Object.keys(spec).forEach((key) => {
+        specFields[`${key}_specification`] = spec[key];
+      });
+
+      reset({
+        name: scannedBarCodeData?.name || "",
+        costPrice: scannedBarCodeData?.costPrice || "",
+        sellingPrice: scannedBarCodeData?.sellingPrice || "",
+        tax: scannedBarCodeData?.tax || "",
+        quantity: scannedBarCodeData?.quantity || "",
+        ...specFields,
+      });
+
+      setDesccription(scannedBarCodeData?.description || "");
+      setSelectedVendor(scannedBarCodeData?.vendor || "");
+      setSelectedStore(scannedBarCodeData?.storeNumber || "");
+      setSelectedCategory(scannedBarCodeData?.categoryId || "");
+    }
+  }, [scannedBarCodeData]);
   const productMutation = useProductMutation();
+
+  const editScannedDataImages = edit?.images ?? scannedBarCodeData?.images;
 
   const onSubmitHandler = async (data) => {
     const specification = {};
-    for (const [key, value] of Object.entries(data)) {
+    for (const key in data) {
       if (key.endsWith("_specification")) {
         const specKey = key.replace("_specification", "");
-        specification[specKey] = value;
+        specification[specKey] = data[key];
       }
     }
     const formData = new FormData();
-    formData.append("barCode", "1234");
+    formData.append("barCode", scannedBarCode);
     formData.append("description", description);
     formData.append("vendor", selectedVendor);
     formData.append("storeNumber", selectedStore);
@@ -114,15 +173,15 @@ export default function AddProduct() {
         formData,
       ]);
       toast.success(`Product ${edit ? "edited" : "added"} successfully`);
-      navigate("/product");
+      setScannedBarCode("");
+      !edit && setDone(!done);
       reset();
     } catch (err) {
       console.log("err", err);
+      setScannedBarCode("");
       setError(err?.response?.data?.error);
     }
   };
-
-  console.log("edit", edit);
 
   const handleClear = (e) => {
     e.preventDefault();
@@ -212,26 +271,40 @@ export default function AddProduct() {
   if (
     vendorIsError ||
     storeIsError ||
+    productDetailsIsError ||
     categoryIsError ||
     categoryDetailsIsError
   ) {
     return <p>Error</p>;
   }
+  if (productDetailsIsLoading) {
+    return <Loading />;
+  }
   return (
-    <div className="flex justify-between gap-6 items-start p-6">
+    <div className="flex justify-between gap-6 items-start p-6 relative h-full">
+      <MdOutlineQrCodeScanner
+        onClick={() => setOpen(true)}
+        className="absolute cursor-pointer bg-white text-2xl border p-1 w-8 h-8 top-0 right-0"
+      />
+      <BarcodeScanner
+        asChild
+        open={open}
+        setOpen={setOpen}
+        setScannedBarCode={setScannedBarCode}
+      />
       <form
         className="w-2/3 no-scrollbar bg-white p-6 rounded-md h-[82vh] overflow-auto flex flex-col justify-between"
         onSubmit={handleSubmit(onSubmitHandler)}
       >
         <div className="flex flex-col gap-2 w-full shadow-[inset_0_-6px_6px_-3px_rgba(0,0,0,0.2)] overflow-auto no-scrollbar">
           <div className="grid grid-cols-2 gap-x-2 sm:grid-cols-1">
-            {edit ? (
+            {edit || scannedBarCodeData ? (
               <div>
                 <p className="text-[#344054] leading-5 font-medium text-sm mb-1">
                   Images
                 </p>
                 <div className="flex items-center gap-2 ">
-                  {edit?.images?.map((item) => {
+                  {editScannedDataImages?.map((item) => {
                     return (
                       <img
                         className="w-12 h-12 border border-gray-200 rounded-lg p-[2px]"
@@ -278,7 +351,6 @@ export default function AddProduct() {
           </div>
           <div className="grid grid-cols-3 md:grid-cols-2 gap-x-2">
             {productSelectFields?.map((item, id) => {
-              console.log("item", item);
               return (
                 <div>
                   <CustomSelect
@@ -309,14 +381,19 @@ export default function AddProduct() {
             {categoryDetsilsData?.data ? (
               <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
                 {categoryDetsilsData?.data?.[0]?.specification?.map((item) => {
+                  const key = smallLetter(item); // e.g., "have", "okey"
+                  const defaultValue =
+                    scannedBarCodeData?.specification?.[key] ?? "";
+
                   return (
                     <InputField
+                      key={key}
                       register={register}
-                      name={`${smallLetter(item)}_specification`}
+                      name={`${key}_specification`}
                       placeholder={`Enter ${item} details`}
-                      className={`w-full text-sm text-gray-500 ${item?.className}`}
-                      defaultValue={item?.defaultValue}
-                      error={item?.error}
+                      className="w-full text-sm text-gray-500"
+                      defaultValue={defaultValue}
+                      error={errors?.[`${key}_specification`] ?? ""}
                       label={capitalizeFirstLetter(item)}
                     />
                   );
@@ -359,7 +436,52 @@ export default function AddProduct() {
           </div>
         </div>
       </form>
-      <div className="w-1/3 bg-white p-6 rounded-md h-[82vh] overflow-auto flex flex-col justify-between"></div>
+      <div className="w-1/3 bg-white px-4  py-2 rounded-md h-[82vh] overflow-auto flex flex-col border-b-4">
+        <p className="font-semibold text-gray-600">Last Added items</p>
+        {data?.data?.length ? (
+          <div className="grid grid-cols-2 gap-2  ">
+            {data?.data?.map((item, index) => {
+              return (
+                <div className="border flex flex-col items-center border-gray-300 hover:drop-shadow-lg bg-white  rounded-[8px] relative  cursor-pointer  gap-1 p-2 pt-3">
+                  <img
+                    className="h-10  object-cover"
+                    src={
+                      item?.images?.[0] ??
+                      "http://localhost:3001/uploads/laptop3.jpg"
+                    }
+                    alt=""
+                  />
+                  <FiEdit2
+                    onClick={() =>
+                      navigate(`/edit-product/${item?.id}`, {
+                        state: item,
+                      })
+                    }
+                    className="absolute top-0 right-0 bg-gray-200 p-[4px] text-blue-500 cursor-pointer font-bold  rounded-tr-[8px] rounded-bl-[8px] text-xl hover:bg-blue-500 hover:text-white"
+                  />
+                  <div className="col-span-2 text-center">
+                    <p className="font-medium w-full line-clamp-1 text-xs text-gray-600">
+                      {truncateText(item?.name, 20)}
+                    </p>
+
+                    <p className="font-semibold w-full  text-yellow-600 text-sm">
+                      ${item?.sellingPrice}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center font-semibold text-sm text-gray-500">
+            <div className="flex flex-col gap-1 items-center">
+              <IoCalendarClearOutline size={20} />
+              No item selected
+            </div>
+          </div>
+        )}
+        {isLoading && <Loading />}
+      </div>
     </div>
   );
 }

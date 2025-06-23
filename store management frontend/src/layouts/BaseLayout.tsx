@@ -16,7 +16,7 @@ export default function BaseLayout() {
       </div>
       <div className={`${hideSidebar ? "w-full" : "w-5/6"} bg-[#f9f9f9]`}>
         <Navbar />
-        <div className="h-full overflow-auto">
+        <div className="h-[90vh] overflow-auto">
           <Outlet />
         </div>
       </div>

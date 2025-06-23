@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxiosPrivate from "./useAxiosPrivate";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export const useQueryData = (
   key: string[],
@@ -34,12 +35,14 @@ export const useProductForUserData = (
   searchText = "",
   pageSize = 10,
   page = 1,
-  storeNumber
-) =>
-  useQueryData(
-    ["product-for-user", searchText, pageSize, page, storeNumber],
-    `api/product/store/${storeNumber}`
+  change
+) => {
+  const { user } = useAuthStore();
+  return useQueryData(
+    ["product-for-user", searchText, pageSize, page, change],
+    `api/product/store/${3340}`
   );
+};
 
 export const useCategoryData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(
@@ -57,6 +60,17 @@ export const useCategoryDetailsData = (id) =>
     "",
     !!id
   );
+
+export const useProductDataByBarcode = (barCode) => {
+  const { user } = useAuthStore();
+  const storeNumber = user?.data?.storeId;
+  return useQueryData(
+    ["product-bar-code", barCode],
+    `api/product/bar-code/?barCode=${barCode}&storeNumber=${3340}`,
+    "",
+    !!barCode
+  );
+};
 
 export const useVendorData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(["vendor", searchText, pageSize, page], `api/vendor/`);

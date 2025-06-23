@@ -62,7 +62,7 @@ const ReactTable = React.forwardRef(
     }, [table?.getSelectedRowModel()]);
 
     return (
-      <div className=" overflow-auto no-scrollbar border  bg-white">
+      <div className="border overflow-auto  no-scrollbar  h-[66vh]  bg-white">
         {isLoading ? (
           <div className="flex justify-center border w-full">
             <img src={loading} alt="" />

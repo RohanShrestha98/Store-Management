@@ -25,8 +25,6 @@ export default function Category() {
     page
   );
 
-  console.log("data", data);
-
   const columns = useMemo(
     () => [
       {
@@ -42,63 +40,31 @@ export default function Category() {
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.email,
-        id: "email",
-        cell: (info) => {
-          return (
-            <p>
-              {info?.row?.original?.email === ""
-                ? "-"
-                : info?.row?.original?.email}
-            </p>
-          );
-        },
-        header: () => <span>Email</span>,
+        accessorFn: (row) => row?.specification?.join(", "),
+        id: "specification",
+        cell: (info) => <p className="line-clamp-2">{info.getValue()}</p>,
+        header: () => <span>Specifications</span>,
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.phone,
-        id: "phone",
-        cell: (info) => {
-          return (
-            <p>
-              {info?.row?.original?.phoneNumber === ""
-                ? "-"
-                : info?.row?.original?.phoneNumber}
-            </p>
-          );
-        },
-        header: () => <span>Phone Number</span>,
+        accessorFn: (row) => row?.brands?.join(", "),
+        id: "brands",
+        cell: (info) => <p className="line-clamp-2">{info.getValue()}</p>,
+        header: () => <span>Brands</span>,
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.isVerified,
-        id: "isVerified",
-        cell: (info) => {
-          return (
-            <p
-              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-medium text-white bg-[#027A48]
-                  `}
-            >
-              {"Verified"}
-            </p>
-          );
-        },
-        // info.getValue(),
-        header: () => <span>Verified</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row?.role?.title,
-        id: "role",
-        header: () => <span>Role</span>,
+        accessorFn: (row) => new Date(row?.createdAt).toLocaleDateString(),
+        id: "createdAt",
+        header: () => <span>Added</span>,
         footer: (props) => props.column.id,
       },
       {
         accessorFn: (row) => row,
         id: "action",
         cell: (info) => {
-          const data = info?.cell?.row?.original;
+          const data = info?.row?.original;
+          const navigate = useNavigate(); // make sure this is used in a component
           return (
             <div className="flex gap-2 text-base justify-center">
               <FiEdit2
@@ -111,9 +77,9 @@ export default function Category() {
               />
               <DeleteModal
                 asChild
-                desc={"Are you sure you want to delete this Category"}
-                title={"Delete Category"}
-                id={info?.row?.original?.id}
+                desc="Are you sure you want to delete this Category?"
+                title="Delete Category"
+                id={data?.id}
               >
                 <FaRegTrashCan className="text-red-600 cursor-pointer" />
               </DeleteModal>

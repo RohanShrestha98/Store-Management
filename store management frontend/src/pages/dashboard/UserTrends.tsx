@@ -15,7 +15,6 @@ export default function UserTrends() {
   const { data: userData } = useUserData();
 
   const admin = userData?.data?.filter((item) => {
-    console.log("item", item);
     return item?.role?.id == 1;
   });
   const analyst = userData?.data?.filter((item) => item?.role?.id == 2);
@@ -24,9 +23,6 @@ export default function UserTrends() {
     (item) => item?.role?.id == 4
   );
   const iso = userData?.data?.filter((item) => item?.role?.id == 5);
-
-  console.log("admin", admin);
-  console.log("userData?.data", userData?.data);
 
   const data = [
     {

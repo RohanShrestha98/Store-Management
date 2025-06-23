@@ -140,6 +140,7 @@ const login = async (req, res) => {
     [email]
   );
   const userData = rows?.[0];
+  console.log("userData", userData);
 
   try {
     nullCheckHandler(res, "users", "email", email);
@@ -152,7 +153,10 @@ const login = async (req, res) => {
       const data = {
         id: userData?.id,
         email: userData?.email,
-        username: userData?.username,
+        firstName: userData?.firstName,
+        lastName: userData?.lastName,
+        storeId: userData?.storeId,
+        address: userData?.address,
       };
       const accessToken = jwt.sign(
         {
@@ -164,7 +168,6 @@ const login = async (req, res) => {
       return res.status(200).json({
         success: true,
         data: { ...data, access: accessToken },
-        userData: userData,
       });
     } else {
       return res

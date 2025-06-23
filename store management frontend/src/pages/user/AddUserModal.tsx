@@ -21,7 +21,6 @@ export default function AddUserModal({
   edit = false,
   editData,
 }) {
-  console.log("editData", editData);
   const [selectedStore, setSelectedStore] = useState(
     edit ? editData?.role?.title : ""
   );
@@ -29,7 +28,6 @@ export default function AddUserModal({
   const [hasSubmittedClick, setHasSubmittedClick] = useState(false);
   const [error, setError] = useState("");
   const { data, isLoading, isError } = useStoreData();
-  console.log("data", data);
 
   const fieldSchema = Yup.object().shape({
     firstName: Yup.string()

@@ -92,14 +92,14 @@ const createProduct = async (req, res) => {
 const getProduct = async (req, res) => {
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM product where createdBy = ?",
+      "SELECT * FROM product where createdBy = ? ORDER BY createdAt DESC ",
       [req?.user?.id]
     );
     const data = rows;
     return res.status(200).json({ success: true, data });
   } catch (err) {
-    console.error("Error retrieving store:", err);
-    statusHandeler(res, 500, false, "Error retrieving store");
+    console.error("Error retrieving product:", err);
+    statusHandeler(res, 500, false, "Error retrieving product");
   }
 };
 
@@ -108,14 +108,33 @@ const getProductForUser = async (req, res) => {
 
   try {
     const [rows] = await connection.query(
-      "SELECT id, images, offer, name, categoryId, createdBy, vendor, quantity, sellingPrice FROM product where storeNumber = ?",
+      "SELECT id, images, offer, name, categoryId, createdBy, vendor, quantity, sellingPrice FROM product where storeNumber = ? ORDER BY createdAt DESC ",
       [storeNumber]
     );
     const data = rows;
     return res.status(200).json({ success: true, data });
   } catch (err) {
-    console.error("Error retrieving store:", err);
-    statusHandeler(res, 500, false, "Error retrieving store");
+    console.error("Error retrieving product:", err);
+    statusHandeler(res, 500, false, "Error retrieving product");
+  }
+};
+
+const getProductByBarcode = async (req, res) => {
+  const { barCode, storeNumber, limit = 1 } = req.query;
+
+  try {
+    const [rows] = await connection.query(
+      `SELECT * FROM product 
+       WHERE barCode = ? AND storeNumber = ? 
+       ORDER BY createdAt DESC 
+       LIMIT ${limit}`,
+      [barCode, storeNumber]
+    );
+
+    return res.status(200).json({ success: true, data: rows || null });
+  } catch (err) {
+    console.error("Error retrieving product:", err);
+    statusHandeler(res, 500, false, "Error retrieving product");
   }
 };
 
@@ -179,6 +198,7 @@ const updateCategory = async (req, res) => {
 
 module.exports = {
   getProductForUser,
+  getProductByBarcode,
   createProduct,
   getProduct,
   updateCategory,

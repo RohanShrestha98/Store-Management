@@ -13,6 +13,7 @@ import { BsGraphUpArrow } from "react-icons/bs";
 import truncateText from "@/utils/truncateText";
 import Loading from "@/assets/AllSvg";
 import EmptyPage from "@/components/EmptyPage";
+import { useCheckoutProductStore } from "@/store/useCheckoutProductStore";
 
 export default function Vendor() {
   const [searchParams, setSearchParams] = useSearchParams();
