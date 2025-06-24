@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAxiosPrivate from "./useAxiosPrivate";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export const useMutate = (
   queryKey: string[],
@@ -50,6 +51,10 @@ export const useStoreMutation = () => useMutate(["store"], "api/store/");
 export const useVendorMutation = () => useMutate(["vendor"], "api/vendor/");
 
 export const useUploadMutation = () => useMutate(["upload"], "api/upload/");
+
+export const useSalesMutation = () => {
+  return useMutate(["sales"], `api/sales`);
+};
 
 export const useChangePasswordMutation = () =>
   useMutate(

@@ -91,7 +91,7 @@ export default function Navbar() {
           )}
         </div>
         <p className="text-[#4D4D4D] font-medium">
-          {user?.data?.username ?? "Sakshii"}
+          {user?.data?.firstName ?? "Rohan"}
         </p>
         <img
           onClick={() => navigate("/settings")}

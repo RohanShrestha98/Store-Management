@@ -14,6 +14,7 @@ const userRoute = require("./routes/user");
 const storeRoute = require("./routes/store");
 const categoryRoute = require("./routes/category");
 const productRoute = require("./routes/product");
+const salesRoute = require("./routes/sales");
 const vendorRoute = require("./routes/vendor");
 const fileUploadRoute = require("./routes/fileUpload");
 const userClockInRoute = require("./routes/userClockIn");
@@ -46,6 +47,7 @@ app.use("/api/user", userRoute);
 app.use("/api/store", storeRoute);
 app.use("/api/category", categoryRoute);
 app.use("/api/product", productRoute);
+app.use("/api/sales", salesRoute);
 app.use("/api/vendor", vendorRoute);
 
 const PORT = process.env.PORT;

@@ -85,7 +85,7 @@ export default function AddProduct() {
     data: productDetsilsData,
     isLoading: productDetailsIsLoading,
     isError: productDetailsIsError,
-  } = useProductDataByBarcode(debouncedBarCode);
+  } = useProductDataByBarcode(debouncedBarCode, true);
 
   const scannedBarCodeData = productDetsilsData?.data?.[0];
 

@@ -69,6 +69,12 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
       link: "/vendor",
     },
     {
+      id: 9,
+      name: "Sales History",
+      icon: <TbReportSearch />,
+      link: "/sales-history",
+    },
+    {
       id: 1,
       name: "Notification",
       icon: <IoNotificationsOutline />,

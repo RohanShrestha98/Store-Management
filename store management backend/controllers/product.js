@@ -2,6 +2,7 @@ const { connection, createConnection } = require("../database");
 const { nullCheckHandler } = require("../helper/nullCheckHandler");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
+const { getSales } = require("./sales");
 
 const createProduct = async (req, res) => {
   const {
@@ -106,13 +107,67 @@ const getProduct = async (req, res) => {
 const getProductForUser = async (req, res) => {
   const storeNumber = req.params.id;
 
+  const [salesRows] = await connection.query(
+    "SELECT * FROM sales WHERE storeNumber = ? ORDER BY createdAt DESC",
+    [storeNumber]
+  );
+
+  const flatSales = salesRows?.flatMap((record) => {
+    const { createdBy, createdAt, storeNumber, sales } = record;
+    const parsedSales = typeof sales === "string" ? JSON.parse(sales) : sales;
+
+    return parsedSales?.map((sale) => ({
+      ...sale,
+      createdBy,
+      createdAt,
+      storeNumber,
+      quantity: 1,
+    }));
+  });
+
+  const mergedMap = new Map();
+
+  flatSales?.forEach((item) => {
+    const key = `${item?.barCode}-${item?.storeNumber}`;
+
+    if (mergedMap.has(key)) {
+      const existing = mergedMap?.get(key);
+      mergedMap?.set(key, {
+        ...existing,
+        quantity: existing?.quantity + 1,
+      });
+    } else {
+      mergedMap.set(key, { ...item });
+    }
+  });
+
+  const mergedSales = Array.from(mergedMap.values());
+
   try {
-    const [rows] = await connection.query(
-      "SELECT id, images, offer, name, categoryId, createdBy, vendor, quantity, sellingPrice FROM product where storeNumber = ? ORDER BY createdAt DESC ",
+    const [productRows] = await connection.query(
+      "SELECT id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice FROM product WHERE storeNumber = ? ORDER BY createdAt DESC",
       [storeNumber]
     );
-    const data = rows;
-    return res.status(200).json({ success: true, data });
+
+    const updatedProducts = productRows.map((product) => {
+      const saleMatch = mergedSales?.find(
+        (sale) =>
+          sale?.barCode === product?.barCode &&
+          sale?.storeNumber === storeNumber
+      );
+
+      const adjustedQuantity = product?.quantity - (saleMatch?.quantity || 0);
+
+      return {
+        ...product,
+        quantity: adjustedQuantity < 0 ? 0 : adjustedQuantity,
+      };
+    });
+    const filteredProducts = updatedProducts.filter(
+      (item) => item.quantity > 0
+    );
+
+    return res.status(200).json({ success: true, data: filteredProducts });
   } catch (err) {
     console.error("Error retrieving product:", err);
     statusHandeler(res, 500, false, "Error retrieving product");
@@ -120,11 +175,17 @@ const getProductForUser = async (req, res) => {
 };
 
 const getProductByBarcode = async (req, res) => {
-  const { barCode, storeNumber, limit = 1 } = req.query;
+  const { barCode, storeNumber, addProduct, limit = 1 } = req.query;
+
+  const isAddProduct = addProduct === "true";
 
   try {
     const [rows] = await connection.query(
-      `SELECT * FROM product 
+      `SELECT ${
+        isAddProduct
+          ? "*"
+          : "id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice"
+      } FROM product 
        WHERE barCode = ? AND storeNumber = ? 
        ORDER BY createdAt DESC 
        LIMIT ${limit}`,
@@ -134,7 +195,7 @@ const getProductByBarcode = async (req, res) => {
     return res.status(200).json({ success: true, data: rows || null });
   } catch (err) {
     console.error("Error retrieving product:", err);
-    statusHandeler(res, 500, false, "Error retrieving product");
+    statusHandeler(res, 400, false, err);
   }
 };
 
