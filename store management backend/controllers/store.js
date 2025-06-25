@@ -6,7 +6,7 @@ const createStore = async (req, res) => {
   const { name, address, storeNumber, open, close } = req.body;
   const requiredFields = { name, address, storeNumber, open, close };
 
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return;
 
   try {
     const connect = await createConnection();

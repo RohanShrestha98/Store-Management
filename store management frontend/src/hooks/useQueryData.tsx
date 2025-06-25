@@ -60,7 +60,7 @@ export const useProductForUserData = (
       limit,
       searchText,
     ],
-    `api/product/store/${storeNumber}/?limit=${limit}&stock=${stock}`
+    `api/product/store/${storeNumber ?? 11111}/?limit=${limit}&stock=${stock}`
   );
 };
 
@@ -101,12 +101,13 @@ export const useProductDataByBarcode = (
 export const useAddProductByBarcodeData = (
   barCode,
   addProduct = false,
+  done,
   storeNumber,
   limit
 ) => {
   const { user } = useAuthStore();
   return useQueryData(
-    ["product-bar-code", barCode, addProduct, storeNumber],
+    ["product-bar-code", barCode, addProduct, storeNumber, done],
     `api/product/bar-code/?barCode=${barCode}&storeNumber=${
       storeNumber ?? user?.data?.storeId
     }&addProduct=${addProduct}&limit=${limit ?? 1}`,

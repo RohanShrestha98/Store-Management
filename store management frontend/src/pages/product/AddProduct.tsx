@@ -41,45 +41,27 @@ export default function AddProduct() {
   const [open, setOpen] = useState(edit ? false : true);
   const [done, setDone] = useState(false);
   const [scannedBarCode, setScannedBarCode] = useState();
+  const [debouncedBarCode, setDebouncedBarCode] = useState("");
   const [selectedVendor, setSelectedVendor] = useState();
   const { user } = useAuthStore();
-
   const [selectedStore, setSelectedStore] = useState();
   const [selectedCategory, setSelectedCategory] = useState();
   const [error, setError] = useState();
   const { data, isLoading, isError } = useProductForUserData(
-    user?.data?.storeId,
+    user?.data?.storeId ?? 11111,
     10,
     done,
     "",
     10,
     1
   );
-
-  const {
-    data: vendorData,
-    isLoading: vendorIsLoading,
-    isError: vendorIsError,
-  } = useVendorData();
-  const {
-    data: categoryData,
-    isLoading: categoryIsLoading,
-    isError: categoryIsError,
-  } = useCategoryNameData();
-
-  const {
-    data: categoryDetsilsData,
-    isLoading: categoryDetailsIsLoading,
-    isError: categoryDetailsIsError,
-  } = useCategoryDetailsData(selectedCategory);
-
-  const {
-    data: storeData,
-    isLoading: storeIsLoading,
-    isError: storeIsError,
-  } = useStoreData();
-
-  const [debouncedBarCode, setDebouncedBarCode] = useState("");
+  const { data: vendorData, isError: vendorIsError } = useVendorData();
+  const { data: categoryData, isError: categoryIsError } =
+    useCategoryNameData();
+  const { data: categoryDetsilsData, isError: categoryDetailsIsError } =
+    useCategoryDetailsData(selectedCategory);
+  const { data: storeData, isError: storeIsError } = useStoreData();
+  const [description, setDescription] = useState(edit?.description);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -94,11 +76,9 @@ export default function AddProduct() {
     data: productDetsilsData,
     isLoading: productDetailsIsLoading,
     isError: productDetailsIsError,
-  } = useAddProductByBarcodeData(debouncedBarCode, true);
+  } = useAddProductByBarcodeData(debouncedBarCode, true, done);
 
   const scannedBarCodeData = productDetsilsData?.data?.[0];
-
-  const [description, setDesccription] = useState(edit?.description);
 
   const fieldSchema = Yup.object().shape({
     name: Yup.string().required("Required"),
@@ -113,7 +93,6 @@ export default function AddProduct() {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm({
     mode: "onChange",
     resolver: yupResolver(fieldSchema),
@@ -127,13 +106,12 @@ export default function AddProduct() {
   });
 
   useEffect(() => {
+    const specFields = {};
+    const spec = scannedBarCodeData?.specification ?? {};
+    Object.keys(spec).forEach((key) => {
+      specFields[`${key}_specification`] = spec[key];
+    });
     if (scannedBarCodeData && !edit) {
-      const specFields = {};
-      const spec = scannedBarCodeData?.specification ?? {};
-      Object.keys(spec).forEach((key) => {
-        specFields[`${key}_specification`] = spec[key];
-      });
-
       reset({
         name: scannedBarCodeData?.name || "",
         costPrice: scannedBarCodeData?.costPrice || "",
@@ -143,16 +121,26 @@ export default function AddProduct() {
         ...specFields,
       });
 
-      setDesccription(scannedBarCodeData?.description || "");
+      setDescription(scannedBarCodeData?.description || "");
       setSelectedVendor(scannedBarCodeData?.vendor || "");
       setSelectedStore(scannedBarCodeData?.storeNumber || "");
       setSelectedCategory(scannedBarCodeData?.categoryId || "");
+    } else {
+      reset({
+        name: "",
+        costPrice: "",
+        sellingPrice: "",
+        tax: "",
+        quantity: "",
+        ...specFields,
+      });
+      setDescription("");
+      setScannedBarCode("");
     }
   }, [scannedBarCodeData]);
+
   const productMutation = useProductMutation();
-
   const editScannedDataImages = edit?.images ?? scannedBarCodeData?.images;
-
   const onSubmitHandler = async (data) => {
     const specification = {};
     for (const key in data) {
@@ -173,21 +161,24 @@ export default function AddProduct() {
         formData.append(key, value);
       }
     });
-    files && files.forEach((file) => formData.append("images", file));
-
+    if (editScannedDataImages) {
+      formData.append("images", editScannedDataImages);
+    } else if (files) {
+      files.forEach((file) => formData.append("images", file));
+    }
     try {
       await productMutation.mutateAsync([
         edit ? "patch" : "post",
-        edit ? `update/${edit?.id}` : "create/",
+        edit ? `update/${edit.id}` : "create/",
         formData,
       ]);
       toast.success(`Product ${edit ? "edited" : "added"} successfully`);
-      setScannedBarCode("");
-      !edit && setDone(!done);
       reset();
+      setSelectedCategory("");
+      setDebouncedBarCode("");
+      !edit && setDone(!done);
     } catch (err) {
-      console.log("err", err);
-      setScannedBarCode("");
+      console.error("Submit error:", err);
       setError(err?.response?.data?.error);
     }
   };
@@ -195,8 +186,18 @@ export default function AddProduct() {
   const handleClear = (e) => {
     e.preventDefault();
     setFiles();
+    reset({
+      name: "",
+      costPrice: "",
+      sellingPrice: "",
+      tax: "",
+      quantity: "",
+    });
+    setDescription("");
+    setScannedBarCode("");
     reset();
   };
+
   const productNameFields = [
     {
       registerName: "name",
@@ -422,7 +423,7 @@ export default function AddProduct() {
           <ReactQuill
             className="h-[110px] w-full "
             value={description}
-            onChange={setDesccription}
+            onChange={setDescription}
           />
         </div>
         <div className="flex items-center justify-end">
@@ -485,7 +486,7 @@ export default function AddProduct() {
           <div className="h-full flex items-center justify-center font-semibold text-sm text-gray-500">
             <div className="flex flex-col gap-1 items-center">
               <IoCalendarClearOutline size={20} />
-              No item selected
+              No product to show
             </div>
           </div>
         )}

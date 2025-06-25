@@ -6,7 +6,7 @@ const createVendor = async (req, res) => {
   const { name, address, storeName, products } = req.body;
   const requiredFields = { name, address, storeName };
 
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return;
 
   try {
     const connect = await createConnection();

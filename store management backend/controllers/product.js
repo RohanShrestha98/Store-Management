@@ -39,7 +39,7 @@ const createProduct = async (req, res) => {
     barCode,
     specification,
   };
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return;
 
   const categoryError = await nullCheckHandler(
     res,
@@ -120,7 +120,7 @@ const getProduct = async (req, res) => {
 
 const getProductForUser = async (req, res) => {
   const storeNumber = req.params.id;
-  const { stock } = req?.query;
+  const { stock, limit } = req?.query;
   const isStock = stock === "true";
 
   const [salesRows] = await connection.query(
@@ -160,12 +160,21 @@ const getProductForUser = async (req, res) => {
   const mergedSales = Array.from(mergedMap.values());
 
   try {
-    const [productRows] = await connection.query(
-      "SELECT id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice FROM product WHERE storeNumber = ? ORDER BY createdAt DESC",
-      [storeNumber]
-    );
+    let productRows;
+    console.log("storeNumber", storeNumber);
 
-    const updatedProducts = productRows.map((product) => {
+    if (!storeNumber || storeNumber == "11111" || storeNumber == "undefined") {
+      [productRows] = await connection.query(
+        `SELECT id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice FROM product ORDER BY createdAt DESC LIMIT ${limit}`
+      );
+    } else {
+      [productRows] = await connection.query(
+        `SELECT id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice FROM product WHERE storeNumber = ? ORDER BY createdAt DESC LIMIT ${limit}`,
+        [storeNumber]
+      );
+    }
+
+    const updatedProducts = productRows?.map((product) => {
       const saleMatch = mergedSales?.find(
         (sale) =>
           sale?.barCode === product?.barCode &&
@@ -189,7 +198,14 @@ const getProductForUser = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: isStock ? filteredProducts : outOfStockProducts,
+      data:
+        storeNumber == "11111"
+          ? productRows
+          : isStock
+          ? filteredProducts
+          : outOfStockProducts,
+      storeNumber,
+      productRows,
     });
   } catch (err) {
     console.error("Error retrieving product:", err);

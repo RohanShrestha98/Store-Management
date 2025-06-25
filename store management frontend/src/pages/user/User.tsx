@@ -76,6 +76,7 @@ export default function User() {
         header: () => <span>Email</span>,
         footer: (props) => props.column.id,
       },
+
       {
         accessorFn: (row) => row?.phone,
         id: "phone",
@@ -92,15 +93,28 @@ export default function User() {
         footer: (props) => props.column.id,
       },
       {
+        accessorFn: (row) => row?.payPerHour,
+        id: "pay",
+        cell: (info) => {
+          return <p>${info?.row?.original?.payPerHour}</p>;
+        },
+        header: () => <span>Pay</span>,
+        footer: (props) => props.column.id,
+      },
+      {
         accessorFn: (row) => row?.isVerified,
         id: "isVerified",
         cell: (info) => {
           return (
             <p
-              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-medium text-white bg-[#027A48]
+              className={`inline-block text-xs px-4 w-[100px] text-center cursor-default rounded-full py-[2px] font-medium text-white ${
+                info?.row?.original?.isVerified
+                  ? "bg-[#027A48]"
+                  : "bg-yellow-600"
+              }
                   `}
             >
-              {"Verified"}
+              {info?.row?.original?.isVerified ? "Verified" : "Not Verified"}
             </p>
           );
         },

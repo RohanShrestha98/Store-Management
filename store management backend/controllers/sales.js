@@ -8,14 +8,14 @@ const createSales = async (req, res) => {
   const requiredFields = {
     sales,
   };
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return;
 
   try {
     const connect = await createConnection();
 
     await connect.execute(
       "INSERT INTO sales (sales, storeNumber, createdBy) VALUES (?, ?, ?)",
-      [sales, req?.user?.storeId, req.user?.firstName]
+      [sales, req?.user?.storeId ?? 3340, req.user?.firstName]
     );
 
     await connect.end();
@@ -30,7 +30,9 @@ const createSales = async (req, res) => {
 const getSales = async (req, res) => {
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM sales WHERE storeNumber = ? ORDER BY createdAt DESC",
+      `SELECT * FROM sales ${
+        req?.user?.storeId ? "WHERE storeNumber = ?" : ""
+      } ORDER BY createdAt DESC`,
       [req?.user?.storeId]
     );
 

@@ -17,7 +17,7 @@ const signUp = async (req, res) => {
     password,
   };
 
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -79,7 +79,7 @@ const createUser = async (req, res) => {
     password,
   };
 
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -134,7 +134,7 @@ const createUser = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   const requiredFields = { email, password };
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return;
 
   const [rows] = await connection.execute(
     "SELECT * FROM users WHERE email = ?",
@@ -156,7 +156,7 @@ const login = async (req, res) => {
         email: userData?.email,
         firstName: userData?.firstName,
         lastName: userData?.lastName,
-        storeId: userData?.storeId,
+        storeNumber: userData?.storeNumber,
         address: userData?.address,
       };
       const accessToken = jwt.sign(
@@ -191,7 +191,7 @@ const getUsers = async (req, res) => {
     const { rows, pagenation } = await paginateQuery({
       connection,
       baseQuery: `
-        SELECT id, firstName, lastName, staffId, email, phoneNumber, address, storeId, payPerHour, days, shift 
+        SELECT id, firstName, lastName, staffId, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift 
         FROM users 
         WHERE 1=1
       `,
@@ -246,7 +246,7 @@ const deleteUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const userId = req.params.id;
+  const id = req.params.id;
   const {
     firstName,
     lastName,
@@ -261,12 +261,12 @@ const updateUser = async (req, res) => {
     isVerified,
   } = req.body;
   const query =
-    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, payPerHour = ?, shift = ?, days = ?, storeNumber = ?  WHERE id = ?";
-
+    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, isVerified = ?, payPerHour = ?, shift = ?, days = ?, storeNumber = ?  WHERE id = ?";
+  console.log("object", req?.body);
   try {
     const [rows] = await connection.execute(
       "SELECT email, phoneNumber, staffId FROM users WHERE id = ?",
-      [userId]
+      [id]
     );
     const userData = rows?.[0];
     const [result] = await connection.execute(query, [
@@ -275,13 +275,13 @@ const updateUser = async (req, res) => {
       staffId ?? userData?.staffId,
       email ?? userData?.email,
       phoneNumber ?? userData?.phoneNumber,
-      isVerified,
       address,
+      true,
       payPerHour,
       shift,
       days,
       storeNumber,
-      userId,
+      id,
     ]);
     if (result.affectedRows === 0) {
       return res.status(404).send("User not found");

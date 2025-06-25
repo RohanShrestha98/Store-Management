@@ -22,7 +22,6 @@ export default function SalesHistory() {
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
   const { data, isLoading, isError } = useSalesData(searchText, pageSize, page);
 
-  console.log("data", data);
   const columns = useMemo(
     () => [
       {
@@ -42,7 +41,7 @@ export default function SalesHistory() {
                 "http://localhost:3001/uploads/laptop3.jpg"
               }
               alt="product"
-              className="h-10 w-10 object-contain rounded"
+              className="h-6 w-8 object-contain rounded"
             />
           </div>
         ),
@@ -54,7 +53,7 @@ export default function SalesHistory() {
         id: "name",
         cell: (info) => {
           return (
-            <p className="max-w-40 line-clamp-2">
+            <p className="max-w-40 line-clamp-1">
               {truncateText(info?.row?.original?.name, 60)}
             </p>
           );
@@ -151,7 +150,7 @@ export default function SalesHistory() {
           data={data?.data ?? []}
           currentPage={1}
           totalPage={1}
-          emptyMessage="Oops! No User available right now."
+          emptyMessage="Oops! No History available right now."
         />
       </div>
     </div>

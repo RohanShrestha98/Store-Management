@@ -54,7 +54,7 @@ export default function Product() {
                 "http://localhost:3001/uploads/laptop3.jpg"
               }
               alt="product"
-              className="h-10 w-10 object-contain rounded"
+              className="h-8 w-8 object-contain rounded"
             />
           </div>
         ),

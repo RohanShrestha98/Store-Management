@@ -241,6 +241,7 @@ export default function UserProduct() {
             <Button
               buttonName={`CheckOut ($${totalPrice})`}
               className="w-full"
+              disabled={totalPrice == "0"}
               handleButtonClick={() => delayedSubmitHandler()}
             />
           </CheckoutModal>

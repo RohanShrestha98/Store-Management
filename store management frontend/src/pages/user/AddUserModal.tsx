@@ -25,6 +25,8 @@ export default function AddUserModal({
     edit ? editData?.role?.title : ""
   );
   const [open, setOpen] = useState(false);
+  const [shift, setShift] = useState([{ start: "9AM", end: "10PM" }]);
+  const [selectedDays, setSelectedDays] = useState([2, 3, 4, 5, 6]);
   const [hasSubmittedClick, setHasSubmittedClick] = useState(false);
   const [error, setError] = useState("");
   const { data, isLoading, isError } = useStoreData();
@@ -92,7 +94,9 @@ export default function AddUserModal({
     const postData = {
       ...data,
       isVerified: true,
-      store_number: selectedStore,
+      storeNumber: selectedStore,
+      shift: shift,
+      days: [2, 3, 4, 5, 6],
     };
     try {
       await userMutation.mutateAsync([
@@ -117,6 +121,39 @@ export default function AddUserModal({
       value: item?.storeNumber,
     };
   });
+
+  const shiftFields = [
+    {
+      name: "Full Day",
+      time: [{ start: "9AM", end: "10PM" }],
+    },
+    {
+      name: "Opening",
+      time: [{ start: "9AM", end: "2PM" }],
+    },
+    {
+      name: "Closing",
+      time: [{ start: "2PM", end: "10PM" }],
+    },
+  ];
+
+  const days = [
+    { label: "Sun", value: 1 },
+    { label: "Mon", value: 2 },
+    { label: "Tue", value: 3 },
+    { label: "Wed", value: 4 },
+    { label: "Thu", value: 5 },
+    { label: "Fri", value: 6 },
+    { label: "Sat", value: 7 },
+  ];
+
+  const toggleDay = (value) => {
+    setSelectedDays((prev) =>
+      prev.includes(value)
+        ? prev.filter((day) => day !== value)
+        : [...prev, value]
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -172,7 +209,16 @@ export default function AddUserModal({
                   error={errors?.password?.message ?? error?.password}
                 />
               )}
-
+              <InputField
+                register={register}
+                name="staffId"
+                placeholder="Enter staff id"
+                className="w-full text-sm text-gray-500"
+                defaultValue=""
+                required={true}
+                label="Staff ID"
+                error={errors?.staffId?.message}
+              />
               <InputField
                 register={register}
                 name="address"
@@ -200,7 +246,7 @@ export default function AddUserModal({
                 <CustomSelect
                   options={storeOptions}
                   label={""}
-                  placeholder={edit ? editData?.store?.name : "Select store"}
+                  placeholder={edit ? editData?.storeNumber : "Select store"}
                   setSelectedField={setSelectedStore}
                   className={"w-full text-sm text-gray-500"}
                   labelName={"Store"}
@@ -211,16 +257,7 @@ export default function AddUserModal({
                   {error?.store}
                 </p>
               </div>
-              <InputField
-                register={register}
-                name="staffId"
-                placeholder="Enter staff id"
-                className="w-full text-sm text-gray-500"
-                defaultValue=""
-                required={true}
-                label="Staff ID"
-                error={errors?.staffId?.message}
-              />
+
               <InputField
                 register={register}
                 name="payPerHour"
@@ -232,6 +269,54 @@ export default function AddUserModal({
                 label="Pay per hour"
                 error={errors?.payPerHour?.message}
               />
+              <div>
+                <p className="text-[#344054] leading-5 font-medium text-sm mb-1">
+                  Shift <span className="text-red-600">*</span>
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {shiftFields?.map((item) => {
+                    return (
+                      <div
+                        onClick={() => setShift(item?.time)}
+                        className="flex items-center cursor-pointer gap-1 text-xs font-medium text-gray-600"
+                      >
+                        <input
+                          checked={
+                            shift?.[0]?.end == item?.time?.[0]?.end &&
+                            shift?.[0]?.start == item?.time?.[0]?.start
+                          }
+                          type="checkbox"
+                          className="cursor-pointer"
+                          name=""
+                          id=""
+                        />
+                        <p>{item?.name}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="text-[#344054] leading-5 font-medium text-sm mb-1">
+                  Days <span className="text-red-600">*</span>
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  {days?.map((item) => (
+                    <div
+                      key={item.value}
+                      onClick={() => toggleDay(item?.value)}
+                      className="flex items-center cursor-pointer gap-1 text-xs font-medium text-gray-600"
+                    >
+                      <input
+                        type="checkbox"
+                        className="cursor-pointer"
+                        checked={selectedDays?.includes(item?.value)}
+                      />
+                      <p>{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 w-full mt-10 gap-2">

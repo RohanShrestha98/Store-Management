@@ -9,13 +9,14 @@ export default function Button({
   danger = false,
   type,
   noFill,
+  disabled = false,
 }) {
   return (
     <div>
       <ShadcnButton
         onClick={handleButtonClick}
         type={type}
-        disabled={loading}
+        disabled={loading || disabled}
         className={`${
           danger
             ? "border border-red-600  text-red-600 hover:bg-red-600 hover:text-white"
