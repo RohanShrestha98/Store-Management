@@ -1,13 +1,13 @@
 const { connection, createConnection } = require("../database");
+const { paginateQuery } = require("../helper/paginationHelper");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
 
 const createCategory = async (req, res) => {
   const { name, specification, brands } = req.body;
-
   const requiredFields = { name, specification };
 
-  requiredFieldHandler(res, requiredFields);
+  if (requiredFieldHandler(res, requiredFields)) return; // 👈 ADD THIS RETURN
 
   try {
     const connect = await createConnection();
@@ -19,8 +19,9 @@ const createCategory = async (req, res) => {
     if (rows.length > 0) {
       return statusHandeler(res, 400, false, "Category name already exists");
     }
+
     await connect.execute(
-      "INSERT INTO category ( name, specification, brands, createdBy) VALUES (?, ?, ?, ?)",
+      "INSERT INTO category (name, specification, brands, createdBy) VALUES (?, ?, ?, ?)",
       [name, specification, brands, req.user.id]
     );
 
@@ -34,12 +35,26 @@ const createCategory = async (req, res) => {
 };
 
 const getCategory = async (req, res) => {
+  const { page = 1, pageSize = 10, searchText = "" } = req.query;
+
   try {
-    const [rows] = await connection.query("SELECT * FROM category");
-    const data = rows;
-    return res.status(200).json({ success: true, data });
+    const { rows, pagenation } = await paginateQuery({
+      connection,
+      baseQuery: "SELECT * FROM category WHERE 1=1",
+      countQuery: "SELECT COUNT(*) as total FROM category WHERE 1=1",
+      searchText,
+      page,
+      pageSize,
+      searchField: "name",
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+      pagenation,
+    });
   } catch (err) {
-    console.error("Error retrieving store:", err);
+    console.error("Error retrieving category:", err);
     statusHandeler(res, 500, false, "Error retrieving category");
   }
 };

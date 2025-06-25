@@ -1,6 +1,6 @@
 import Loading from "@/assets/AllSvg";
 import {
-  useProductDataByBarcode,
+  useAddProductByBarcodeData,
   useProductForUserData,
 } from "@/hooks/useQueryData";
 import Button from "@/ui/Button";
@@ -14,9 +14,20 @@ import BarcodeScanner from "@/components/BarcodeScanner";
 import { useSalesMutation } from "@/hooks/useMutateData";
 import toast from "react-hot-toast";
 import CheckoutModal from "./CheckoutModal";
+import { useAuthStore } from "@/store/useAuthStore";
+import EmptyPage from "@/components/EmptyPage";
 
 export default function UserProduct() {
-  const { data, isLoading } = useProductForUserData("", 10, 1);
+  const { user } = useAuthStore();
+  const { data, isLoading, isError } = useProductForUserData(
+    user?.data?.storeId,
+    10,
+    false,
+    true,
+    "",
+    10,
+    1
+  );
   const [selectedProduct, setSelectedProduct] = useState([]);
   const [open, setOpen] = useState(true);
   const [openCheckOutModal, setOpenCheckOutModal] = useState(false);
@@ -42,7 +53,7 @@ export default function UserProduct() {
     data: productDetsilsData,
     isLoading: productDetailsIsLoading,
     isError: productDetailsIsError,
-  } = useProductDataByBarcode(debouncedBarCode);
+  } = useAddProductByBarcodeData(debouncedBarCode);
 
   const [scannedBarCodeData, setScannedBarCodeData] = useState([]);
 
@@ -167,6 +178,13 @@ export default function UserProduct() {
               );
           })}
         </div>
+        {isLoading && <Loading />}
+        {isError && <p className="flex items-center justify-center">Error</p>}
+        {data?.data?.length == 0 && (
+          <div className="w-full flex justify-center  pt-16 pb-20">
+            <EmptyPage message={"Oops! No product in this store"} />
+          </div>
+        )}
       </div>
 
       {/* Checkout Panel */}

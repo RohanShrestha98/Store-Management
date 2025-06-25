@@ -18,6 +18,7 @@ import Store from "./pages/store/Store";
 import Vendor from "./pages/vendor/Vendor";
 import UserProduct from "./pages/userside/UserProduct";
 import SalesHistory from "./pages/sales history/SalesHistory";
+import StoreProduct from "./pages/store/StoreProduct";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/user" element={<User />} />
           <Route path="/store" element={<Store />} />
+          <Route path="/store-product/:id" element={<StoreProduct />} />
           <Route path="/vendor" element={<Vendor />} />
           <Route path="/product" element={<Product />} />
           <Route path="/add-product" element={<AddProduct />} />

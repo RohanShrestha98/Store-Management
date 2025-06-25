@@ -16,6 +16,7 @@ import KeywordSelect from "@/components/KeywordSelect";
 import CustomSelect from "@/ui/CustomSelect";
 import { CiImageOn } from "react-icons/ci";
 import Button from "@/ui/Button";
+import EmptyPage from "@/components/EmptyPage";
 
 export default function AddCategory() {
   const location = useLocation();
@@ -28,9 +29,7 @@ export default function AddCategory() {
   const [brands, setBrands] = useState(edit ? editData?.brands : []);
 
   const fieldSchema = Yup.object().shape({
-    // name: Yup.string()
-    //   .required("Required")
-    //   .max(36, "Must be 36 characters or less"),
+    name: Yup.string().required("Required"),
   });
 
   const {
@@ -50,6 +49,7 @@ export default function AddCategory() {
   const navigate = useNavigate();
   const categoryMutation = useCategoryMutation();
   const [selectedBrand, setSelectedBrand] = useState();
+  const [error, setError] = useState();
 
   const onSubmitHandler = async (data) => {
     const postData = {
@@ -69,6 +69,8 @@ export default function AddCategory() {
       reset();
     } catch (err) {
       console.log("err", err);
+      setError(err?.response?.data);
+      toast(err?.response?.data?.msg);
     }
   };
 
@@ -85,27 +87,20 @@ export default function AddCategory() {
   return (
     <div className="flex justify-between gap-6 items-start p-6">
       <form
-        className="w-3/5 bg-white p-6 rounded-md h-[82vh] overflow-auto flex flex-col justify-between"
+        className="w-3/5 bg-white p-6 rounded-md h-[80vh] overflow-auto flex flex-col justify-between"
         onSubmit={handleSubmit(onSubmitHandler)}
       >
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-2">
-            <InputField
-              register={register}
-              name="name"
-              required
-              placeholder="Enter Category Name"
-              className="w-full text-sm text-gray-500"
-              defaultValue=""
-              error={errors?.name?.message}
-              label="Category Name"
-            />
-            <ChooseImage
-              setSelectedImage={setSelectedImage}
-              selectedImage={selectedImage}
-              defaultUrl={editData?.thumbnail?.url}
-            />
-          </div>
+          <InputField
+            register={register}
+            name="name"
+            required
+            placeholder="Enter Category Name"
+            className="w-full text-sm text-gray-500"
+            defaultValue=""
+            error={errors?.name?.message ?? error?.name}
+            label="Category Name"
+          />
           <KeywordSelect
             title={"Enter the brand under this category"}
             id="brands "
@@ -141,21 +136,10 @@ export default function AddCategory() {
           </div>
         </div>
       </form>
-      <div className="w-2/5 flex flex-col items-center gap-2 h-[82vh] overflow-auto bg-white py-4 px-4">
-        <p className="font-medium">Preview Category Form</p>
-        <div className="flex flex-col items-center gap-1">
-          <div className="rounded-full  bg-gray-200 border-2 border-gray-200">
-            {selectedImage && URL.createObjectURL(selectedImage) ? (
-              <img
-                className="h-14 w-14 rounded-full object-cover"
-                src={selectedImage && URL.createObjectURL(selectedImage)}
-                alt=""
-              />
-            ) : (
-              <CiImageOn size={50} className="text-gray-500 p-2" />
-            )}
-          </div>
-        </div>
+      <div className="w-2/5 flex flex-col h-[80vh] overflow-auto bg-white py-4 px-4">
+        <p className="text-[#344054] leading-5 font-semibold text-base  border-gray-600 underline">
+          Category Form Preview
+        </p>
         <div className="gap-2 w-full grid grid-cols-2 mt-2">
           <InputField
             disabled
@@ -172,6 +156,11 @@ export default function AddCategory() {
             labelName={"Brands"}
             setSelectedField={setSelectedBrand}
           />
+        </div>
+        <p className="text-[#344054] leading-5 mt-2 mb-2 font-semibold text-base underline  w-24">
+          Specifications
+        </p>
+        <div className="gap-2 w-full grid grid-cols-2 ">
           {specification?.map((item) => {
             return (
               <InputField
@@ -182,6 +171,13 @@ export default function AddCategory() {
               />
             );
           })}
+        </div>
+        <div className="w-full">
+          {specification?.length == 0 && (
+            <div className="w-full flex justify-center mt-10">
+              <EmptyPage message={"Specification not added"} />
+            </div>
+          )}
         </div>
       </div>
     </div>

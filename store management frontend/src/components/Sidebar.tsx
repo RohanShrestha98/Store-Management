@@ -5,7 +5,7 @@ import { IoIosLogOut } from "react-icons/io";
 import LogoutModal from "./LogoutModal";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { IoNotificationsOutline, IoSettingsOutline } from "react-icons/io5";
-import { DiAsterisk } from "react-icons/di";
+import { MdOutlineCategory } from "react-icons/md";
 import { CiBoxList } from "react-icons/ci";
 import { FiUsers } from "react-icons/fi";
 import { TbReportSearch } from "react-icons/tb";
@@ -25,68 +25,73 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
   }, [window.location.pathname]);
 
   const sidebar = [
-    { id: 7, name: "Dashboard", icon: <LuLayoutDashboard />, link: "/" },
+    { id: 1, name: "Dashboard", icon: <LuLayoutDashboard />, link: "/" },
     {
       id: 2,
       name: "Category",
-      icon: <LuLayoutDashboard />,
+      icon: <MdOutlineCategory />,
       link: "/category",
       subLink: "/add-category",
       subSubLink: "/edit-category",
     },
     {
-      id: 1,
+      id: 3,
       name: "Product",
       icon: <CiBoxList />,
       link: "/product",
       subLink: "/add-product",
     },
     {
-      id: 5,
+      id: 4,
       name: "User Product",
       icon: <LuSquareUser />,
       link: "/user-product",
     },
 
     {
-      id: 3,
+      id: 5,
       name: "Staff",
       // visiable: role == 1 ? false : true,
       icon: <FiUsers />,
       link: "/user",
     },
     {
-      id: 4,
+      id: 6,
       name: "Store",
       // visiable: role == 1 ? false : true,
       icon: <LuStore />,
       link: "/store",
     },
     {
-      id: 5,
+      id: 7,
       name: "Vendor",
       icon: <LuSquareUser />,
       link: "/vendor",
     },
     {
-      id: 9,
+      id: 8,
       name: "Sales History",
       icon: <TbReportSearch />,
       link: "/sales-history",
     },
     {
-      id: 1,
+      id: 9,
       name: "Notification",
       icon: <IoNotificationsOutline />,
       link: "/notification",
     },
     {
-      id: 5,
+      id: 10,
       name: "Risk Details",
       icon: <TbReportSearch />,
       link: "/risk-details",
     },
-    { id: 6, name: "Settings", icon: <IoSettingsOutline />, link: "/settings" },
+    {
+      id: 11,
+      name: "Settings",
+      icon: <IoSettingsOutline />,
+      link: "/settings",
+    },
   ];
 
   const handleActive = (item) => {
@@ -95,17 +100,18 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
   };
 
   return (
-    <div className="border-r h-full  w-full flex flex-col bg-black text-[#C9BCF7]">
+    <div className="border-r h-full  w-full flex flex-col bg-black  text-[#C9BCF7] ">
       <div
         onClick={() => {
           setActive("/");
           navigate("/");
         }}
-        className="flex md:justify-center p-4 gap-1 items-center mb-1"
+        className="flex cursor-pointer md:justify-center p-4 gap-1 items-center mb-1"
       >
         <img className="h-12 w-12" src={logo} alt="logo" />
-        <div className="font-bold text-sm flex flex-col">
-          <p>Store Management</p>
+        <div className="flex flex-col mt-2">
+          <p className="text-[10px] font-semibold mb-[-6px] pl-[2px]">store</p>
+          <p className="font-bold text-xl">STORE</p>
         </div>
       </div>
       <div className="flex  flex-col  h-[84vh] overflow-auto no-scrollbar ">

@@ -1,5 +1,6 @@
 const { connection, createConnection } = require("../database");
 const { nullCheckHandler } = require("../helper/nullCheckHandler");
+const { paginateQuery } = require("../helper/paginationHelper");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
 const { getSales } = require("./sales");
@@ -91,13 +92,26 @@ const createProduct = async (req, res) => {
 };
 
 const getProduct = async (req, res) => {
+  const { page = 1, pageSize = 10, searchText = "" } = req.query;
+  const userId = req?.user?.id;
+
   try {
-    const [rows] = await connection.query(
-      "SELECT * FROM product where createdBy = ? ORDER BY createdAt DESC ",
-      [req?.user?.id]
-    );
-    const data = rows;
-    return res.status(200).json({ success: true, data });
+    const { rows, pagenation } = await paginateQuery({
+      connection,
+      baseQuery: "SELECT * FROM product WHERE createdBy = ?",
+      countQuery: "SELECT COUNT(*) as total FROM product WHERE createdBy = ?",
+      searchText,
+      page,
+      pageSize,
+      searchField: "name",
+      queryParams: [userId],
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+      pagenation,
+    });
   } catch (err) {
     console.error("Error retrieving product:", err);
     statusHandeler(res, 500, false, "Error retrieving product");
@@ -106,9 +120,11 @@ const getProduct = async (req, res) => {
 
 const getProductForUser = async (req, res) => {
   const storeNumber = req.params.id;
+  const { stock } = req?.query;
+  const isStock = stock === "true";
 
   const [salesRows] = await connection.query(
-    "SELECT * FROM sales WHERE storeNumber = ? ORDER BY createdAt DESC",
+    `SELECT * FROM sales WHERE storeNumber = ? ORDER BY createdAt DESC`,
     [storeNumber]
   );
 
@@ -161,13 +177,20 @@ const getProductForUser = async (req, res) => {
       return {
         ...product,
         quantity: adjustedQuantity < 0 ? 0 : adjustedQuantity,
+        sold: saleMatch?.quantity ?? 0,
       };
     });
-    const filteredProducts = updatedProducts.filter(
-      (item) => item.quantity > 0
+    const filteredProducts = updatedProducts?.filter(
+      (item) => item?.quantity > 0
+    );
+    const outOfStockProducts = updatedProducts?.filter(
+      (item) => item?.quantity == 0
     );
 
-    return res.status(200).json({ success: true, data: filteredProducts });
+    return res.status(200).json({
+      success: true,
+      data: isStock ? filteredProducts : outOfStockProducts,
+    });
   } catch (err) {
     console.error("Error retrieving product:", err);
     statusHandeler(res, 500, false, "Error retrieving product");
@@ -186,7 +209,7 @@ const getProductByBarcode = async (req, res) => {
           ? "*"
           : "id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice"
       } FROM product 
-       WHERE barCode = ? AND storeNumber = ? 
+       WHERE barCode = ? OR storeNumber = ? 
        ORDER BY createdAt DESC 
        LIMIT ${limit}`,
       [barCode, storeNumber]

@@ -1,8 +1,8 @@
 import { useProductMutation } from "@/hooks/useMutateData";
 import {
+  useAddProductByBarcodeData,
   useCategoryDetailsData,
   useCategoryNameData,
-  useProductDataByBarcode,
   useProductForUserData,
   useStoreData,
   useVendorData,
@@ -31,6 +31,7 @@ import Loading from "@/assets/AllSvg";
 import { IoCalendarClearOutline } from "react-icons/io5";
 import truncateText from "@/utils/truncateText";
 import { FiEdit2 } from "react-icons/fi";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -41,11 +42,19 @@ export default function AddProduct() {
   const [done, setDone] = useState(false);
   const [scannedBarCode, setScannedBarCode] = useState();
   const [selectedVendor, setSelectedVendor] = useState();
+  const { user } = useAuthStore();
 
   const [selectedStore, setSelectedStore] = useState();
   const [selectedCategory, setSelectedCategory] = useState();
   const [error, setError] = useState();
-  const { data, isLoading, isError } = useProductForUserData("", 10, 1, done);
+  const { data, isLoading, isError } = useProductForUserData(
+    user?.data?.storeId,
+    10,
+    done,
+    "",
+    10,
+    1
+  );
 
   const {
     data: vendorData,
@@ -85,7 +94,7 @@ export default function AddProduct() {
     data: productDetsilsData,
     isLoading: productDetailsIsLoading,
     isError: productDetailsIsError,
-  } = useProductDataByBarcode(debouncedBarCode, true);
+  } = useAddProductByBarcodeData(debouncedBarCode, true);
 
   const scannedBarCodeData = productDetsilsData?.data?.[0];
 

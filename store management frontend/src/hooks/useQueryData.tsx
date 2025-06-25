@@ -23,34 +23,51 @@ export const useQueryData = (
 };
 
 export const useUserData = (searchText = "", pageSize = "10", page = 1) =>
-  useQueryData(["user", searchText, pageSize, page], `api/user/`);
+  useQueryData(
+    ["user", searchText, pageSize, page],
+    `api/user/?searchText=${searchText}&pageSize=${pageSize}&page=${page}`
+  );
 
 export const useStoreData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(["store", searchText, pageSize, page], `api/store/`);
 
 export const useProductData = (searchText = "", pageSize = "10", page = 1) =>
-  useQueryData(["product", searchText, pageSize, page], `api/product/`);
+  useQueryData(
+    ["product", searchText, pageSize, page],
+    `api/product/?searchText=${searchText}&page=${page}&pageSize=${pageSize}`
+  );
 
 export const useSalesData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(["sales", searchText, pageSize, page], `api/sales/`);
 
 export const useProductForUserData = (
-  searchText = "",
+  storeNumber,
+  limit,
+  change,
+  stock = true,
+  searchText,
   pageSize = 10,
-  page = 1,
-  change
+  page = 1
 ) => {
-  const { user } = useAuthStore();
   return useQueryData(
-    ["product-for-user", searchText, pageSize, page, change],
-    `api/product/store/${3340}`
+    [
+      "product-for-user",
+      pageSize,
+      page,
+      change,
+      stock,
+      storeNumber,
+      limit,
+      searchText,
+    ],
+    `api/product/store/${storeNumber}/?limit=${limit}&stock=${stock}`
   );
 };
 
 export const useCategoryData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(
     ["category", searchText, pageSize, page],
-    `api/category/?page=${page}&&search=${searchText}&&pageSize=${pageSize}`
+    `api/category/?page=${page}&&searchText=${searchText}&&pageSize=${pageSize}`
   );
 
 export const useCategoryNameData = () =>
@@ -64,12 +81,35 @@ export const useCategoryDetailsData = (id) =>
     !!id
   );
 
-export const useProductDataByBarcode = (barCode, addProduct = false) => {
+export const useProductDataByBarcode = (
+  barCode,
+  storeNumber,
+  limit,
+  searchText,
+  page,
+  pageSize
+) => {
   const { user } = useAuthStore();
-  const storeNumber = user?.data?.storeId;
   return useQueryData(
-    ["product-bar-code", barCode, addProduct],
-    `api/product/bar-code/?barCode=${barCode}&storeNumber=${3340}&addProduct=${addProduct}`,
+    ["product-bar-code", barCode, searchText, page, pageSize, storeNumber],
+    `api/product/bar-code/?page=${page}&&search=${searchText}&&pageSize=${pageSize}&barCode=${barCode}&storeNumber=${
+      storeNumber ?? user?.data?.storeId
+    }&limit=${limit ?? 10}`
+  );
+};
+
+export const useAddProductByBarcodeData = (
+  barCode,
+  addProduct = false,
+  storeNumber,
+  limit
+) => {
+  const { user } = useAuthStore();
+  return useQueryData(
+    ["product-bar-code", barCode, addProduct, storeNumber],
+    `api/product/bar-code/?barCode=${barCode}&storeNumber=${
+      storeNumber ?? user?.data?.storeId
+    }&addProduct=${addProduct}&limit=${limit ?? 1}`,
     "",
     !!barCode
   );

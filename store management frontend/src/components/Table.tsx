@@ -11,6 +11,7 @@ import {
 
 import EmptyPage from "./EmptyPage";
 import loading from "../assets/loading.svg";
+import Loading from "@/assets/AllSvg";
 
 const ReactTable = React.forwardRef(
   (
@@ -62,10 +63,12 @@ const ReactTable = React.forwardRef(
     }, [table?.getSelectedRowModel()]);
 
     return (
-      <div className={`border overflow-auto  no-scrollbar   bg-white`}>
+      <div
+        className={`border overflow-auto  min-h-[60vh] no-scrollbar  bg-white`}
+      >
         {isLoading ? (
-          <div className="flex justify-center border w-full">
-            <img src={loading} alt="" />
+          <div className="flex justify-center  mt-20 w-full">
+            <Loading />
           </div>
         ) : isError ? (
           <div className="pt-16 pb-20">Something went wrong</div>

@@ -5,7 +5,7 @@ import { useStoreData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AddStoreModal from "./AddStoreModal";
 import { LuStore } from "react-icons/lu";
 import { MdOutlineDashboard } from "react-icons/md";
@@ -16,6 +16,7 @@ import EmptyPage from "@/components/EmptyPage";
 
 export default function Store() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
   );
@@ -31,6 +32,7 @@ export default function Store() {
       name: "Product",
       icon: <MdOutlineDashboard size={16} />,
       className: "row-span-2 ",
+      navigate: "/store-product",
     },
     {
       id: 2,
@@ -68,9 +70,10 @@ export default function Store() {
           </div>
         </AddStoreModal>
       </div>
-      <div className="py-6 px-4 rounded-xl bg-white border h-[78vh] overflow-auto">
+      <div className="py-6 px-4 rounded-xl bg-white border h-[76vh]">
         <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
+            console.log("item", item);
             return (
               <div className="border border-gray-300 pt-3 pb-2 bg-[#f0edfa] px-2 mb-2 relative rounded-xl">
                 <div className="absolute px-2 rounded-[4px] font-medium skew-x-[-12deg] right-0 top-[-14px] bg-black text-xs text-[#C9BCF7]">
@@ -107,6 +110,11 @@ export default function Store() {
                   {storeDetailOptions?.map((option) => {
                     return (
                       <div
+                        onClick={() =>
+                          navigate(`${option?.navigate}/${item?.storeNumber}`, {
+                            state: item,
+                          })
+                        }
                         className={`${option?.className} cursor-pointer border flex flex-col gap-[2px] py-2  items-center justify-center rounded-[8px] border-gray-300 bg-white hover:bg-[#e2dbf9] hover:border-gray-400 `}
                       >
                         {option?.icon}

@@ -19,8 +19,20 @@ export default function User() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
-  const { data, isLoading, isError } = useUserData(searchText, pageSize, page);
-  
+  const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchText]);
+  const { data, isLoading, isError } = useUserData(
+    debouncedSearchText,
+    pageSize,
+    page
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -152,9 +164,11 @@ export default function User() {
       </div>
       <div>
         <SearchPagination
-          totalPage={data?.totalPage}
+          totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
           page={page}
+          setSearchText={setSearchText}
+          searchText={searchText}
           pageSize={pageSize}
           setPageSize={setPageSize}
         />
@@ -165,7 +179,7 @@ export default function User() {
           data={data?.data ?? []}
           currentPage={1}
           totalPage={1}
-          emptyMessage="Oops! No User available right now."
+          emptyMessage="Oops! No user to show"
         />
       </div>
     </div>

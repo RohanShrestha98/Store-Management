@@ -16,12 +16,21 @@ export default function Product() {
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
   );
+  const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchText]);
+
   const [pageSize, setPageSize] = useState(
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
   const { data, isLoading, isError } = useProductData(
-    searchText,
+    debouncedSearchText,
     pageSize,
     page
   );
@@ -143,9 +152,11 @@ export default function Product() {
 
       <div>
         <SearchPagination
-          totalPage={data?.totalPage}
+          totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
+          setSearchText={setSearchText}
           page={page}
+          searchText={searchText}
           pageSize={pageSize}
           setPageSize={setPageSize}
         />

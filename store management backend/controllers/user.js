@@ -3,6 +3,7 @@ const { connection, createConnection } = require("../database");
 const jwt = require("jsonwebtoken");
 const { nullCheckHandler } = require("../helper/nullCheckHandler");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
+const { paginateQuery } = require("../helper/paginationHelper");
 
 const signUp = async (req, res) => {
   const { firstName, lastName, email, password, phoneNumber, address } =
@@ -184,17 +185,37 @@ const login = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
+  const { page = 1, pageSize = 10, searchText = "" } = req.query;
+
   try {
-    const [rows] = await connection.query(
-      "SELECT id, firstName, lastName, staffId, email, phoneNumber, address, storeId, payPerHour, days, shift FROM users"
-    );
-    const data = rows;
-    return res.status(200).json({ success: true, data });
+    const { rows, pagenation } = await paginateQuery({
+      connection,
+      baseQuery: `
+        SELECT id, firstName, lastName, staffId, email, phoneNumber, address, storeId, payPerHour, days, shift 
+        FROM users 
+        WHERE 1=1
+      `,
+      countQuery: `
+        SELECT COUNT(*) as total 
+        FROM users 
+        WHERE 1=1
+      `,
+      searchText,
+      page,
+      pageSize,
+      searchField: "firstName", // or "staffId", "email", etc.
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+      pagenation,
+    });
   } catch (err) {
     console.error("Error retrieving users:", err);
-    return res.status(500).send({
-      success: true,
-      messege: `Error retriving users`,
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving users",
     });
   }
 };

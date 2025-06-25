@@ -15,12 +15,21 @@ export default function Category() {
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
   );
+  const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
   const [pageSize, setPageSize] = useState(
     searchParams.get("pageSize") ?? "10"
   );
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchText]);
+
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
   const { data, isLoading, isError } = useCategoryData(
-    searchText,
+    debouncedSearchText,
     pageSize,
     page
   );
@@ -112,9 +121,11 @@ export default function Category() {
       </div>
       <div>
         <SearchPagination
-          totalPage={data?.totalPage}
+          totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
+          setSearchText={setSearchText}
           page={page}
+          searchText={searchText}
           pageSize={pageSize}
           setPageSize={setPageSize}
         />
@@ -125,7 +136,7 @@ export default function Category() {
           data={data?.data ?? []}
           currentPage={1}
           totalPage={1}
-          emptyMessage="Oops! No User available right now."
+          emptyMessage="Oops! No category to show"
         />
       </div>
     </div>

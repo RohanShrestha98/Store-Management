@@ -168,7 +168,7 @@ export default function Task() {
       </div>
       <div>
         <SearchPagination
-          totalPage={data?.totalPage}
+          totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
           page={page}
           pageSize={pageSize}
