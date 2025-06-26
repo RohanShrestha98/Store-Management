@@ -80,7 +80,7 @@ export default function AddVendorModal({
       toast.success(`Vendor ${edit ? "updated" : "added"} successfully`);
     } catch (err) {
       console.log("err", err);
-      setError(err?.response?.data?.errors);
+      setError(err?.response?.data);
     }
   };
 

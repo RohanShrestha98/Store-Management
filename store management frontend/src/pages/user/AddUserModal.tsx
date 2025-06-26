@@ -111,7 +111,7 @@ export default function AddUserModal({
       toast.success(`Staff ${edit ? "updated" : "added"} successfully`);
     } catch (err) {
       console.log("err", err);
-      setError(err?.response?.data?.errors);
+      setError(err?.response?.data);
     }
   };
 
@@ -239,7 +239,7 @@ export default function AddUserModal({
                 required={true}
                 type="number"
                 label="Phone number"
-                error={errors?.phonenumber?.message ?? error?.phonenumber}
+                error={errors?.phoneNumber?.message ?? error?.phoneNumber}
               />
 
               <div>

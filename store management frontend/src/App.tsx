@@ -19,32 +19,50 @@ import Vendor from "./pages/vendor/Vendor";
 import UserProduct from "./pages/userside/UserProduct";
 import SalesHistory from "./pages/sales history/SalesHistory";
 import StoreProduct from "./pages/store/StoreProduct";
+import ClockIn from "./pages/auth/ClockIn";
+import { useAuthStore } from "./store/useAuthStore";
+import VendorProduct from "./pages/vendor/VendorProduct";
+import Profile from "./pages/profile/Profile";
 
 function App() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.data?.role !== "Staff";
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/clock-in" element={<ClockIn />} />
         </Route>
 
         <Route element={<BaseLayout />}>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/user" element={<User />} />
-          <Route path="/store" element={<Store />} />
-          <Route path="/store-product/:id" element={<StoreProduct />} />
-          <Route path="/vendor" element={<Vendor />} />
-          <Route path="/product" element={<Product />} />
-          <Route path="/add-product" element={<AddProduct />} />
-          <Route path="/edit-product/:id" element={<AddProduct />} />
-          <Route path="/category" element={<Category />} />
+          <Route path="/user" element={isAdmin && <User />} />
+          <Route path="/store" element={isAdmin && <Store />} />
+          <Route
+            path="/store-product/:id"
+            element={isAdmin && <StoreProduct />}
+          />
+          <Route path="/vendor" element={isAdmin && <Vendor />} />
+          <Route
+            path="/vendor-product/:id"
+            element={isAdmin && <VendorProduct />}
+          />
+          <Route path="/product" element={isAdmin && <Product />} />
+          <Route path="/add-product" element={isAdmin && <AddProduct />} />
+          <Route path="/edit-product/:id" element={isAdmin && <AddProduct />} />
+          <Route path="/category" element={isAdmin && <Category />} />
           <Route path="/sales-history" element={<SalesHistory />} />
-          <Route path="/add-category" element={<AddCategory />} />
-          <Route path="/edit-category/:id" element={<AddCategory />} />
-          <Route path="/risk-details" element={<Users />} />
+          <Route path="/add-category" element={isAdmin && <AddCategory />} />
+          <Route
+            path="/edit-category/:id"
+            element={isAdmin && <AddCategory />}
+          />
+          <Route path="/pay-check" element={isAdmin && <Users />} />
           <Route path="/user-product" element={<UserProduct />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/notification" element={<Notification />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />

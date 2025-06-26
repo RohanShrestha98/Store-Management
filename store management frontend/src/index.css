@@ -30,3 +30,10 @@
 .ql-editor:focus {
   border: 1px solid rgb(88, 88, 88);
 }
+
+.rdp-months {
+  width: 100% !important;
+}
+.rdp-month_grid {
+  width: 100% !important;
+}

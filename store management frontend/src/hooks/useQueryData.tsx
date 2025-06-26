@@ -31,14 +31,28 @@ export const useUserData = (searchText = "", pageSize = "10", page = 1) =>
 export const useStoreData = (searchText = "", pageSize = "10", page = 1) =>
   useQueryData(["store", searchText, pageSize, page], `api/store/`);
 
-export const useProductData = (searchText = "", pageSize = "10", page = 1) =>
+export const useUserDetailsData = (email) =>
   useQueryData(
-    ["product", searchText, pageSize, page],
-    `api/product/?searchText=${searchText}&page=${page}&pageSize=${pageSize}`
+    ["user-details", email],
+    `api/user/user-details/?email=${email}`
   );
 
-export const useSalesData = (searchText = "", pageSize = "10", page = 1) =>
-  useQueryData(["sales", searchText, pageSize, page], `api/sales/`);
+export const useProductData = (
+  vendor,
+  searchText = "",
+  pageSize = "10",
+  page = 1
+) =>
+  useQueryData(
+    ["product", searchText, pageSize, page, vendor],
+    `api/product/?searchText=${searchText}&page=${page}&pageSize=${pageSize}&vendor=${vendor}`
+  );
+
+export const useSalesData = (searchText = "", pageSize = 10, page = 1) =>
+  useQueryData(
+    ["sales", searchText, pageSize, page],
+    `api/sales/?searchText=${searchText}&pageSize=${pageSize}&page=${page}`
+  );
 
 export const useProductForUserData = (
   storeNumber,

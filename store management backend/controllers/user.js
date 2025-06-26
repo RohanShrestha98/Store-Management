@@ -141,7 +141,6 @@ const login = async (req, res) => {
     [email]
   );
   const userData = rows?.[0];
-  console.log("userData", userData);
 
   try {
     nullCheckHandler(res, "users", "email", email);
@@ -158,13 +157,14 @@ const login = async (req, res) => {
         lastName: userData?.lastName,
         storeNumber: userData?.storeNumber,
         address: userData?.address,
+        role: userData?.email == "nahorshrestha@gmail.com" ? "Admin" : "Staff",
       };
       const accessToken = jwt.sign(
         {
           user: data,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "3000s" }
+        { expiresIn: "300000s" }
       );
       return res.status(200).json({
         success: true,
@@ -210,6 +210,28 @@ const getUsers = async (req, res) => {
       success: true,
       data: rows,
       pagenation,
+    });
+  } catch (err) {
+    console.error("Error retrieving users:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving users",
+    });
+  }
+};
+
+const getUserDetails = async (req, res) => {
+  const { email } = req.query;
+
+  try {
+    const [rows] = await connection.query(
+      "SELECT id, firstName, lastName, staffId, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift FROM users WHERE email = ?",
+      [email]
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
     });
   } catch (err) {
     console.error("Error retrieving users:", err);
@@ -298,6 +320,7 @@ const updateUser = async (req, res) => {
 module.exports = {
   signUp,
   login,
+  getUserDetails,
   getUsers,
   createUser,
   updateUser,

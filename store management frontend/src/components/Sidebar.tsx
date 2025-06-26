@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
 import LogoutModal from "./LogoutModal";
 import { LuLayoutDashboard } from "react-icons/lu";
-import { IoNotificationsOutline, IoSettingsOutline } from "react-icons/io5";
+import { IoNotificationsOutline } from "react-icons/io5";
 import { MdOutlineCategory } from "react-icons/md";
 import { CiBoxList } from "react-icons/ci";
 import { FiUsers } from "react-icons/fi";
@@ -13,12 +13,13 @@ import { LuSquareUser } from "react-icons/lu";
 import SideBarItems from "./SideBarItems";
 import { LuStore } from "react-icons/lu";
 import { useAuthStore } from "@/store/useAuthStore";
+import { LuUserRound } from "react-icons/lu";
 
 export default function Sidebar({ hideSidebar, setHideSidebar }) {
   const [active, setActive] = useState(window.location.pathname);
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const role = user?.data?.role?.id;
+  const role = user?.data?.role;
 
   useEffect(() => {
     setActive(window.location.pathname);
@@ -82,15 +83,15 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
     },
     {
       id: 10,
-      name: "Risk Details",
+      name: "Pay Check",
       icon: <TbReportSearch />,
-      link: "/risk-details",
+      link: "/pay-check",
     },
     {
       id: 11,
-      name: "Settings",
-      icon: <IoSettingsOutline />,
-      link: "/settings",
+      name: "Profile",
+      icon: <LuUserRound />,
+      link: "/profile",
     },
   ];
 
@@ -98,6 +99,12 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
     setActive(item?.link);
     navigate(`${item?.link}`);
   };
+
+  useEffect(() => {
+    if (role == "Staff") {
+      setHideSidebar(true);
+    }
+  }, []);
 
   return (
     <div className="border-r h-full  w-full flex flex-col bg-black  text-[#C9BCF7] ">
@@ -109,25 +116,43 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
         className="flex cursor-pointer md:justify-center p-4 gap-1 items-center mb-1"
       >
         <img className="h-12 w-12" src={logo} alt="logo" />
-        <div className="flex flex-col mt-2">
-          <p className="text-[10px] font-semibold mb-[-6px] pl-[2px]">store</p>
-          <p className="font-bold text-xl">STORE</p>
-        </div>
+        {!hideSidebar && (
+          <div className="flex flex-col mt-2">
+            <p className="text-[10px] font-semibold mb-[-6px] pl-[2px]">
+              store
+            </p>
+            <p className="font-bold text-xl">STORE</p>
+          </div>
+        )}
       </div>
       <div className="flex  flex-col  h-[84vh] overflow-auto no-scrollbar ">
         <div className="flex flex-col ">
-          {sidebar?.map((item) => {
-            if (!item?.visiable) {
-              return (
-                <SideBarItems
-                  item={item}
-                  handleActive={handleActive}
-                  active={active}
-                  hideSidebar={hideSidebar}
-                />
-              );
-            }
-          })}
+          {sidebar
+            .filter((item) => {
+              if (role == "Staff") {
+                return (
+                  item?.name === "Dashboard" ||
+                  item?.name === "User Product" ||
+                  item?.name === "Sales History" ||
+                  item?.name === "Notification" ||
+                  item?.name === "Profile" ||
+                  item?.name === "Settings"
+                );
+              }
+              return true;
+            })
+            ?.map((item) => {
+              if (!item?.visiable) {
+                return (
+                  <SideBarItems
+                    item={item}
+                    handleActive={handleActive}
+                    active={active}
+                    hideSidebar={hideSidebar}
+                  />
+                );
+              }
+            })}
         </div>
         {/* {sidebar?.map((items) => {
           return (

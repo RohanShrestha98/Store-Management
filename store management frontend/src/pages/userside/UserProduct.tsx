@@ -20,7 +20,7 @@ import EmptyPage from "@/components/EmptyPage";
 export default function UserProduct() {
   const { user } = useAuthStore();
   const { data, isLoading, isError } = useProductForUserData(
-    user?.data?.storeId,
+    user?.data?.storeNumber,
     10,
     false,
     true,
@@ -29,14 +29,12 @@ export default function UserProduct() {
     1
   );
   const [selectedProduct, setSelectedProduct] = useState([]);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [openCheckOutModal, setOpenCheckOutModal] = useState(false);
   const [scannedBarCode, setScannedBarCode] = useState();
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
-
   const { checkoutProduct, setCheckoutProduct } = useCheckoutProductStore();
-
   const [debouncedBarCode, setDebouncedBarCode] = useState("");
 
   useEffect(() => {
@@ -59,16 +57,26 @@ export default function UserProduct() {
 
   useEffect(() => {
     const product = productDetsilsData?.data?.[0];
+
     if (product) {
       setScannedBarCodeData((prev) => [product, ...prev]);
 
       setSelectedProduct((prev) => {
         const updated = [product, ...prev];
         setCheckoutProduct(updated);
+        setOpen(true);
         return updated;
       });
     }
-    setOpen(true);
+  }, [productDetsilsData]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (productDetsilsData?.data?.length == 0)
+        return toast.error("Product not added in the store");
+    }, 500);
+
+    return () => clearInterval(interval);
   }, [productDetsilsData]);
 
   const handleProductClick = (item) => {
@@ -94,8 +102,6 @@ export default function UserProduct() {
   }, []);
 
   const salesMutation = useSalesMutation();
-
-  console.log("che", checkoutProduct);
 
   const onSubmitHandler = async () => {
     const postData = {

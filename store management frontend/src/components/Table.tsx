@@ -112,7 +112,7 @@ const ReactTable = React.forwardRef(
                         return (
                           <td
                             key={cell.id}
-                            className={`px-3 py-3 font-medium text-[#374253] text-xs text-gray1  ${
+                            className={`px-3 py-[6px] font-medium text-[#374253] text-xs text-gray1  ${
                               index % 2 === 0
                                 ? "text-gray1"
                                 : "text-gray1 bg-gray-100"

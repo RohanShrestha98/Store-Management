@@ -3,11 +3,14 @@ import { FaBook } from "react-icons/fa6";
 import { HiCurrencyDollar } from "react-icons/hi2";
 import { MdSubscriptions } from "react-icons/md";
 import { useRiskData, useUserData } from "@/hooks/useQueryData";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function DashboardTop() {
   const { data: userData } = useUserData();
   const { data: riskData } = useRiskData();
   const { data: completedRiskData } = useRiskData("", "", "50", "");
+  const { user } = useAuthStore();
+  const role = user?.data?.role;
 
   const completedData = completedRiskData?.data?.filter(
     (item) => item?.status == "closed"
@@ -21,36 +24,59 @@ export default function DashboardTop() {
     },
     {
       icon: <FaBook color="white" fontSize={14} />,
-      title: "Total Risks",
+      title: "Total Store",
       amount: riskData?.data?.length ?? 0,
       bgColor: "bg-[#7DD3E8]",
     },
-    // {
-    //   icon: <FaSackDollar color="white" fontSize={15} />,
-    //   title: "Pending Actions",
-    //   amount: 20,
-    //   // percentage: 2,
-    //   bgColor: "bg-[#E8CD7D]",
-    // },
     {
       icon: <HiCurrencyDollar color="white" fontSize={18} />,
-      title: "Completed Task",
+      title: "Total Product",
       amount: completedData?.length ?? 0,
       // percentage: -2,
       bgColor: "bg-[#7DE888]",
     },
     {
       icon: <MdSubscriptions color="white" fontSize={16} />,
-      title: "Risk",
-      amount: <p className="text-red-500">0 %</p>,
+      title: "Total Sales",
+      amount: <p className="text-green-500">$10</p>,
       // percentage: -30,
       bgColor: "bg-[#E87D7D]",
     },
   ];
+
+  const staffItems = [
+    {
+      icon: <FaUser color="white" fontSize={14} />,
+      title: "Total Time",
+      amount: userData?.data?.length ?? 0,
+      bgColor: "bg-[#7DA8E8]",
+    },
+    {
+      icon: <FaBook color="white" fontSize={14} />,
+      title: "Store Number",
+      amount: user?.data?.storeNumber,
+      bgColor: "bg-[#7DD3E8]",
+    },
+    {
+      icon: <HiCurrencyDollar color="white" fontSize={18} />,
+      title: "Sold Product",
+      amount: completedData?.length ?? 0,
+      // percentage: -2,
+      bgColor: "bg-[#7DE888]",
+    },
+    {
+      icon: <MdSubscriptions color="white" fontSize={16} />,
+      title: "Total Sales",
+      amount: <p className="text-green-500">$10</p>,
+      // percentage: -30,
+      bgColor: "bg-[#E87D7D]",
+    },
+  ];
+  const dashboardTopItems = role == "Staff" ? staffItems : items;
   return (
     <div>
-      <div className="grid grid-cols-4 gap-2 ">
-        {items?.map((item, index) => (
+      <div className={`grid grid-cols-4 gap-2 `}>
+        {dashboardTopItems?.map((item, index) => (
           <div
             key={index}
             className="bg-white rounded-xl px-4 py-2 flex justify-between items-end gap-10"

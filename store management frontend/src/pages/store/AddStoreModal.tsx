@@ -97,7 +97,7 @@ export default function AddStoreModal({
         </DialogTitle>
         <form onSubmit={handleSubmit(onSubmitHandler)}>
           <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-2 gap-2">
+            <div className={`grid ${edit ? "" : "grid-cols-2"} gap-2`}>
               <InputField
                 register={register}
                 name="name"
@@ -108,16 +108,18 @@ export default function AddStoreModal({
                 label="Store name"
                 error={errors?.name?.message ?? error?.name}
               />
-              <InputField
-                register={register}
-                required
-                name="storeNumber"
-                placeholder="Enter store number"
-                className="w-full text-sm text-gray-500"
-                defaultValue=""
-                label="Store number"
-                error={errors?.storeNumber?.message ?? error?.storeNumber}
-              />
+              {!edit && (
+                <InputField
+                  register={register}
+                  required
+                  name="storeNumber"
+                  placeholder="Enter store number"
+                  className="w-full text-sm text-gray-500"
+                  defaultValue=""
+                  label="Store number"
+                  error={errors?.storeNumber?.message ?? error?.storeNumber}
+                />
+              )}
             </div>
             <InputField
               register={register}

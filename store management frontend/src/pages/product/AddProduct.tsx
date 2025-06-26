@@ -449,7 +449,7 @@ export default function AddProduct() {
       <div className="w-1/3 bg-white px-4  py-2 rounded-md h-[82vh] overflow-auto flex flex-col border-b-4">
         <p className="font-semibold text-gray-600">Last Added items</p>
         {data?.data?.length ? (
-          <div className="grid grid-cols-2 gap-2  ">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-1 h-[76vh] overflow-auto ">
             {data?.data?.map((item, index) => {
               return (
                 <div className="border flex flex-col items-center border-gray-300 hover:drop-shadow-lg bg-white  rounded-[8px] relative  cursor-pointer  gap-1 p-2 pt-3">
@@ -461,14 +461,14 @@ export default function AddProduct() {
                     }
                     alt=""
                   />
-                  <FiEdit2
+                  {/* <FiEdit2
                     onClick={() =>
                       navigate(`/edit-product/${item?.id}`, {
                         state: item,
                       })
                     }
                     className="absolute top-0 right-0 bg-gray-200 p-[4px] text-blue-500 cursor-pointer font-bold  rounded-tr-[8px] rounded-bl-[8px] text-xl hover:bg-blue-500 hover:text-white"
-                  />
+                  /> */}
                   <div className="col-span-2 text-center">
                     <p className="font-medium w-full line-clamp-1 text-xs text-gray-600">
                       {truncateText(item?.name, 20)}

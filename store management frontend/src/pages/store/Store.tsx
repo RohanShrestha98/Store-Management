@@ -73,7 +73,6 @@ export default function Store() {
       <div className="py-6 px-4 rounded-xl bg-white border h-[76vh]">
         <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
-            console.log("item", item);
             return (
               <div className="border border-gray-300 pt-3 pb-2 bg-[#f0edfa] px-2 mb-2 relative rounded-xl">
                 <div className="absolute px-2 rounded-[4px] font-medium skew-x-[-12deg] right-0 top-[-14px] bg-black text-xs text-[#C9BCF7]">
@@ -87,20 +86,20 @@ export default function Store() {
                     <AddStoreModal asChild edit editData={item}>
                       <FiEdit2
                         size={12}
-                        className="text-[#4365a7] cursor-pointer"
+                        className="text-blue-500 cursor-pointer"
                       />
                     </AddStoreModal>
-                    <DeleteModal
+                    {/* <DeleteModal
                       asChild
                       desc={"Are you sure you want to delete this Store"}
                       title={"Delete Store"}
                       id={item?.id}
-                    >
-                      <FaRegTrashCan
-                        size={12}
-                        className="text-red-600 cursor-pointer"
-                      />
-                    </DeleteModal>
+                    > */}
+                    <FaRegTrashCan
+                      size={12}
+                      className="text-red-600 cursor-not-allowed"
+                    />
+                    {/* </DeleteModal> */}
                   </div>
                 </p>
                 <p className="text-xs font-medium text-gray-600 line-clamp-1">

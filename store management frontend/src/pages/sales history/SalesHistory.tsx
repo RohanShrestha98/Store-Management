@@ -1,13 +1,8 @@
 import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
-import TopButton from "@/components/TopButton";
 import { useSalesData } from "@/hooks/useQueryData";
-import { FiEdit2 } from "react-icons/fi";
-import { FaRegTrashCan } from "react-icons/fa6";
-import DeleteModal from "@/components/DeleteModal";
 import { useSearchParams } from "react-router-dom";
-import AddUserModal from "./AddUserModal";
 import moment from "moment";
 import truncateText from "@/utils/truncateText";
 
@@ -16,11 +11,23 @@ export default function SalesHistory() {
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
   );
+  const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchText]);
   const [pageSize, setPageSize] = useState(
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
-  const { data, isLoading, isError } = useSalesData(searchText, pageSize, page);
+  const { data, isLoading, isError } = useSalesData(
+    debouncedSearchText,
+    pageSize,
+    page
+  );
 
   const columns = useMemo(
     () => [
@@ -140,6 +147,7 @@ export default function SalesHistory() {
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
           page={page}
+          setSearchText={setSearchText}
           pageSize={pageSize}
           setPageSize={setPageSize}
         />

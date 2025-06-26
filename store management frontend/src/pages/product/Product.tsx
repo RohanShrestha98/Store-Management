@@ -30,6 +30,7 @@ export default function Product() {
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
   const { data, isLoading, isError } = useProductData(
+    "",
     debouncedSearchText,
     pageSize,
     page

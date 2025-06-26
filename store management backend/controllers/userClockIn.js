@@ -1,20 +1,21 @@
 const { connection, createConnection } = require("../database");
+const jwt = require("jsonwebtoken");
 
 const userClockIn = async (req, res) => {
-  const { staffId, storeId } = req.body;
+  const { staffId, storeNumber } = req.body;
 
   if (!staffId) {
-    return res.status(400).json({ message: "Staff Id is required" });
+    return res.status(400).json({ msg: "Staff Id is required" });
   }
-  if (!storeId) {
-    return res.status(400).json({ message: "Store Id is required" });
+  if (!storeNumber) {
+    return res.status(400).json({ msg: "Store is required" });
   }
 
   try {
     const connect = await createConnection();
 
     const [rows] = await connect.execute(
-      "SELECT staffId, storeId FROM users WHERE staffId = ?",
+      "SELECT * FROM users WHERE staffId = ?",
       [staffId]
     );
 
@@ -22,12 +23,13 @@ const userClockIn = async (req, res) => {
     if (staffId !== staffData?.staffId) {
       return res
         .status(400)
-        .send({ success: false, message: "User not found" });
+        .send({ success: false, message: "User not found", staffData });
     }
-    if (storeId !== staffData?.storeId) {
-      return res
-        .status(400)
-        .send({ success: false, message: "User not assigned to this store" });
+    if (storeNumber !== parseInt(staffData?.storeNumber)) {
+      return res.status(400).send({
+        success: false,
+        message: "User not assigned to this store",
+      });
     }
     const createTableQuery = `
       CREATE TABLE IF NOT EXISTS ${staffId} (
@@ -41,12 +43,32 @@ const userClockIn = async (req, res) => {
     await connect.execute(`INSERT INTO ${staffId} (storeId) VALUES (?)`, [
       staffId,
     ]);
+    const data = {
+      id: staffData?.id,
+      email: staffData?.email,
+      firstName: staffData?.firstName,
+      lastName: staffData?.lastName,
+      storeNumber: staffData?.storeNumber,
+      address: staffData?.address,
+      role: "Staff",
+    };
+    const accessToken = jwt.sign(
+      {
+        user: data,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "300000s" }
+    );
 
     await connect.end();
-
-    return res
-      .status(201)
-      .json({ success: true, message: "Clocked in successfully" });
+    return res.status(201).json({
+      success: true,
+      data: {
+        ...data,
+        access: accessToken,
+        message: "Clocked in successfully",
+      },
+    });
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -55,7 +77,6 @@ const userClockIn = async (req, res) => {
 
 const getUserClockInDetails = async (req, res) => {
   const { staffId } = req.body;
-  console.log("staffId", staffId);
   try {
     const [rows] = await connection.query(`SELECT * FROM ${staffId}`);
     const data = rows;

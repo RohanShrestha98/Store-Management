@@ -92,19 +92,23 @@ const createProduct = async (req, res) => {
 };
 
 const getProduct = async (req, res) => {
-  const { page = 1, pageSize = 10, searchText = "" } = req.query;
+  const { page = 1, pageSize = 10, searchText = "", vendor } = req.query;
   const userId = req?.user?.id;
 
   try {
     const { rows, pagenation } = await paginateQuery({
       connection,
-      baseQuery: "SELECT * FROM product WHERE createdBy = ?",
-      countQuery: "SELECT COUNT(*) as total FROM product WHERE createdBy = ?",
+      baseQuery: `SELECT * FROM product WHERE createdBy = ?${
+        vendor ? " AND vendor = ?" : ""
+      }`,
+      countQuery: `SELECT COUNT(*) as total FROM product WHERE createdBy = ?${
+        vendor ? " AND vendor = ?" : ""
+      }`,
       searchText,
       page,
       pageSize,
       searchField: "name",
-      queryParams: [userId],
+      queryParams: vendor ? [userId, vendor] : [userId],
     });
 
     return res.status(200).json({
@@ -199,13 +203,11 @@ const getProductForUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       data:
-        storeNumber == "11111"
-          ? productRows
-          : isStock
+        storeNumber == "11111" || isStock
           ? filteredProducts
           : outOfStockProducts,
+      salesRows,
       storeNumber,
-      productRows,
     });
   } catch (err) {
     console.error("Error retrieving product:", err);
@@ -225,7 +227,7 @@ const getProductByBarcode = async (req, res) => {
           ? "*"
           : "id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice"
       } FROM product 
-       WHERE barCode = ? OR storeNumber = ? 
+       WHERE barCode = ? AND storeNumber = ? 
        ORDER BY createdAt DESC 
        LIMIT ${limit}`,
       [barCode, storeNumber]

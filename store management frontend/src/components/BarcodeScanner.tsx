@@ -67,6 +67,7 @@ export default function BarcodeScanner({
             <Button
               type="submit"
               buttonName="Confirm"
+              disabled={!manual}
               handleButtonClick={() => {
                 setScannedBarCode(inputValue); // immediate on confirm
                 setOpen(false);

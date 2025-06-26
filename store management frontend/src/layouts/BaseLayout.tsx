@@ -1,10 +1,17 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function BaseLayout() {
   const [hideSidebar, setHideSidebar] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setHideSidebar(window.innerWidth <= 1224);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div className="flex h-screen overflow-hidden">
       <div

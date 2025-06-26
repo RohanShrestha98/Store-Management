@@ -12,12 +12,43 @@ const createVendor = async (req, res) => {
     const connect = await createConnection();
 
     const [rows] = await connect.execute(
-      "SELECT * FROM vendor WHERE name = ? AND address = ?",
-      [name, address]
+      "SELECT * FROM vendor WHERE name = ?",
+      [name]
     );
-    if (rows.length > 0) {
-      return statusHandeler(res, 400, false, "Vendor already exists", "vendor");
+    const [addressRows] = await connect.execute(
+      "SELECT * FROM vendor WHERE address = ?",
+      [address]
+    );
+    const [storeNameRows] = await connect.execute(
+      "SELECT * FROM vendor WHERE storeName = ?",
+      [storeName]
+    );
+    if (rows?.length > 0) {
+      return statusHandeler(
+        res,
+        400,
+        false,
+        "Already exists try different name",
+        "name"
+      );
     }
+    if (addressRows?.length > 0)
+      return statusHandeler(
+        res,
+        400,
+        false,
+        "Already exists try different address",
+        "address"
+      );
+
+    if (storeNameRows?.length > 0)
+      return statusHandeler(
+        res,
+        400,
+        false,
+        "Already exists try different store name",
+        "storeName"
+      );
 
     await connect.execute(
       "INSERT INTO vendor (name, address, storeName, products, createdBy) VALUES (?, ?, ?, ?, ?)",
@@ -29,7 +60,13 @@ const createVendor = async (req, res) => {
     return statusHandeler(res, 201, true, "Vendor created successfully");
   } catch (error) {
     console.error("Error:", error);
-    return statusHandeler(res, 500, false, "Internal Server error");
+    return statusHandeler(
+      res,
+      500,
+      false,
+      "Internal Server error",
+      addressRows
+    );
   }
 };
 

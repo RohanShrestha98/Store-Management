@@ -35,6 +35,9 @@ export const useMutate = (
 
 export const useAuthMutation = () => useMutate(["login"], "api/user/login");
 
+export const useClockInMutation = () =>
+  useMutate(["clock-in"], "/api/clock-in");
+
 export const useAuthSignupMutation = () =>
   useMutate(["signup"], "api/user/sign-up");
 
