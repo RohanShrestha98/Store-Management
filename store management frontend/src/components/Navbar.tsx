@@ -21,6 +21,7 @@ export default function Navbar() {
   const { user } = useAuthStore();
   const [showNotification, setShowNotification] = useState(false);
   const buttonRef = useRef(null);
+  console.log("user", user?.data);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -86,7 +87,7 @@ export default function Navbar() {
           )}
         </div>
         <p className="text-[#4D4D4D] font-medium">
-          {user?.data?.firstName ?? "Rohan"}
+          {user?.data?.firstName ?? user?.data?.name ?? "Rohan"}
         </p>
         <img
           onClick={() => navigate("/settings")}

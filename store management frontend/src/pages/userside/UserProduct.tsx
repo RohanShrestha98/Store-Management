@@ -153,8 +153,10 @@ export default function UserProduct() {
       setLoading(false);
     } catch (err) {
       console.log("err", err);
-      setError(err?.response?.data?.errors);
       setLoading(false);
+      setOpenCheckOutModal(false);
+      toast.error(err?.response?.data?.message);
+      setError(err?.response?.data?.message);
     }
   };
 

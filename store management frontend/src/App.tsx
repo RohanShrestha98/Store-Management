@@ -23,6 +23,7 @@ import ClockIn from "./pages/auth/ClockIn";
 import { useAuthStore } from "./store/useAuthStore";
 import VendorProduct from "./pages/vendor/VendorProduct";
 import Profile from "./pages/profile/Profile";
+import AdminRegister from "./pages/auth/adminRegsiter";
 
 function App() {
   const { user } = useAuthStore();
@@ -34,6 +35,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/clock-in" element={<ClockIn />} />
+          <Route path="/admin-register" element={<AdminRegister />} />
         </Route>
 
         <Route element={<BaseLayout />}>

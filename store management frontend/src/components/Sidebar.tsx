@@ -100,12 +100,6 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
     navigate(`${item?.link}`);
   };
 
-  useEffect(() => {
-    if (role == "Staff") {
-      setHideSidebar(true);
-    }
-  }, []);
-
   return (
     <div className="border-r h-full  w-full flex flex-col bg-black  text-[#C9BCF7] ">
       <div

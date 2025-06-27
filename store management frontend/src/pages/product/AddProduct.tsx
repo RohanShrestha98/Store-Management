@@ -48,7 +48,7 @@ export default function AddProduct() {
   const [selectedCategory, setSelectedCategory] = useState();
   const [error, setError] = useState();
   const { data, isLoading, isError } = useProductForUserData(
-    user?.data?.storeId ?? 11111,
+    user?.data?.storeNumber,
     10,
     done,
     "",

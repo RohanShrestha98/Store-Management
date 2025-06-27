@@ -75,7 +75,7 @@ export const useProductForUserData = (
   searchText,
   pageSize = "10",
   page = "1",
-  categoryId
+  categoryId = ""
 ) => {
   return useQueryData(
     [
@@ -89,9 +89,9 @@ export const useProductForUserData = (
       searchText,
       categoryId,
     ],
-    `api/product/store/${
-      storeNumber ?? 11111
-    }/?limit=${limit}&stock=${stock}&searchText=${searchText}&page=${page}&pageSize=${pageSize}&categoryId=${categoryId}`
+    `api/product/user/?store=${
+      storeNumber ?? "all"
+    }&limit=${limit}&stock=${stock}&searchText=${searchText}&page=${page}&pageSize=${pageSize}&categoryId=${categoryId}`
   );
 };
 
@@ -124,7 +124,7 @@ export const useProductDataByBarcode = (
   return useQueryData(
     ["product-bar-code", barCode, searchText, page, pageSize, storeNumber],
     `api/product/bar-code/?page=${page}&&search=${searchText}&&pageSize=${pageSize}&barCode=${barCode}&storeNumber=${
-      storeNumber ?? user?.data?.storeId
+      storeNumber ?? user?.data?.storeNumber
     }&limit=${limit ?? 10}`
   );
 };
@@ -140,7 +140,7 @@ export const useAddProductByBarcodeData = (
   return useQueryData(
     ["product-bar-code", barCode, addProduct, storeNumber, done],
     `api/product/bar-code/?barCode=${barCode}&storeNumber=${
-      storeNumber ?? user?.data?.storeId
+      storeNumber ?? user?.data?.storeNumber
     }&addProduct=${addProduct}&limit=${limit ?? 1}`,
     "",
     !!barCode

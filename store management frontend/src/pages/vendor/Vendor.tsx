@@ -1,7 +1,6 @@
-import { HiOutlineUsers } from "react-icons/hi2";
 import { useEffect, useState } from "react";
 import TopButton from "@/components/TopButton";
-import { useStoreData, useVendorData } from "@/hooks/useQueryData";
+import { useVendorData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
@@ -13,7 +12,6 @@ import { BsGraphUpArrow } from "react-icons/bs";
 import truncateText from "@/utils/truncateText";
 import Loading from "@/assets/AllSvg";
 import EmptyPage from "@/components/EmptyPage";
-import { useCheckoutProductStore } from "@/store/useCheckoutProductStore";
 import InputField from "@/ui/InputField";
 
 export default function Vendor() {

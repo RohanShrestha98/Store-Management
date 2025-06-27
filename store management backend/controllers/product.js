@@ -123,8 +123,8 @@ const getProduct = async (req, res) => {
 };
 
 const getProductForUser = async (req, res) => {
-  const storeNumber = req.params.id;
   const {
+    storeNumber,
     stock,
     pageSize = 10,
     page = 1,
@@ -172,14 +172,6 @@ const getProductForUser = async (req, res) => {
   try {
     const params = [];
     const whereClauses = [];
-
-    const hasValidStore =
-      storeNumber && storeNumber !== "11111" && storeNumber !== "undefined";
-
-    if (hasValidStore) {
-      whereClauses.push("storeNumber = ?");
-      params.push(storeNumber);
-    }
 
     if (categoryId) {
       whereClauses.push("categoryId = ?");

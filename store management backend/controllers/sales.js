@@ -13,9 +13,19 @@ const createSales = async (req, res) => {
   try {
     const connect = await createConnection();
 
+    if (!req?.user?.storeNumber) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Not login to the store" });
+    }
+
     await connect.execute(
       "INSERT INTO sales (sales, storeNumber, createdBy) VALUES (?, ?, ?)",
-      [sales, req?.user?.storeNumber ?? 3340, req.user?.firstName]
+      [
+        sales,
+        req?.user?.storeNumber ?? "",
+        req?.user?.firstName ?? req?.user?.name,
+      ]
     );
 
     await connect.end();

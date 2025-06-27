@@ -41,6 +41,9 @@ export const useClockInMutation = () =>
 export const useAuthSignupMutation = () =>
   useMutate(["signup"], "api/user/sign-up");
 
+export const useAuthAdminMutation = () =>
+  useMutate(["admin"], "api/admin/create");
+
 export const useCategoryMutation = () =>
   useMutate(["category"], "api/category/");
 

@@ -5,18 +5,16 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.svg";
-import { useAuthSignupMutation } from "@/hooks/useMutateData";
+import { useAuthAdminMutation } from "@/hooks/useMutateData";
 import Button from "@/ui/Button";
 import LoginInput from "@/ui/LoginInput";
 import toast from "react-hot-toast";
 
 const loginSchema = Yup.object().shape({
-  firstName: Yup.string()
+  name: Yup.string()
     .required("Required")
     .max(36, "Must be 36 characters or less"),
-  lastName: Yup.string()
-    .required("Required")
-    .max(36, "Must be 36 characters or less"),
+  storeLimit: Yup.string().required("Required"),
   address: Yup.string().required("Required"),
   phoneNumber: Yup.string().required("Required"),
   email: Yup.string()
@@ -25,8 +23,8 @@ const loginSchema = Yup.object().shape({
   password: Yup.string().required("Required"),
 });
 
-const SignUp = () => {
-  const authMutation = useAuthSignupMutation();
+const AdminRegister = () => {
+  const authMutation = useAuthAdminMutation();
   const [error, setError] = useState();
   const navigate = useNavigate();
 
@@ -41,13 +39,9 @@ const SignUp = () => {
   });
 
   const onSubmitHandler = async (data) => {
-    const postData = {
-      ...data,
-      isVerified: false,
-    };
     try {
-      await authMutation.mutateAsync(["post", "", postData]);
-      toast.success("Signup successfully");
+      await authMutation.mutateAsync(["post", "", data]);
+      toast.success("Admin register successfully");
       navigate("/login");
       reset();
     } catch (error) {
@@ -59,55 +53,41 @@ const SignUp = () => {
   return (
     //
     <div className=" flex flex-col ">
-      <div className="flex md:justify-center p-4 gap-1 items-center ">
-        <img className="h-8 w-8" src={logo} alt="logo" />
-        <div className="font-bold text-[#121212] flex flex-col">
-          <p>Staff Management System</p>
-          {/* <p className="mt-[-6px]">App</p> */}
-        </div>
+      <div className="flex cursor-pointer md:justify-center p-4 gap-1 items-center mb-1">
+        <img className="h-12 w-12" src={logo} alt="logo" />
+        {
+          <div className="flex flex-col mt-2">
+            <p className="text-[10px] font-semibold mb-[-6px] pl-[2px]">
+              store
+            </p>
+            <p className="font-bold text-xl">STORE</p>
+          </div>
+        }
       </div>
       <div className="md:items-center md:justify-center flex flex-col">
         <div className="flex flex-col items-center md:justify-center mt-4 ">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center px-10">
             <div className="flex flex-col gap-1 mb-10 md:items-center tracking-tight md:justify-center text-2xl sm:text-xl font-bold ">
               <p className=" text-2xl text-center">Register </p>
-              <p className="text-[#666] text-base font-medium">
-                Register your free account
-              </p>
             </div>
             <form
               onSubmit={handleSubmit(onSubmitHandler)}
-              className="w-[500px] lg:w-full "
+              className="w-[480px] lg:w-full "
             >
               <div className="grid grid-cols-2  gap-3">
                 <div className="rounded-md">
                   <p className="text-gray-600 text-sm font-semibold mb-1">
-                    Firstname <span className="text-red-600">*</span>
+                    Name <span className="text-red-600">*</span>
                   </p>
                   <LoginInput
                     className="bg-white w-full text-sm"
                     register={register}
-                    name="firstName"
+                    name="name"
                     type="text"
-                    placeholder="Enter first name"
+                    placeholder="Enter your name"
                   />
                   <p className="text-red-600 text-xs">
-                    {errors?.firstName?.message ?? error?.firstName}
-                  </p>
-                </div>
-                <div className="rounded-md">
-                  <p className="text-gray-600 text-sm font-semibold mb-1">
-                    Lastname <span className="text-red-600">*</span>
-                  </p>
-                  <LoginInput
-                    className="bg-white w-full text-sm"
-                    register={register}
-                    name="lastName"
-                    type="text"
-                    placeholder="Enter last name"
-                  />
-                  <p className="text-red-600 text-xs">
-                    {errors?.lastName?.message ?? error?.lastName}
+                    {errors?.name?.message ?? error?.name}
                   </p>
                 </div>
 
@@ -171,6 +151,21 @@ const SignUp = () => {
                     {errors?.address?.message ?? error?.address}
                   </p>
                 </div>
+                <div className="rounded-md">
+                  <p className="text-gray-600 text-sm font-semibold mb-1">
+                    Store Limit <span className="text-red-600">*</span>
+                  </p>
+                  <LoginInput
+                    className="bg-white w-full text-sm"
+                    register={register}
+                    name="storeLimit"
+                    type="number"
+                    placeholder="Enter store limit"
+                  />
+                  <p className="text-red-600 text-xs">
+                    {errors?.storeLimit?.message ?? error?.storeLimit}
+                  </p>
+                </div>
               </div>
               <p className="text-red-600 text-xs mt-6">{error}</p>
               <Button
@@ -196,4 +191,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default AdminRegister;

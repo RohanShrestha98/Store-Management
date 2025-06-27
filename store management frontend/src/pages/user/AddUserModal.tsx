@@ -22,7 +22,7 @@ export default function AddUserModal({
   editData,
 }) {
   const [selectedStore, setSelectedStore] = useState(
-    edit ? editData?.role?.title : ""
+    edit ? editData?.storeNumber : ""
   );
   const [open, setOpen] = useState(false);
   const [shift, setShift] = useState([{ start: "9AM", end: "10PM" }]);

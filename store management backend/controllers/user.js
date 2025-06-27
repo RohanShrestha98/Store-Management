@@ -140,11 +140,24 @@ const login = async (req, res) => {
     "SELECT * FROM users WHERE email = ?",
     [email]
   );
-  const userData = rows?.[0];
+  const [rowsAdmin] = await connection.execute(
+    "SELECT * FROM admins WHERE email = ?",
+    [email]
+  );
+
+  console.log("rows", rows?.[0]);
+
+  if (!rows?.length && !rowsAdmin?.length) {
+    return res.status(400).json({ error: "User not found" });
+  }
+
+  if (!rows?.[0]?.isVerified) {
+    return res.status(400).json({ error: "User is not verified" });
+  }
+
+  const userData = rows?.[0] ?? rowsAdmin?.[0];
 
   try {
-    nullCheckHandler(res, "users", "email", email);
-
     const comparePassword = await bcrypt.compareSync(
       password,
       userData?.password
@@ -154,10 +167,12 @@ const login = async (req, res) => {
         id: userData?.id,
         email: userData?.email,
         firstName: userData?.firstName,
+        name: userData?.name,
+        storeLimit: userData?.storeLimit,
         lastName: userData?.lastName,
         storeNumber: userData?.storeNumber,
         address: userData?.address,
-        role: userData?.email == "nahorshrestha@gmail.com" ? "Admin" : "Staff",
+        role: userData?.role,
       };
       const accessToken = jwt.sign(
         {
@@ -191,10 +206,9 @@ const getUsers = async (req, res) => {
     const { rows, pagenation } = await paginateQuery({
       connection,
       baseQuery: `
-        SELECT id, firstName, lastName, staffId, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift 
+        SELECT id, firstName, lastName, staffId, role, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift 
         FROM users 
        ${storeNumber ? `WHERE storeNumber = ${storeNumber}` : "WHERE 1=1"}
-        
       `,
       countQuery: `
         SELECT COUNT(*) as total 
@@ -226,7 +240,7 @@ const getUserDetails = async (req, res) => {
 
   try {
     const [rows] = await connection.query(
-      "SELECT id, firstName, lastName, staffId, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift FROM users WHERE email = ?",
+      "SELECT id, firstName, lastName, staffId, role, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift FROM users WHERE email = ?",
       [email]
     );
 
@@ -281,10 +295,11 @@ const updateUser = async (req, res) => {
     shift,
     days,
     storeNumber,
+    role,
     isVerified,
   } = req.body;
   const query =
-    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, isVerified = ?, payPerHour = ?, shift = ?, days = ?, storeNumber = ?  WHERE id = ?";
+    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, isVerified = ?, payPerHour = ?, shift = ?, days = ?, storeNumber = ?, role = ?  WHERE id = ?";
   console.log("object", req?.body);
   try {
     const [rows] = await connection.execute(
@@ -304,6 +319,7 @@ const updateUser = async (req, res) => {
       shift,
       days,
       storeNumber,
+      role ?? "Staff",
       id,
     ]);
     if (result.affectedRows === 0) {

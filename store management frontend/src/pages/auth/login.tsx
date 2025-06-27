@@ -41,10 +41,12 @@ const Login = () => {
         data: result?.data,
       });
       toast.success("Login successfully");
-      navigate("/");
+      console.log("result", result?.data);
+      result?.data?.role == "Staff" ? navigate("/user-product") : navigate("/");
       reset();
     } catch (error) {
-      setError(error?.response?.data?.message);
+      toast.error(error?.response?.data?.error);
+      setError(error?.response?.data?.error);
     }
   };
 

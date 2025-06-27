@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
   },
 });
 
-router.get("/store/:id", productControler.getProductForUser);
+router.get("/user", productControler.getProductForUser);
 router.use(createUserValidateToken);
 
 const upload = multer({ storage: storage });

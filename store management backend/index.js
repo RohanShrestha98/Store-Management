@@ -10,6 +10,7 @@ app.use("/uploads", express.static("uploads"));
 app.use(cors());
 
 // Routes
+const adminRoute = require("./routes/admin");
 const userRoute = require("./routes/user");
 const storeRoute = require("./routes/store");
 const categoryRoute = require("./routes/category");
@@ -44,6 +45,7 @@ app.get("/", function (req, res) {
 app.use("", fileUploadRoute);
 app.use("/api/clock-in", userClockInRoute);
 app.use("/api/user", userRoute);
+app.use("/api/admin", adminRoute);
 app.use("/api/store", storeRoute);
 app.use("/api/category", categoryRoute);
 app.use("/api/product", productRoute);
