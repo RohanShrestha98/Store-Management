@@ -13,6 +13,7 @@ import { BsGraphUpArrow } from "react-icons/bs";
 import truncateText from "@/utils/truncateText";
 import Loading from "@/assets/AllSvg";
 import EmptyPage from "@/components/EmptyPage";
+import InputField from "@/ui/InputField";
 
 export default function Store() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,7 +25,19 @@ export default function Store() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
-  const { data, isLoading, isError } = useStoreData(searchText, pageSize, page);
+  const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchText]);
+  const { data, isLoading, isError } = useStoreData(
+    debouncedSearchText,
+    pageSize,
+    page
+  );
 
   const storeDetailOptions = [
     {
@@ -58,8 +71,13 @@ export default function Store() {
   }, [page, pageSize, searchText]);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <div className="flex justify-end items-center">
+    <div className="p-4 flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <InputField
+          placeholder={"Search store ..."}
+          className={"w-[220px] border text-gray-500 border-gray-300"}
+          setSearchText={setSearchText}
+        />
         <AddStoreModal asChild>
           <div>
             <TopButton

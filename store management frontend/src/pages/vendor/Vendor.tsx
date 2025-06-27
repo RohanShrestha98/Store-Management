@@ -14,6 +14,7 @@ import truncateText from "@/utils/truncateText";
 import Loading from "@/assets/AllSvg";
 import EmptyPage from "@/components/EmptyPage";
 import { useCheckoutProductStore } from "@/store/useCheckoutProductStore";
+import InputField from "@/ui/InputField";
 
 export default function Vendor() {
   const navigate = useNavigate();
@@ -25,8 +26,17 @@ export default function Vendor() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
+  const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchText]);
+
   const { data, isLoading, isError } = useVendorData(
-    searchText,
+    debouncedSearchText,
     pageSize,
     page
   );
@@ -63,8 +73,13 @@ export default function Vendor() {
   }, [page, pageSize, searchText]);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <div className="flex justify-end items-center">
+    <div className="p-4 flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <InputField
+          placeholder={"Search vendor ..."}
+          className={"w-[220px] border text-gray-500 border-gray-300"}
+          setSearchText={setSearchText}
+        />
         <AddVendorModal asChild>
           <div>
             <TopButton
@@ -75,7 +90,7 @@ export default function Vendor() {
           </div>
         </AddVendorModal>
       </div>
-      <div className="p-4 rounded-xl bg-white border h-[78vh] overflow-auto">
+      <div className="p-4 rounded-xl bg-white border h-[76vh] overflow-auto">
         <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
             console.log("item", item);

@@ -124,8 +124,16 @@ const getProduct = async (req, res) => {
 
 const getProductForUser = async (req, res) => {
   const storeNumber = req.params.id;
-  const { stock, limit } = req?.query;
+  const {
+    stock,
+    pageSize = 10,
+    page = 1,
+    categoryId,
+    searchText = "",
+  } = req.query;
+
   const isStock = stock === "true";
+  const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
   const [salesRows] = await connection.query(
     `SELECT * FROM sales WHERE storeNumber = ? ORDER BY createdAt DESC`,
@@ -146,15 +154,13 @@ const getProductForUser = async (req, res) => {
   });
 
   const mergedMap = new Map();
-
   flatSales?.forEach((item) => {
     const key = `${item?.barCode}-${item?.storeNumber}`;
-
     if (mergedMap.has(key)) {
-      const existing = mergedMap?.get(key);
-      mergedMap?.set(key, {
+      const existing = mergedMap.get(key);
+      mergedMap.set(key, {
         ...existing,
-        quantity: existing?.quantity + 1,
+        quantity: existing.quantity + 1,
       });
     } else {
       mergedMap.set(key, { ...item });
@@ -164,19 +170,51 @@ const getProductForUser = async (req, res) => {
   const mergedSales = Array.from(mergedMap.values());
 
   try {
-    let productRows;
-    console.log("storeNumber", storeNumber);
+    const params = [];
+    const whereClauses = [];
 
-    if (!storeNumber || storeNumber == "11111" || storeNumber == "undefined") {
-      [productRows] = await connection.query(
-        `SELECT id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice FROM product ORDER BY createdAt DESC LIMIT ${limit}`
-      );
-    } else {
-      [productRows] = await connection.query(
-        `SELECT id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice FROM product WHERE storeNumber = ? ORDER BY createdAt DESC LIMIT ${limit}`,
-        [storeNumber]
-      );
+    const hasValidStore =
+      storeNumber && storeNumber !== "11111" && storeNumber !== "undefined";
+
+    if (hasValidStore) {
+      whereClauses.push("storeNumber = ?");
+      params.push(storeNumber);
     }
+
+    if (categoryId) {
+      whereClauses.push("categoryId = ?");
+      params.push(categoryId);
+    }
+
+    if (searchText) {
+      whereClauses.push(`(name LIKE ? OR barCode LIKE ?)`);
+      const likeSearch = `%${searchText}%`;
+      params.push(likeSearch, likeSearch);
+    }
+
+    const whereSQL = whereClauses.length
+      ? `WHERE ${whereClauses.join(" AND ")}`
+      : "";
+
+    const [countRows] = await connection.query(
+      `SELECT COUNT(*) as total FROM product ${whereSQL}`,
+      params
+    );
+    const total = countRows[0]?.total || 0;
+    const totalPages = Math.ceil(total / parseInt(pageSize));
+
+    const productQuery = `
+      SELECT id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice 
+      FROM product 
+      ${whereSQL}
+      ORDER BY createdAt DESC 
+      LIMIT ? OFFSET ?
+    `;
+    const [productRows] = await connection.query(productQuery, [
+      ...params,
+      parseInt(pageSize),
+      offset,
+    ]);
 
     const updatedProducts = productRows?.map((product) => {
       const saleMatch = mergedSales?.find(
@@ -193,21 +231,26 @@ const getProductForUser = async (req, res) => {
         sold: saleMatch?.quantity ?? 0,
       };
     });
+
     const filteredProducts = updatedProducts?.filter(
-      (item) => item?.quantity > 0
+      (item) => item.quantity > 0
     );
     const outOfStockProducts = updatedProducts?.filter(
-      (item) => item?.quantity == 0
+      (item) => item.quantity === 0
     );
+
+    const paginatedData =
+      storeNumber == "11111" || isStock ? filteredProducts : outOfStockProducts;
 
     return res.status(200).json({
       success: true,
-      data:
-        storeNumber == "11111" || isStock
-          ? filteredProducts
-          : outOfStockProducts,
-      salesRows,
-      storeNumber,
+      pagenation: {
+        total,
+        page: parseInt(page),
+        pageSize: parseInt(pageSize),
+        totalPages,
+      },
+      data: paginatedData,
     });
   } catch (err) {
     console.error("Error retrieving product:", err);

@@ -28,7 +28,7 @@ const paginateQuery = async ({
   const total = countRows[0].total;
 
   const [rows] = await connection.query(
-    `${baseQuery}${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+    `${baseQuery}${whereClause}  ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
     [...queryParams, ...filterParams, limit, offset]
   );
 

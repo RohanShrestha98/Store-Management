@@ -42,6 +42,9 @@ export default function CustomSelect({
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
+        {/* <p onClick={() => setSelectedField("")}>
+            <RxCross2 size={16} className="mr-2 cursor-pointer" />
+          </p> */}
         <SelectContent className="bg-white ">
           <SelectGroup>
             <SelectLabel>{label}</SelectLabel>

@@ -21,7 +21,7 @@ export default function BaseLayout() {
       >
         <Sidebar setHideSidebar={setHideSidebar} hideSidebar={hideSidebar} />
       </div>
-      <div className={`${hideSidebar ? "w-full" : "w-5/6"} bg-[#f9f9f9]`}>
+      <div className={`${hideSidebar ? "w-full" : "w-5/6"} bg-[#f4f4f4]`}>
         <Navbar />
         <div className="h-[90vh] overflow-auto">
           <Outlet />

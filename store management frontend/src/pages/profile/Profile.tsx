@@ -16,7 +16,7 @@ export default function Profile() {
   const profileData = [
     {
       label: "Phone number",
-      value: +1 + data?.phoneNumber,
+      value: "+1 " + data?.phoneNumber,
     },
     {
       label: "Address",

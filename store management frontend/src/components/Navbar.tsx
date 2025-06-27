@@ -37,11 +37,6 @@ export default function Navbar() {
   return (
     <div className="border-b sticky top-0 flex items-center z-10 bg-white justify-between h-14 w-full px-6">
       <div className="flex items-center gap-2 text-[#808080]">
-        <IoMdArrowBack
-          className="cursor-pointer"
-          onClick={() => navigate(-1)}
-          size={20}
-        />
         <h1 className="font-semibold text-md ">
           {headerName === "" ? "Dashboard" : headerName}
         </h1>

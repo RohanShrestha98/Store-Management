@@ -28,42 +28,42 @@ const createSales = async (req, res) => {
 };
 
 const getSales = async (req, res) => {
-  const { page = 1, pageSize = 10, date } = req.query;
-  const offset = (page - 1) * pageSize;
+  const {
+    page = 1,
+    pageSize = 10,
+    date,
+    storeNumber,
+    searchText = "",
+  } = req.query;
+
   const limit = parseInt(pageSize);
-  const storeNumber = req?.user?.storeNumber;
+  const currentPage = parseInt(page);
+  const offset = (currentPage - 1) * limit;
   const isAdmin = req?.user?.role !== "Staff";
 
   const targetDate = date || new Date().toISOString().split("T")[0];
 
   try {
     let whereClause = "";
-    let countParams = [];
     let salesParams = [];
-
-    if (isAdmin) {
+    if (isAdmin && storeNumber) {
+      whereClause = "WHERE storeNumber = ? ";
+      salesParams = [storeNumber];
+    } else if (isAdmin) {
       whereClause = "";
-      countParams = [];
-      salesParams = [limit, offset];
+      salesParams = [];
     } else if (storeNumber) {
       whereClause = "WHERE storeNumber = ? AND DATE(createdAt) = ?";
-      countParams = [storeNumber, targetDate];
-      salesParams = [storeNumber, targetDate, limit, offset];
+      salesParams = [storeNumber, targetDate];
     } else {
-      whereClause = "WHERE DATE(createdAt) = ?";
-      countParams = [targetDate];
-      salesParams = [targetDate, limit, offset];
+      whereClause = "WHERE storeNumber = ? AND DATE(createdAt) = ?";
+      salesParams = [req?.user?.storeNumber, targetDate];
     }
-
-    const countQuery = `SELECT COUNT(*) as total FROM sales ${whereClause}`;
-    const [countRows] = await connection.query(countQuery, countParams);
-    const total = countRows[0]?.total || 0;
 
     const salesQuery = `
       SELECT * FROM sales 
       ${whereClause}
-      ORDER BY createdAt DESC 
-      LIMIT ? OFFSET ?
+      ORDER BY createdAt DESC
     `;
     const [rows] = await connection.query(salesQuery, salesParams);
 
@@ -82,10 +82,18 @@ const getSales = async (req, res) => {
       }));
     });
 
-    const mergedMap = new Map();
-    flatSales?.forEach((item) => {
-      const key = `${item?.barCode}-${item?.createdBy}-${item?.createdAt}-${item?.storeNumber}-${item?.sellingPrice}`;
+    const filteredSales = searchText
+      ? flatSales.filter(
+          (item) =>
+            item?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.barCode?.toLowerCase().includes(searchText.toLowerCase())
+        )
+      : flatSales;
 
+    // Merge similar sales
+    const mergedMap = new Map();
+    filteredSales?.forEach((item) => {
+      const key = `${item?.barCode}-${item?.createdBy}-${item?.createdAt}-${item?.storeNumber}-${item?.sellingPrice}`;
       if (mergedMap.has(key)) {
         const existing = mergedMap.get(key);
         mergedMap.set(key, {
@@ -100,14 +108,19 @@ const getSales = async (req, res) => {
 
     const mergedSales = Array.from(mergedMap.values());
 
+    // Apply pagination on the final merged list
+    const total = mergedSales.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginatedData = mergedSales.slice(offset, offset + limit);
+
     return res.status(200).json({
       success: true,
-      data: mergedSales,
+      data: paginatedData,
       pagenation: {
         total,
-        page: parseInt(page),
+        page: currentPage,
         pageSize: limit,
-        totalPages: Math.max(1, Math.ceil(total / limit)),
+        totalPages,
       },
     });
   } catch (err) {

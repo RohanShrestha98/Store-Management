@@ -1,14 +1,16 @@
 import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
-import AddInstructorModal from "./AddUserModal";
 import TopButton from "@/components/TopButton";
-import { useUserData } from "@/hooks/useQueryData";
+import { useStoreData, useUserData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
 import { useSearchParams } from "react-router-dom";
 import AddUserModal from "./AddUserModal";
+import { RxCross2 } from "react-icons/rx";
+import CustomSelect from "@/ui/CustomSelect";
+import InputField from "@/ui/InputField";
 
 export default function User() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,6 +21,9 @@ export default function User() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
+  const [selectedStore, setSelectedStore] = useState(
+    searchParams.get("store") ?? ""
+  );
   const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -27,11 +32,23 @@ export default function User() {
 
     return () => clearTimeout(delay);
   }, [searchText]);
+
   const { data, isLoading, isError } = useUserData(
+    selectedStore,
     debouncedSearchText,
     pageSize,
     page
   );
+
+  const {
+    data: storeData,
+    isLoading: storeIsLoading,
+    isError: storeIsError,
+  } = useStoreData();
+
+  const storeOptions = storeData?.data?.map((item) => {
+    return { value: item?.storeNumber, label: item?.name };
+  });
 
   const columns = useMemo(
     () => [
@@ -159,13 +176,42 @@ export default function User() {
       searchText: searchText,
       page: page,
       pageSize: pageSize,
+      store: selectedStore,
     };
     setSearchParams(searchQuery);
-  }, [page, pageSize, searchText]);
+  }, [page, pageSize, searchText, selectedStore]);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <div className="flex justify-end items-center">
+    <div className="p-4 flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2  relative">
+          <InputField
+            placeholder={"Search users ..."}
+            className={"w-[220px] border text-gray-500 border-gray-300"}
+            setSearchText={setSearchText}
+          />
+          <CustomSelect
+            options={storeOptions}
+            placeholder={"Select Store"}
+            className={`w-[160px] text-xs text-gray-500 border-gray-300 focus-visible:border-gray-700`}
+            setSelectedField={setSelectedStore}
+          />
+          {(searchText || selectedStore) && (
+            <div
+              onClick={() => {
+                setSearchText("");
+                setSelectedStore("");
+                setPage("1");
+                setPageSize("10");
+                setSearchParams({});
+              }}
+              className="flex border h-[30px] gap-1 border-red-600 rounded-[6px] bg-red-600 text-white cursor-pointer items-center font-semibold px-2 text-xs"
+            >
+              <RxCross2 size={14} />
+              <p>Clear</p>
+            </div>
+          )}
+        </div>
         <AddUserModal asChild>
           <div>
             <TopButton
@@ -181,6 +227,7 @@ export default function User() {
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
           page={page}
+          disabled
           setSearchText={setSearchText}
           searchText={searchText}
           pageSize={pageSize}

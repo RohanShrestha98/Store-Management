@@ -9,6 +9,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import Button from "@/ui/Button";
 import truncateText from "@/utils/truncateText";
+import InputField from "@/ui/InputField";
 
 export default function Product() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -142,8 +143,13 @@ export default function Product() {
   }, [page, pageSize, searchText]);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <div className="flex justify-end items-center">
+    <div className="p-4 flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <InputField
+          placeholder={"Search product ..."}
+          className={"w-[220px] border text-gray-500 border-gray-300"}
+          setSearchText={setSearchText}
+        />
         <Button
           buttonName={"Add Product"}
           icon={<FaPlus />}
@@ -155,6 +161,7 @@ export default function Product() {
         <SearchPagination
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
+          disabled
           setSearchText={setSearchText}
           page={page}
           searchText={searchText}

@@ -71,10 +71,41 @@ const createVendor = async (req, res) => {
 };
 
 const getVendor = async (req, res) => {
+  const { page = 1, pageSize = 10, searchText = "" } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(pageSize);
+  const keyword = `%${searchText}%`;
+
   try {
-    const [rows] = await connection.query("SELECT * FROM vendor");
-    const data = rows;
-    return res.status(200).json({ success: true, data });
+    let whereClause = "WHERE 1=1";
+    let params = [];
+
+    if (searchText) {
+      whereClause += " AND (name LIKE ? OR address LIKE ? OR storeName LIKE ?)";
+      params.push(keyword, keyword, keyword);
+    }
+
+    const [countRows] = await connection.query(
+      `SELECT COUNT(*) as total FROM vendor ${whereClause}`,
+      params
+    );
+    const total = countRows[0]?.total || 0;
+    const totalPages = Math.ceil(total / pageSize);
+
+    const [rows] = await connection.query(
+      `SELECT * FROM vendor ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+      [...params, parseInt(pageSize), offset]
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pageSize: parseInt(pageSize),
+        totalPages,
+      },
+    });
   } catch (err) {
     console.error("Error retrieving vendor:", err);
     statusHandeler(res, 500, false, "Error retrieving vendor");

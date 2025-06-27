@@ -11,7 +11,11 @@ export default function SearchPagination({
   searchText,
 }) {
   return (
-    <div className="flex items-center justify-between border-t border-l border-r bg-white p-2 px-3 rounded-t-xl">
+    <div
+      className={`flex items-center ${
+        disabled ? "justify-end" : "justify-between"
+      } border-t border-l border-r bg-white p-2 px-3 rounded-t-xl`}
+    >
       {!disabled && (
         <input
           placeholder={"Search ..."}

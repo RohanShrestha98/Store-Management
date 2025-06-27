@@ -185,7 +185,7 @@ const login = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
-  const { page = 1, pageSize = 10, searchText = "" } = req.query;
+  const { page = 1, pageSize = 10, searchText = "", storeNumber } = req.query;
 
   try {
     const { rows, pagenation } = await paginateQuery({
@@ -193,7 +193,8 @@ const getUsers = async (req, res) => {
       baseQuery: `
         SELECT id, firstName, lastName, staffId, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift 
         FROM users 
-        WHERE 1=1
+       ${storeNumber ? `WHERE storeNumber = ${storeNumber}` : "WHERE 1=1"}
+        
       `,
       countQuery: `
         SELECT COUNT(*) as total 
@@ -203,7 +204,7 @@ const getUsers = async (req, res) => {
       searchText,
       page,
       pageSize,
-      searchField: "firstName", // or "staffId", "email", etc.
+      searchField: "firstName",
     });
 
     return res.status(200).json({

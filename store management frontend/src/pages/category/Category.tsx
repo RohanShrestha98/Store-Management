@@ -8,6 +8,7 @@ import DeleteModal from "@/components/DeleteModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import Button from "@/ui/Button";
+import InputField from "@/ui/InputField";
 
 export default function Category() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -112,7 +113,12 @@ export default function Category() {
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <div className="flex justify-end items-center">
+      <div className="flex justify-between items-center">
+        <InputField
+          placeholder={"Search category ..."}
+          className={"w-[220px] border text-gray-500 border-gray-300"}
+          setSearchText={setSearchText}
+        />
         <Button
           buttonName={"Add Category"}
           icon={<FaPlus />}
@@ -123,6 +129,7 @@ export default function Category() {
         <SearchPagination
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
+          disabled
           setSearchText={setSearchText}
           page={page}
           searchText={searchText}
