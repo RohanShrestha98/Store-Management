@@ -52,7 +52,7 @@ export default function VendorProduct() {
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <div className=" p-4 rounded-xl h-[84vh] overflow-auto  bg-white border ">
+      <div className=" p-4 h-[84vh] overflow-auto  bg-white border ">
         <div className="grid grid-cols-5 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
             const vendorDetailOptions = [
@@ -75,7 +75,7 @@ export default function VendorProduct() {
               <div
                 key={item.id}
                 // onClick={() => handleProductClick(item)}
-                className="px-2 py-2 border cursor-pointer hover:drop-shadow-lg bg-white flex flex-col gap-[2px] justify-between border-gray-300  rounded-[6px] text-sm relative"
+                className="px-2 py-2 border cursor-pointer hover:drop-shadow-lg bg-white flex flex-col gap-[2px] justify-between border-gray-300 text-sm relative"
               >
                 <img
                   className="h-28 object-cover"
@@ -100,7 +100,7 @@ export default function VendorProduct() {
                   {vendorDetailOptions?.map((option) => {
                     return (
                       <div
-                        className={`cursor-pointer border flex flex-col gap-[2px] py-2  items-center justify-center rounded-[8px] border-gray-300 bg-[#f0edfa] hover:bg-[#e2dbf9] hover:border-gray-400 `}
+                        className={`cursor-pointer border flex flex-col gap-[2px] py-2  items-center justify-center border-gray-300 bg-[#f0edfa] hover:bg-[#e2dbf9] hover:border-gray-400 `}
                       >
                         <p className="font-bold">{option?.label}</p>
                         <p className={option?.className}>{option?.value}</p>

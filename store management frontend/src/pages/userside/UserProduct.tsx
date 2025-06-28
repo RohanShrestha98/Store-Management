@@ -205,7 +205,7 @@ export default function UserProduct() {
               setPageSize("10");
               setSearchParams({});
             }}
-            className="flex border h-[30px] gap-1 border-red-600 rounded-[6px] bg-red-600 text-white cursor-pointer items-center font-semibold px-2 text-xs"
+            className="flex border h-[30px] gap-1 border-red-600  bg-red-600 text-white cursor-pointer items-center font-semibold px-2 text-xs"
           >
             <RxCross2 size={14} />
             <p>Clear</p>
@@ -220,7 +220,7 @@ export default function UserProduct() {
           setPage={setPage}
         /> */}
       </div>
-      <div className="px-4 pt-2 pb-4 flex gap-4 relative">
+      <div className="px-4 pt-2 pb-4 flex gap-2 relative">
         <BarcodeScanner
           asChild
           open={open}
@@ -228,7 +228,7 @@ export default function UserProduct() {
           setScannedBarCode={setScannedBarCode}
         />
         {/* Product List */}
-        <div className="w-2/3 border h-[76vh] overflow-auto border-b-4 no-scrollbar bg-white p-4 rounded-[8px]">
+        <div className="w-2/3 border h-[76vh] overflow-auto border-b-4 no-scrollbar bg-white p-4">
           <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
             {data?.data?.map((item) => {
               if (item?.quantity !== 0)
@@ -236,7 +236,7 @@ export default function UserProduct() {
                   <div
                     key={item.id}
                     onClick={() => handleProductClick(item)}
-                    className="px-2 py-1 border cursor-pointer hover:drop-shadow-lg bg-white flex flex-col gap-[2px] justify-center border-gray-300 rounded-[6px] text-sm relative"
+                    className="p-2 border cursor-pointer hover:drop-shadow-lg bg-white flex flex-col gap-[2px] justify-center border-gray-300 text-sm relative"
                   >
                     <img
                       className="h-28 object-cover"
@@ -280,7 +280,7 @@ export default function UserProduct() {
         </div>
 
         {/* Checkout Panel */}
-        <div className="w-1/3 border px-3 py-2 h-[76vh] bg-white rounded-[8px]">
+        <div className="w-1/3 border px-3 py-2 h-[76vh] bg-white ">
           <p className="font-semibold text-gray-600">Selected Product</p>
           <div className="flex flex-col gap-3 bg-white justify-between h-[69vh] no-scrollbar">
             {selectedProduct?.length ? (
@@ -288,7 +288,7 @@ export default function UserProduct() {
                 {selectedProduct?.map((item, index) => (
                   <div
                     key={index}
-                    className="border border-gray-300 hover:drop-shadow-lg bg-white rounded-[8px] relative grid grid-cols-3 cursor-pointer items-center gap-1 px-3"
+                    className="border border-gray-300 hover:drop-shadow-lg bg-white relative grid grid-cols-3 cursor-pointer items-center gap-1 px-3"
                   >
                     <img
                       className="h-10 w-[90%] object-cover"
@@ -300,9 +300,9 @@ export default function UserProduct() {
                     />
                     <RxCross2
                       onClick={() => handleRemoveProduct(index)}
-                      className="absolute top-0 right-0 bg-gray-300 p-[4px] cursor-pointer font-bold rounded-tr-[8px] rounded-bl-[8px] text-xl hover:bg-red-600 hover:text-white"
+                      className="absolute top-0 right-0 bg-gray-300 p-[4px] cursor-pointer font-bold text-xl hover:bg-red-600 hover:text-white"
                     />
-                    <div className="absolute top-0 left-0 px-2 py-[2px] cursor-pointer font-bold rounded-br-[8px] rounded-tl-[8px] text-xs bg-gray-500 text-white">
+                    <div className="absolute top-0 left-0 px-2 py-[2px] cursor-pointer font-bold text-xs bg-gray-500 text-white">
                       {index + 1}
                     </div>
                     <div className="col-span-2 py-2">

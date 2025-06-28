@@ -13,6 +13,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
 import SelectTime from "@/utils/selectTime";
+import { useStoreCount } from "@/hooks/useQueryData";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function AddStoreModal({
   asChild,
@@ -21,10 +23,16 @@ export default function AddStoreModal({
   editData,
 }) {
   const [open, setOpen] = useState(false);
+  const { user } = useAuthStore();
   const [hasSubmittedClick, setHasSubmittedClick] = useState(false);
   const [error, setError] = useState("");
   const [selectedOpenTime, setSelectedOpenTime] = useState();
   const [selectedCloseTime, setSelectedCloseTime] = useState();
+  const {
+    data: storeCount,
+    isLoading: storeIsLoading,
+    isError: storeIsError,
+  } = useStoreCount();
 
   const fieldSchema = Yup.object().shape({
     name: Yup.string()
@@ -151,11 +159,22 @@ export default function AddStoreModal({
             />
             <Button
               type="submit"
-              buttonName={`${edit ? "Edit" : "Add"} Store`}
+              disabled={user?.data?.storeLimit <= storeCount?.total}
+              buttonName={`${
+                user?.data?.storeLimit <= storeCount?.total
+                  ? "Reach Maximum"
+                  : edit
+                  ? "Edit Store"
+                  : "Add Store"
+              }`}
               handleButtonClick={() => {
-                setHasSubmittedClick(true);
+                user?.data?.storeLimit >= storeCount?.total
+                  ? toast.error(
+                      "You have reach the limit of maximum store you can create with this package"
+                    )
+                  : setHasSubmittedClick(true);
               }}
-              className={"w-full"}
+              className={`w-full`}
               icon={""}
             />
           </div>

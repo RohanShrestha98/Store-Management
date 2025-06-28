@@ -53,7 +53,7 @@ export default function UserTrends() {
     <div className="flex gap-2 items-center">
       {legends.map((item, index) => (
         <div key={index} className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${item.color}`}></div>
+          <div className={`w-2 h-2 ${item.color}`}></div>
           <p className="text-[#667085] text-sm font-normal">{item.name}</p>
         </div>
       ))}
@@ -61,10 +61,7 @@ export default function UserTrends() {
   );
 
   return (
-    <div
-      className="p-5 bg-white rounded-xl"
-      style={{ width: "100%", height: "300px" }}
-    >
+    <div className="p-5 bg-white" style={{ width: "100%", height: "300px" }}>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-[#4C4C4C] text-lg font-semibold">User Trends</h2>
         <CustomLegend />

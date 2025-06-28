@@ -11,6 +11,7 @@ import AddUserModal from "./AddUserModal";
 import { RxCross2 } from "react-icons/rx";
 import CustomSelect from "@/ui/CustomSelect";
 import InputField from "@/ui/InputField";
+import truncateText from "@/utils/truncateText";
 
 export default function User() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -86,7 +87,7 @@ export default function User() {
             <p>
               {info?.row?.original?.email === ""
                 ? "-"
-                : info?.row?.original?.email}
+                : truncateText(info?.row?.original?.email)}
             </p>
           );
         },
@@ -124,7 +125,7 @@ export default function User() {
         cell: (info) => {
           return (
             <p
-              className={`inline-block text-xs px-4 w-[100px] text-center cursor-default rounded-full py-[2px] font-medium text-white ${
+              className={`inline-block text-xs px-4  text-center cursor-default rounded-full py-[2px] font-medium text-white ${
                 info?.row?.original?.isVerified
                   ? "bg-[#027A48]"
                   : "bg-yellow-600"
@@ -222,7 +223,7 @@ export default function User() {
           </div>
         </AddUserModal>
       </div>
-      <div>
+      <div className="">
         <SearchPagination
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}

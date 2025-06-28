@@ -39,12 +39,12 @@ export default function StoreProduct() {
   }, [page, pageSize, searchText]);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-2">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div
             onClick={() => setStock(true)}
-            className={`border px-4 py-1 rounded-full text-sm font-semibold hover:opacity-75 cursor-pointer ${
+            className={`border px-4 py-1 text-sm font-semibold hover:opacity-75 cursor-pointer ${
               stock ? "bg-black text-white" : "text-black bg-gray-200"
             }`}
           >
@@ -52,7 +52,7 @@ export default function StoreProduct() {
           </div>
           <div
             onClick={() => setStock(false)}
-            className={`border px-4 py-1 rounded-full text-sm font-semibold hover:opacity-75 cursor-pointer ${
+            className={`border px-4 py-1  text-sm font-semibold hover:opacity-75 cursor-pointer ${
               stock ? "text-black bg-white" : "bg-black text-gray-200"
             }`}
           >
@@ -65,14 +65,14 @@ export default function StoreProduct() {
           handleButtonClick={() => navigate("/add-product")}
         />
       </div>
-      <div className=" p-4 rounded-xl min-h-[76vh] bg-white border ">
+      <div className=" p-4 min-h-[76vh] bg-white border ">
         <div className="grid grid-cols-5 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
             return (
               <div
                 key={item.id}
                 // onClick={() => handleProductClick(item)}
-                className="px-2 py-1 border cursor-pointer hover:drop-shadow-lg bg-white flex flex-col gap-[2px] justify-between border-gray-300 rounded-[6px] text-sm relative"
+                className="p-2  border cursor-pointer hover:drop-shadow-lg bg-white flex flex-col gap-[2px] justify-between border-gray-300 text-sm relative"
               >
                 <img
                   className="h-28 object-cover"

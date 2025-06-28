@@ -1,4 +1,4 @@
-export default function InputField({
+export default function TextArea({
   type = "text",
   disabled,
   placeholder = "",
@@ -20,7 +20,7 @@ export default function InputField({
           {label} {required && <span className="text-red-600">*</span>}{" "}
         </p>
       )}
-      <input
+      <textarea
         placeholder={placeholder}
         onChange={(e) => {
           setSearchText(e.target.value);

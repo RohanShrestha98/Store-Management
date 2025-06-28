@@ -58,7 +58,6 @@ export default function BarcodeScanner({
             placeholder={"Scan the product barcode"}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            style={{ borderRadius: "6px" }}
             className={`flex h-8 border border-gray-300 rounded-lg bg-white px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:border-gray-700 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-full mt-[-10px] ${
               !manual && "cursor-not-allowed"
             }`}

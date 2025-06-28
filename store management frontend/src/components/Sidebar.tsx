@@ -44,7 +44,7 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
     },
     {
       id: 4,
-      name: "User Product",
+      name: "Checkout",
       icon: <LuSquareUser />,
       link: "/user-product",
     },
@@ -101,13 +101,13 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
   };
 
   return (
-    <div className="border-r h-full  w-full flex flex-col bg-black  text-[#C9BCF7] ">
+    <div className="border-r h-full  w-full flex flex-col bg-[#000080]  text-[#f4f4f4] ">
       <div
         onClick={() => {
           setActive("/");
           navigate("/");
         }}
-        className="flex cursor-pointer md:justify-center p-4 gap-1 items-center mb-1"
+        className="flex cursor-pointer md:justify-center px-4 py-2 gap-1 items-center mb-1"
       >
         <img className="h-12 w-12" src={logo} alt="logo" />
         {!hideSidebar && (
@@ -126,7 +126,7 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
               if (role == "Staff") {
                 return (
                   item?.name === "Dashboard" ||
-                  item?.name === "User Product" ||
+                  item?.name === "Checkout" ||
                   item?.name === "Sales History" ||
                   item?.name === "Notification" ||
                   item?.name === "Profile" ||
@@ -168,10 +168,10 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
       <LogoutModal asChild>
         <div
           onClick={() => {}}
-          className={`flex  px-4 py-[2px] font-medium items-center  gap-2 text-red-600  mt-4  border-l-4 border-transparent cursor-pointer `}
+          className={`flex  px-4 py-2 pt-4 font-medium items-center  gap-2 text-red-600   border-l-4 border-transparent cursor-pointer `}
         >
           <div className="text-lg">
-            <IoIosLogOut />
+            <IoIosLogOut size={20} />
           </div>
           {!hideSidebar && <div className="line-clamp-1">Logout</div>}
         </div>

@@ -35,7 +35,7 @@ export default function PaymentGateway() {
     <div className="flex gap-2 justify-center">
       {legends.map((item, index) => (
         <div
-          className="border border-[#F2F2F2] rounded-xl px-2 py-2 cursor-pointer flex flex-col gap-1"
+          className="border border-[#F2F2F2] px-2 py-2 cursor-pointer flex flex-col gap-1"
           key={index}
         >
           <div className="flex items-center gap-1">
@@ -48,7 +48,7 @@ export default function PaymentGateway() {
                   : item?.name == "High"
                   ? "bg-[#E67E22]"
                   : "bg-[#E74C3C]"
-              } w-6 h-6  min-w-6 rounded-lg min-h-6`}
+              } w-6 h-6  min-w-6 min-h-6`}
             ></p>
             <p className="text-[#808080] font-medium text-sm">{item.name}</p>
           </div>
@@ -61,7 +61,7 @@ export default function PaymentGateway() {
   );
 
   return (
-    <div className="p-5 bg-white rounded-xl">
+    <div className="p-5 bg-white">
       <h2 className="text-[#4C4C4C] text-lg font-semibold mb-5">Impact</h2>
       <div className="-ml-14">
         <ResponsiveContainer width="100%" height={150}>

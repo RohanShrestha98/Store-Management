@@ -24,7 +24,7 @@ export default function LoginInput({
         </p>
       )}
       <div
-        className={`flex items-center  justify-between pr-3 h-10 w-full border border-gray-300 rounded-lg bg-white  text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground  outline-none focus-visible:ring-2 focus-visible:ring-ring hover:border-gray-700 focus-visible:ring-offset-2 py-1 disabled:cursor-not-allowed disabled:opacity-50
+        className={`flex items-center  justify-between pr-3 h-10 w-full border border-gray-300 bg-white  text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground  outline-none focus-visible:ring-2 focus-visible:ring-ring hover:border-gray-700 focus-visible:ring-offset-2 py-1 disabled:cursor-not-allowed disabled:opacity-50
                    ${className}`}
       >
         <input
@@ -36,7 +36,6 @@ export default function LoginInput({
           defaultValue={defaultValue}
           {...register(name)}
           type={type === "password" ? passwordType : type}
-          style={{ borderRadius: "6px" }}
           className={` h-full w-full px-3 py-2 outline-none  focus-visible:border-gray-700`}
         />
         {type === "password" && (

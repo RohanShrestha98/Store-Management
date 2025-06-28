@@ -20,8 +20,8 @@ const createStore = async (req, res) => {
     }
 
     await connect.execute(
-      "INSERT INTO store (name, address, storeNumber, open, close) VALUES (?, ?, ?, ?, ?)",
-      [name, address, storeNumber, open, close]
+      "INSERT INTO store (name, address, storeNumber, open, close, createdBy) VALUES (?, ?, ?, ?, ?, ?)",
+      [name, address, storeNumber, open, close, req?.user?.id]
     );
 
     await connect.end();
@@ -73,6 +73,30 @@ const getStore = async (req, res) => {
   } catch (err) {
     console.error("Error retrieving store:", err);
     statusHandeler(res, 500, false, "Error retrieving store");
+  }
+};
+
+const getTotalStoreCount = async (req, res) => {
+  const userId = req?.user?.id;
+
+  try {
+    const [stores] = await connection.query(
+      "SELECT * FROM store WHERE createdBy = ? ORDER BY createdAt DESC",
+      [userId]
+    );
+
+    const total = stores?.length;
+
+    return res.status(200).json({
+      success: true,
+      total,
+    });
+  } catch (error) {
+    console.error("Error retrieving user stores:", error);
+    return res.status(500).json({
+      success: false,
+      msg: "Internal Server Error",
+    });
   }
 };
 
@@ -137,6 +161,7 @@ const updateStore = async (req, res) => {
 
 module.exports = {
   createStore,
+  getTotalStoreCount,
   getStore,
   updateStore,
   deleteStore,

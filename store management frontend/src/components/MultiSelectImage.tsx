@@ -3,12 +3,12 @@ import { GoPlus } from "react-icons/go";
 export default function MultiSelectImage({ files = [], setFiles }) {
   const handleFileChange = (e) => {
     const selected = Array.from(e.target.files);
-    const combined = [...(files || []), ...selected].slice(0, 5); // Ensure files is an array
+    const combined = [...(files || []), ...selected].slice(0, 5);
     setFiles(combined);
-    e.target.value = ""; // Reset input for re-selection
+    e.target.value = "";
   };
 
-  const numberImages = Array.from({ length: 5 });
+  const numberImages = Array.from({ length: 1 });
 
   return (
     <div>
@@ -23,7 +23,7 @@ export default function MultiSelectImage({ files = [], setFiles }) {
           return (
             <label
               key={index}
-              htmlFor={!image ? "files" : undefined} // only attach label when it's a plus
+              htmlFor={!image ? "files" : undefined}
               className="cursor-pointer border-dashed flex items-center justify-center border-gray-400 w-12 h-12 border rounded overflow-hidden"
             >
               {image ? (

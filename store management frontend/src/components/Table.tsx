@@ -78,7 +78,7 @@ const ReactTable = React.forwardRef(
           </div>
         ) : (
           data?.length > 0 && (
-            <table className="w-full ">
+            <table className="w-full">
               <thead className="border-b-[1px] border-white4">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>

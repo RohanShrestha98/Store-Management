@@ -32,6 +32,7 @@ import { IoCalendarClearOutline } from "react-icons/io5";
 import truncateText from "@/utils/truncateText";
 import { FiEdit2 } from "react-icons/fi";
 import { useAuthStore } from "@/store/useAuthStore";
+import TextArea from "@/ui/TextArea";
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -291,7 +292,7 @@ export default function AddProduct() {
     return <Loading />;
   }
   return (
-    <div className="flex justify-between gap-6 items-start p-6 relative h-full">
+    <div className="flex justify-between gap-3 items-start p-6 relative h-full">
       <MdOutlineQrCodeScanner
         onClick={() => setOpen(true)}
         className="absolute cursor-pointer bg-white text-2xl border p-1 w-8 h-8 top-0 right-0"
@@ -331,7 +332,7 @@ export default function AddProduct() {
 
             {productNameFields?.map((item) => {
               return (
-                <InputField
+                <TextArea
                   register={register}
                   name={item?.registerName}
                   placeholder={item?.placeHolder}

@@ -151,7 +151,7 @@ const login = async (req, res) => {
     return res.status(400).json({ error: "User not found" });
   }
 
-  if (!rows?.[0]?.isVerified) {
+  if (!rowsAdmin && !rows?.[0]?.isVerified) {
     return res.status(400).json({ error: "User is not verified" });
   }
 

@@ -19,7 +19,7 @@ export default function DashboardNotification() {
   const [active, setActive] = useState("push notification");
 
   return (
-    <div className="py-5 bg-white rounded-xl">
+    <div className="py-5 bg-white">
       <div className="flex flex-col gap-5 px-5">
         <div className="flex gap-4">
           <div
@@ -49,7 +49,7 @@ export default function DashboardNotification() {
             ?.map((item, index) => (
               <div
                 key={index}
-                className="bg-[#f0f4f8] px-5 py-2 rounded-sm flex justify-between"
+                className="bg-[#f0f4f8] px-5 py-2 flex justify-between"
               >
                 <div className="flex flex-col gap-1">
                   <h2 className="text-[#4D4D4D] text-base font-semibold">

@@ -88,12 +88,12 @@ export default function Vendor() {
           </div>
         </AddVendorModal>
       </div>
-      <div className="p-4 rounded-xl bg-white border h-[76vh] overflow-auto">
+      <div className="p-4 bg-white border h-[76vh] overflow-auto">
         <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
             console.log("item", item);
             return (
-              <div className="border border-gray-300 bg-[#f0edfa] p-2 mb-2 relative rounded-xl">
+              <div className="border border-gray-300 bg-[#f0edfa] p-2 mb-2 relative">
                 <p className="text-sm flex justify-between items-center font-semibold text-gray-600">
                   <div className="flex gap-1 items-center line-clamp-1">
                     <LuStore /> {truncateText(item?.name, 30)}
@@ -128,7 +128,7 @@ export default function Vendor() {
                         onClick={() =>
                           navigate(`${option?.navigate}/${item?.name}/`)
                         }
-                        className={`cursor-pointer border flex flex-col gap-[2px] py-3  items-center justify-center rounded-[8px] border-gray-300 bg-white hover:bg-[#e2dbf9] hover:border-gray-400 `}
+                        className={`cursor-pointer border flex flex-col gap-[2px] py-3  items-center justify-center border-gray-300 bg-white hover:bg-[#e2dbf9] hover:border-gray-400 `}
                       >
                         {option?.icon}
                         {option?.name}

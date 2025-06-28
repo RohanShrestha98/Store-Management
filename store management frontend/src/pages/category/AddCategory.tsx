@@ -85,7 +85,7 @@ export default function AddCategory() {
   };
 
   return (
-    <div className="flex justify-between gap-6 items-start p-6">
+    <div className="flex justify-between gap-3 items-start p-6">
       <form
         className="w-3/5 bg-white p-6 rounded-md h-[80vh] overflow-auto flex flex-col justify-between"
         onSubmit={handleSubmit(onSubmitHandler)}

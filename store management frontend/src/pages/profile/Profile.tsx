@@ -46,7 +46,7 @@ export default function Profile() {
   return (
     <div className="p-4 flex flex-col gap-4">
       <div className=" h-[84vh] md:h-full overflow-auto no-scrollbar flex justify-between gap-3 md:flex-col">
-        <div className=" w-1/3 lg:w-1/2 md:w-full border border-gray-300 h-full bg-white rounded-xl p-3 pt-4 items-center flex gap-2 flex-col ">
+        <div className=" w-1/3 lg:w-1/2 md:w-full border border-gray-300 h-full bg-white p-3 pt-4 items-center flex gap-2 flex-col ">
           <img
             className="w-[140px] h-[140px] object-fill"
             src={profileImage}
@@ -73,12 +73,12 @@ export default function Profile() {
             </div>
           </div>
         </div>
-        <div className="w-2/3 lg:w-1/2 md:w-full border border-gray-300 bg-white rounded-xl h-full overflow-auto">
+        <div className="w-2/3 lg:w-1/2 md:w-full border border-gray-300 bg-white h-full overflow-auto">
           <div className="p-3 underline">Schedule</div>
           <div className="grid grid-cols-2 lg:grid-cols-1">
             <Calendar />
             <div className="border bg-[#f9f9f9] flex flex-col gap-3 p-3 h-[74vh] overflow-auto no-scrollbar">
-              <div className="border border-gray-300 p-3 rounded-[8px]  bg-white">
+              <div className="border border-gray-300 p-3 bg-white">
                 <div className="flex items-end justify-between font-semibold border-b border-gray-400">
                   <p className=" ">Last Punch</p>
                   <p className="text-sm  text-[#5d31fd]">View</p>
@@ -90,7 +90,7 @@ export default function Profile() {
                   <p className="font-medium">Punch at 05:56 AM</p>
                 </div>
               </div>
-              <div className="border border-gray-300 p-3 rounded-[8px] bg-white">
+              <div className="border border-gray-300 p-3 bg-white">
                 <div className="flex items-end justify-between font-semibold border-b border-gray-400">
                   <p className=" ">Next Shift</p>
                   <p className="text-sm  text-[#5d31fd]">View</p>

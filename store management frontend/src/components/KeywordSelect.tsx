@@ -49,10 +49,10 @@ export default function KeywordSelect(props) {
   return (
     <div className="">
       <p className="text-[#344054] font-medium text-sm mb-1">{title} </p>
-      <div className="border flex flex-wrap gap-2 mt-2 bg-white px-3 py-2 min-h-[40px] rounded border-stroke">
+      <div className="border flex flex-wrap gap-2 mt-2 bg-white px-3 py-2 min-h-[40px]  border-stroke">
         {tags?.map((tag, index) => (
           <div
-            className="flex gap-2 px-2 text-sm rounded items-center bg-slate-100"
+            className="flex gap-2 px-2 text-sm  items-center bg-slate-100"
             key={index}
           >
             {tag}

@@ -104,6 +104,9 @@ export const useCategoryData = (searchText = "", pageSize = "10", page = 1) =>
 export const useCategoryNameData = () =>
   useQueryData(["category-name"], `api/category/name-list/`);
 
+export const useStoreCount = () =>
+  useQueryData(["store-count"], `api/store/count/`);
+
 export const useCategoryDetailsData = (id) =>
   useQueryData(
     ["category-details", id],
