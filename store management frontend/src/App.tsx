@@ -33,7 +33,7 @@ function App() {
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/register" element={<SignUp />} />
           <Route path="/clock-in" element={<ClockIn />} />
           <Route path="/admin-register" element={<AdminRegister />} />
         </Route>
@@ -52,7 +52,7 @@ function App() {
             element={isAdmin && <VendorProduct />}
           />
           <Route path="/product" element={isAdmin && <Product />} />
-          <Route path="/add-product" element={isAdmin && <AddProduct />} />
+          <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product/:id" element={isAdmin && <AddProduct />} />
           <Route path="/category" element={isAdmin && <Category />} />
           <Route path="/sales-history" element={<SalesHistory />} />

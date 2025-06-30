@@ -12,8 +12,10 @@ import { RxCross2 } from "react-icons/rx";
 import CustomSelect from "@/ui/CustomSelect";
 import InputField from "@/ui/InputField";
 import truncateText from "@/utils/truncateText";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function User() {
+  const { user } = useAuthStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
@@ -23,7 +25,7 @@ export default function User() {
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
   const [selectedStore, setSelectedStore] = useState(
-    searchParams.get("store") ?? ""
+    searchParams.get("store") ?? user?.data?.storeId ?? ""
   );
   const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function User() {
   } = useStoreData();
 
   const storeOptions = storeData?.data?.map((item) => {
-    return { value: item?.storeNumber, label: item?.name };
+    return { value: item?.id, label: item?.name };
   });
 
   const columns = useMemo(
@@ -141,7 +143,7 @@ export default function User() {
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.role?.title ?? "Staff",
+        accessorFn: (row) => row?.role ?? "Staff",
         id: "role",
         header: () => <span>Role</span>,
         footer: (props) => props.column.id,
@@ -191,13 +193,15 @@ export default function User() {
             className={"w-[220px] border text-gray-500 border-gray-300"}
             setSearchText={setSearchText}
           />
-          <CustomSelect
-            options={storeOptions}
-            placeholder={"Select Store"}
-            className={`w-[160px] text-xs text-gray-500 border-gray-300 focus-visible:border-gray-700`}
-            setSelectedField={setSelectedStore}
-          />
-          {(searchText || selectedStore) && (
+          {user?.data?.role === "Admin" && (
+            <CustomSelect
+              options={storeOptions}
+              placeholder={"Select Store"}
+              className={`w-[160px] text-xs text-gray-500 border-gray-300 focus-visible:border-gray-700`}
+              setSelectedField={setSelectedStore}
+            />
+          )}
+          {user?.data?.role === "Admin" && (searchText || selectedStore) && (
             <div
               onClick={() => {
                 setSearchText("");

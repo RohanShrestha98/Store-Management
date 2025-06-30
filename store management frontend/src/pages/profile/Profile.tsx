@@ -32,7 +32,9 @@ export default function Profile() {
     },
     {
       label: "Shift Time",
-      value: `${data?.shift[0]?.start} - ${data?.shift[0]?.end}`,
+      value: `${data?.shift?.[0]?.start ?? "None"} - ${
+        data?.shift?.[0]?.end ?? "None"
+      }`,
     },
 
     {

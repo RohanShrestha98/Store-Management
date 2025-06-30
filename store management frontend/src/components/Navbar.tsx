@@ -5,8 +5,6 @@ import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect, useRef, useState } from "react";
 import truncateText from "@/utils/truncateText";
-import { useNotificationData } from "@/hooks/useQueryData";
-import { IoMdArrowBack } from "react-icons/io";
 
 export default function Navbar() {
   const loaction = useLocation();
@@ -21,7 +19,6 @@ export default function Navbar() {
   const { user } = useAuthStore();
   const [showNotification, setShowNotification] = useState(false);
   const buttonRef = useRef(null);
-  console.log("user", user?.data);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -90,7 +87,7 @@ export default function Navbar() {
           {user?.data?.firstName ?? user?.data?.name ?? "Rohan"}
         </p>
         <img
-          onClick={() => navigate("/settings")}
+          onClick={() => navigate("/profile")}
           src={profile}
           className="w-9 h-9 cursor-pointer rounded-full object-cover"
           alt=""

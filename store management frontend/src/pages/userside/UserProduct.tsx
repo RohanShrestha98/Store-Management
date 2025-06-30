@@ -3,6 +3,7 @@ import {
   useAddProductByBarcodeData,
   useCategoryData,
   useProductForUserData,
+  useStoreData,
 } from "@/hooks/useQueryData";
 import Button from "@/ui/Button";
 import truncateText from "@/utils/truncateText";
@@ -45,8 +46,11 @@ export default function UserProduct() {
   const [selectedCategory, setSelectedCategory] = useState(
     searchParams.get("category") ?? ""
   );
+  const [selectedStore, setSelectedStore] = useState(
+    searchParams.get("store") ?? user?.data?.storeId ?? ""
+  );
   const { data, isLoading, isError } = useProductForUserData(
-    user?.data?.storeNumber,
+    selectedStore,
     10,
     false,
     true,
@@ -60,6 +64,7 @@ export default function UserProduct() {
     isLoading: categoryIsLoading,
     isError: categoryIsError,
   } = useCategoryData();
+
   const [selectedProduct, setSelectedProduct] = useState([]);
   const [open, setOpen] = useState(false);
   const [openCheckOutModal, setOpenCheckOutModal] = useState(false);
@@ -86,6 +91,12 @@ export default function UserProduct() {
     isError: productDetailsIsError,
   } = useAddProductByBarcodeData(debouncedBarCode);
 
+  const {
+    data: storeData,
+    isLoading: storeIsLoading,
+    isError: storeIsError,
+  } = useStoreData();
+
   useEffect(() => {
     const product = productDetsilsData?.data?.[0];
 
@@ -111,6 +122,10 @@ export default function UserProduct() {
   }, [productDetsilsData]);
 
   const categoryOptions = categoryData?.data?.map((item) => {
+    return { value: item?.id, label: item?.name };
+  });
+
+  const storeOptions = storeData?.data?.map((item) => {
     return { value: item?.id, label: item?.name };
   });
 
@@ -141,6 +156,7 @@ export default function UserProduct() {
   const onSubmitHandler = async () => {
     const postData = {
       sales: checkoutProduct,
+      storeId: selectedStore,
     };
     try {
       await salesMutation.mutateAsync([`post`, "/create", postData]);
@@ -174,9 +190,10 @@ export default function UserProduct() {
       page: page,
       pageSize: pageSize,
       category: selectedCategory,
+      store: selectedStore,
     };
     setSearchParams(searchQuery);
-  }, [page, pageSize, searchText, selectedCategory]);
+  }, [page, pageSize, searchText, selectedCategory, selectedStore]);
 
   return (
     <div>
@@ -190,6 +207,14 @@ export default function UserProduct() {
           className={"w-[220px] border text-gray-500 border-gray-300"}
           setSearchText={setSearchText}
         />
+        {user?.data?.role === "Admin" && (
+          <CustomSelect
+            options={storeOptions}
+            placeholder={"Select store"}
+            className={`w-[160px] text-xs text-gray-500 border-gray-300 focus-visible:border-gray-700`}
+            setSelectedField={setSelectedStore}
+          />
+        )}
         <CustomSelect
           options={categoryOptions}
           placeholder={"Select Category"}

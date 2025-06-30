@@ -112,7 +112,7 @@ export default function Category() {
   }, [page, pageSize, searchText]);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-2">
       <div className="flex justify-between items-center">
         <InputField
           placeholder={"Search category ..."}

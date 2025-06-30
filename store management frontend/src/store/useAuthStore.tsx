@@ -13,6 +13,14 @@ const authStore = (set: any) => ({
       return { user: user };
     });
   },
+  registerStore: decryptedData(cookies.get("registerStore")) || null,
+
+  setRegisterStore: (registerStore: any) => {
+    set(() => {
+      cookies.set("registerStore", encryptData(registerStore));
+      return { registerStore: registerStore };
+    });
+  },
 
   logout: () =>
     set(() => {

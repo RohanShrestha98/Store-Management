@@ -33,7 +33,6 @@ export default function ClockIn() {
         "/create/",
         postData,
       ]);
-      console.log("response", response);
       reset();
       setError();
       setUser({

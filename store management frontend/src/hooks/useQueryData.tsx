@@ -23,14 +23,14 @@ export const useQueryData = (
 };
 
 export const useUserData = (
-  storeNumber,
+  storeId,
   searchText = "",
   pageSize = "10",
   page = 1
 ) =>
   useQueryData(
-    ["user", searchText, pageSize, page, storeNumber],
-    `api/user/?searchText=${searchText}&pageSize=${pageSize}&page=${page}&storeNumber=${storeNumber}`
+    ["user", searchText, pageSize, page, storeId],
+    `api/user/?searchText=${searchText}&pageSize=${pageSize}&page=${page}&storeId=${storeId}`
   );
 
 export const useStoreData = (searchText = "", pageSize = "10", page = 1) =>
@@ -49,26 +49,27 @@ export const useProductData = (
   vendor,
   searchText = "",
   pageSize = "10",
-  page = 1
+  page = 1,
+  storeId = ""
 ) =>
   useQueryData(
-    ["product", searchText, pageSize, page, vendor],
-    `api/product/?searchText=${searchText}&page=${page}&pageSize=${pageSize}&vendor=${vendor}`
+    ["product", searchText, pageSize, page, vendor, storeId],
+    `api/product/?searchText=${searchText}&page=${page}&pageSize=${pageSize}&vendor=${vendor}&storeId=${storeId}`
   );
 
 export const useSalesData = (
-  storeNumber = "",
+  storeId = "",
   searchText = "",
   pageSize = 10,
   page = 1
 ) =>
   useQueryData(
-    ["sales", searchText, pageSize, page, storeNumber],
-    `api/sales/?searchText=${searchText}&pageSize=${pageSize}&page=${page}&storeNumber=${storeNumber}`
+    ["sales", searchText, pageSize, page, storeId],
+    `api/sales/?searchText=${searchText}&pageSize=${pageSize}&page=${page}&storeId=${storeId}`
   );
 
 export const useProductForUserData = (
-  storeNumber,
+  storeId,
   limit,
   change,
   stock = true,
@@ -77,6 +78,11 @@ export const useProductForUserData = (
   page = "1",
   categoryId = ""
 ) => {
+  const hasStoreId =
+    storeId !== undefined &&
+    storeId !== "undefined" &&
+    storeId !== null &&
+    storeId.trim() !== "";
   return useQueryData(
     [
       "product-for-user",
@@ -84,13 +90,13 @@ export const useProductForUserData = (
       page,
       change,
       stock,
-      storeNumber,
+      storeId,
       limit,
       searchText,
       categoryId,
     ],
-    `api/product/user/?store=${
-      storeNumber ?? "all"
+    `api/product/user/?storeId=${
+      hasStoreId ? storeId : ""
     }&limit=${limit}&stock=${stock}&searchText=${searchText}&page=${page}&pageSize=${pageSize}&categoryId=${categoryId}`
   );
 };
@@ -136,14 +142,14 @@ export const useAddProductByBarcodeData = (
   barCode,
   addProduct = false,
   done,
-  storeNumber,
+  storeId,
   limit
 ) => {
   const { user } = useAuthStore();
   return useQueryData(
-    ["product-bar-code", barCode, addProduct, storeNumber, done],
-    `api/product/bar-code/?barCode=${barCode}&storeNumber=${
-      storeNumber ?? user?.data?.storeNumber
+    ["product-bar-code", barCode, addProduct, storeId, done],
+    `api/product/bar-code/?barCode=${barCode}&storeId=${
+      storeId ?? user?.data?.storeId
     }&addProduct=${addProduct}&limit=${limit ?? 1}`,
     "",
     !!barCode

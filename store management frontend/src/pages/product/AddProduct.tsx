@@ -30,7 +30,6 @@ import { MdOutlineQrCodeScanner } from "react-icons/md";
 import Loading from "@/assets/AllSvg";
 import { IoCalendarClearOutline } from "react-icons/io5";
 import truncateText from "@/utils/truncateText";
-import { FiEdit2 } from "react-icons/fi";
 import { useAuthStore } from "@/store/useAuthStore";
 import TextArea from "@/ui/TextArea";
 
@@ -49,7 +48,7 @@ export default function AddProduct() {
   const [selectedCategory, setSelectedCategory] = useState();
   const [error, setError] = useState();
   const { data, isLoading, isError } = useProductForUserData(
-    user?.data?.storeNumber,
+    user?.data?.storeId,
     10,
     done,
     "",
@@ -124,7 +123,7 @@ export default function AddProduct() {
 
       setDescription(scannedBarCodeData?.description || "");
       setSelectedVendor(scannedBarCodeData?.vendor || "");
-      setSelectedStore(scannedBarCodeData?.storeNumber || "");
+      setSelectedStore(scannedBarCodeData?.storeId || "");
       setSelectedCategory(scannedBarCodeData?.categoryId || "");
     } else {
       reset({
@@ -154,7 +153,7 @@ export default function AddProduct() {
     formData.append("barCode", scannedBarCode);
     formData.append("description", description);
     formData.append("vendor", selectedVendor);
-    formData.append("storeNumber", selectedStore);
+    formData.append("storeId", selectedStore);
     formData.append("specification", JSON.stringify(specification));
     formData.append("categoryId", selectedCategory);
     Object.entries(data).forEach(([key, value]) => {
@@ -263,7 +262,7 @@ export default function AddProduct() {
       placeHolder: "Select store",
       options: convertToSelectOptions(storeData?.data),
       className: "",
-      defaultValue: defaultSelect(storeData?.data, edit?.storeNumber),
+      defaultValue: defaultSelect(storeData?.data, edit?.storeId),
       setSelectedField: setSelectedStore,
       error: error?.store,
       label: "Store",

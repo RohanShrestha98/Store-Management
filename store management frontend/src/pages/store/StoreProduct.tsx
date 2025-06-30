@@ -19,6 +19,7 @@ export default function StoreProduct() {
     searchParams.get("pageSize") ?? "10"
   );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
+  console.log("id", id);
   const { data, isLoading, isError } = useProductForUserData(
     id,
     20,

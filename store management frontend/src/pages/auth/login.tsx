@@ -41,7 +41,6 @@ const Login = () => {
         data: result?.data,
       });
       toast.success("Login successfully");
-      console.log("result", result?.data);
       result?.data?.role == "Staff" ? navigate("/user-product") : navigate("/");
       reset();
     } catch (error) {

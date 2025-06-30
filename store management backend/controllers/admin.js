@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const { nullCheckHandler } = require("../helper/nullCheckHandler");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { paginateQuery } = require("../helper/paginationHelper");
+const crypto = require("crypto");
+
+const uid = crypto.randomBytes(16).toString("hex");
 
 const createAdmin = async (req, res) => {
   const { name, email, password, phoneNumber, address, storeLimit } = req.body;
@@ -48,8 +51,17 @@ const createAdmin = async (req, res) => {
     }
 
     await connect.execute(
-      "INSERT INTO admins (name, storeLimit, email, password, phoneNumber, address, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [name, storeLimit, email, hashedPassword, phoneNumber, address, "Admin"]
+      "INSERT INTO admins (id, name, storeLimit, email, password, phoneNumber, address, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        uid,
+        name,
+        storeLimit,
+        email,
+        hashedPassword,
+        phoneNumber,
+        address,
+        "Admin",
+      ]
     );
 
     await connect.end();

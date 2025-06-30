@@ -4,7 +4,6 @@ import TopButton from "@/components/TopButton";
 import { useStoreData } from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
-import DeleteModal from "@/components/DeleteModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AddStoreModal from "./AddStoreModal";
 import { LuStore } from "react-icons/lu";
@@ -14,9 +13,13 @@ import truncateText from "@/utils/truncateText";
 import Loading from "@/assets/AllSvg";
 import EmptyPage from "@/components/EmptyPage";
 import InputField from "@/ui/InputField";
+import { AiOutlineCopy } from "react-icons/ai";
+import { useAuthStore } from "@/store/useAuthStore";
+import toast from "react-hot-toast";
 
 export default function Store() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
@@ -61,6 +64,20 @@ export default function Store() {
     },
   ];
 
+  const handleCopyRegsiterLink = (storeId) => {
+    const baseUrl = window.location.origin;
+    const url = `${baseUrl}/register/?store=${storeId}&userId=${user?.data?.id}`;
+
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        toast.success("Link copied to clipboard!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy the link.");
+      });
+  };
+
   useEffect(() => {
     const searchQuery = {
       searchText: searchText,
@@ -101,9 +118,14 @@ export default function Store() {
                     <LuStore /> {truncateText(item?.name, 30)}
                   </div>
                   <div className="flex gap-1 text-base mb-2">
+                    <AiOutlineCopy
+                      onClick={() => handleCopyRegsiterLink(item?.id)}
+                      size={14}
+                      className="text-green-500 cursor-pointer"
+                    />
                     <AddStoreModal asChild edit editData={item}>
                       <FiEdit2
-                        size={12}
+                        size={14}
                         className="text-blue-500 cursor-pointer"
                       />
                     </AddStoreModal>
@@ -114,7 +136,7 @@ export default function Store() {
                       id={item?.id}
                     > */}
                     <FaRegTrashCan
-                      size={12}
+                      size={14}
                       className="text-red-600 cursor-not-allowed"
                     />
                     {/* </DeleteModal> */}
@@ -128,7 +150,7 @@ export default function Store() {
                     return (
                       <div
                         onClick={() =>
-                          navigate(`${option?.navigate}/${item?.storeNumber}`, {
+                          navigate(`${option?.navigate}/${item?.id}`, {
                             state: item,
                           })
                         }

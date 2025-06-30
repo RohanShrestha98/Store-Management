@@ -1,27 +1,47 @@
 const { connection, createConnection } = require("../database");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
+const crypto = require("crypto");
+
+const uid = crypto.randomBytes(16).toString("hex");
 
 const createStore = async (req, res) => {
   const { name, address, storeNumber, open, close } = req.body;
   const requiredFields = { name, address, storeNumber, open, close };
 
   if (requiredFieldHandler(res, requiredFields)) return;
-
   try {
     const connect = await createConnection();
 
     const [rows] = await connect.execute(
-      "SELECT * FROM store WHERE storeNumber = ?",
-      [storeNumber]
+      "SELECT * FROM store WHERE storeNumber = ? AND createdBy = ?",
+      [storeNumber, req?.user?.id]
     );
-    if (rows.length > 0) {
-      return statusHandeler(res, 400, false, "Store number already exists");
+    const existCheck = [
+      {
+        label: "name",
+        value: rows?.[0]?.name == name,
+      },
+      {
+        label: "storeNumber",
+        value: rows?.[0]?.storeNumber == storeNumber,
+      },
+    ];
+    const existingField = existCheck.find((item) => item.value);
+
+    if (existingField) {
+      return statusHandeler(
+        res,
+        400,
+        false,
+        `${existingField.label} already exists`,
+        existingField.label
+      );
     }
 
     await connect.execute(
-      "INSERT INTO store (name, address, storeNumber, open, close, createdBy) VALUES (?, ?, ?, ?, ?, ?)",
-      [name, address, storeNumber, open, close, req?.user?.id]
+      "INSERT INTO store (id, name, address, storeNumber, open, close, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [uid, name, address, storeNumber, open, close, req?.user?.id]
     );
 
     await connect.end();
@@ -38,8 +58,14 @@ const getStore = async (req, res) => {
   const offset = (page - 1) * pageSize;
 
   try {
-    let whereClause = "WHERE 1=1";
-    let params = [];
+    const [userRows] = await connection.query(
+      "SELECT id, role, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+    let userId =
+      req?.user?.role !== "Admin" ? userRows?.[0]?.createdBy : req?.user?.id;
+    let whereClause = `WHERE createdBy = ?`;
+    let params = [userId];
 
     if (searchText) {
       whereClause +=

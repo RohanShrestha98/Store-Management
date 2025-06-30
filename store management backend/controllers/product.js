@@ -3,7 +3,6 @@ const { nullCheckHandler } = require("../helper/nullCheckHandler");
 const { paginateQuery } = require("../helper/paginationHelper");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
-const { getSales } = require("./sales");
 
 const createProduct = async (req, res) => {
   const {
@@ -17,7 +16,7 @@ const createProduct = async (req, res) => {
     description,
     categoryId,
     brand,
-    storeNumber,
+    storeId,
     barCode,
     specification,
   } = req.body;
@@ -35,7 +34,7 @@ const createProduct = async (req, res) => {
     vendor,
     description,
     categoryId,
-    storeNumber,
+    storeId,
     barCode,
     specification,
   };
@@ -50,19 +49,21 @@ const createProduct = async (req, res) => {
   if (categoryError)
     return statusHandeler(res, 400, false, `Category not found`);
 
-  const storeError = await nullCheckHandler(
-    res,
-    "store",
-    "storeNumber",
-    storeNumber
-  );
+  const storeError = await nullCheckHandler(res, "store", "id", storeId);
   if (storeError) return statusHandeler(res, 400, false, `Store not found`);
 
   try {
     const connect = await createConnection();
+    const [userRows] = await connect.execute(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+
+    const createdUnder =
+      req.user.role !== "Admin" ? userRows?.[0]?.createdBy : req.user.id;
 
     await connect.execute(
-      "INSERT INTO product (name, costPrice, sellingPrice, quantity, tax, offer, vendor, description, categoryId, brand, storeNumber, barCode, specification, images, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO product (name, costPrice, sellingPrice, quantity, tax, offer, vendor, description, categoryId, brand, storeId, barCode, specification, images, createdUnder, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         name,
         costPrice,
@@ -74,10 +75,11 @@ const createProduct = async (req, res) => {
         description,
         categoryId,
         brand ?? "No brand",
-        storeNumber,
+        storeId,
         barCode,
         specification,
         JSON.stringify(images),
+        createdUnder,
         req.user?.id,
       ]
     );
@@ -92,23 +94,46 @@ const createProduct = async (req, res) => {
 };
 
 const getProduct = async (req, res) => {
-  const { page = 1, pageSize = 10, searchText = "", vendor } = req.query;
+  const {
+    page = 1,
+    pageSize = 10,
+    searchText = "",
+    vendor,
+    storeId,
+  } = req.query;
   const userId = req?.user?.id;
 
   try {
+    const connect = await createConnection();
+    const [userRows] = await connect.execute(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [userId]
+    );
+    console.log("storeId", storeId);
+    const createdUnder =
+      req.user.role !== "Admin" ? userRows?.[0]?.createdBy : userId;
+    console.log("createdUnder", createdUnder);
+    console.log("vendor", vendor);
+    const hasStoreId =
+      storeId !== undefined && storeId !== null && storeId.trim() !== "";
+
     const { rows, pagenation } = await paginateQuery({
       connection,
-      baseQuery: `SELECT * FROM product WHERE createdBy = ?${
-        vendor ? " AND vendor = ?" : ""
-      }`,
-      countQuery: `SELECT COUNT(*) as total FROM product WHERE createdBy = ?${
-        vendor ? " AND vendor = ?" : ""
-      }`,
+      baseQuery: `SELECT * FROM product WHERE createdUnder = ?  ${
+        hasStoreId ? " AND storeId = ?" : ""
+      } ${vendor ? " AND vendor = ?" : ""}`,
+      countQuery: `SELECT * FROM product WHERE createdUnder = ?  ${
+        hasStoreId ? " AND storeId = ?" : ""
+      } ${vendor ? " AND vendor = ?" : ""}`,
       searchText,
       page,
       pageSize,
       searchField: "name",
-      queryParams: vendor ? [userId, vendor] : [userId],
+      queryParams: vendor
+        ? [createdUnder, vendor]
+        : storeId
+        ? [createdUnder, storeId]
+        : [createdUnder],
     });
 
     return res.status(200).json({
@@ -124,7 +149,7 @@ const getProduct = async (req, res) => {
 
 const getProductForUser = async (req, res) => {
   const {
-    storeNumber,
+    storeId = req?.user?.storeId,
     stock,
     pageSize = 10,
     page = 1,
@@ -136,26 +161,26 @@ const getProductForUser = async (req, res) => {
   const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
   const [salesRows] = await connection.query(
-    `SELECT * FROM sales WHERE storeNumber = ? ORDER BY createdAt DESC`,
-    [storeNumber]
+    `SELECT * FROM sales WHERE storeId = ? ORDER BY createdAt DESC`,
+    [storeId]
   );
 
   const flatSales = salesRows?.flatMap((record) => {
-    const { createdBy, createdAt, storeNumber, sales } = record;
+    const { createdBy, createdAt, storeId, sales } = record;
     const parsedSales = typeof sales === "string" ? JSON.parse(sales) : sales;
 
     return parsedSales?.map((sale) => ({
       ...sale,
       createdBy,
       createdAt,
-      storeNumber,
+      storeId,
       quantity: 1,
     }));
   });
 
   const mergedMap = new Map();
   flatSales?.forEach((item) => {
-    const key = `${item?.barCode}-${item?.storeNumber}`;
+    const key = `${item?.barCode}-${item?.storeId}`;
     if (mergedMap.has(key)) {
       const existing = mergedMap.get(key);
       mergedMap.set(key, {
@@ -176,6 +201,11 @@ const getProductForUser = async (req, res) => {
     if (categoryId) {
       whereClauses.push("categoryId = ?");
       params.push(categoryId);
+    }
+
+    if (storeId) {
+      whereClauses.push("storeId = ?");
+      params.push(storeId);
     }
 
     if (searchText) {
@@ -211,8 +241,7 @@ const getProductForUser = async (req, res) => {
     const updatedProducts = productRows?.map((product) => {
       const saleMatch = mergedSales?.find(
         (sale) =>
-          sale?.barCode === product?.barCode &&
-          sale?.storeNumber === storeNumber
+          sale?.barCode === product?.barCode && sale?.storeId === storeId
       );
 
       const adjustedQuantity = product?.quantity - (saleMatch?.quantity || 0);
@@ -231,8 +260,7 @@ const getProductForUser = async (req, res) => {
       (item) => item.quantity === 0
     );
 
-    const paginatedData =
-      storeNumber == "11111" || isStock ? filteredProducts : outOfStockProducts;
+    const paginatedData = isStock ? filteredProducts : outOfStockProducts;
 
     return res.status(200).json({
       success: true,
@@ -251,7 +279,7 @@ const getProductForUser = async (req, res) => {
 };
 
 const getProductByBarcode = async (req, res) => {
-  const { barCode, storeNumber, addProduct, limit = 1 } = req.query;
+  const { barCode, storeId, addProduct, limit = 1 } = req.query;
 
   const isAddProduct = addProduct === "true";
 
@@ -262,10 +290,10 @@ const getProductByBarcode = async (req, res) => {
           ? "*"
           : "id, images, offer, name, categoryId, createdBy, vendor, barCode, quantity, sellingPrice"
       } FROM product 
-       WHERE barCode = ? AND storeNumber = ? 
+       WHERE barCode = ? AND storeId = ? 
        ORDER BY createdAt DESC 
        LIMIT ${limit}`,
-      [barCode, storeNumber]
+      [barCode, storeId]
     );
 
     return res.status(200).json({ success: true, data: rows || null });

@@ -64,7 +64,7 @@ const ReactTable = React.forwardRef(
 
     return (
       <div
-        className={`border overflow-auto  min-h-[60vh] no-scrollbar  bg-white`}
+        className={`border overflow-auto  min-h-[70vh] no-scrollbar  bg-white`}
       >
         {isLoading ? (
           <div className="flex justify-center  mt-20 w-full">
@@ -87,7 +87,7 @@ const ReactTable = React.forwardRef(
                         <th
                           key={header.id}
                           colSpan={header.colSpan}
-                          className="px-3 bg-[#F9FAFB] py-2 text-left table_header  font-medium text-sm  text-slate-800"
+                          className="px-3 bg-[#eeeeee] py-2 text-left table_header  font-medium text-sm  text-slate-800"
                         >
                           {header.isPlaceholder ? null : (
                             <>

@@ -5,9 +5,21 @@ const { nullCheckHandler } = require("../helper/nullCheckHandler");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { paginateQuery } = require("../helper/paginationHelper");
 
+const crypto = require("crypto");
+
+const uid = crypto.randomBytes(16).toString("hex");
+
 const signUp = async (req, res) => {
-  const { firstName, lastName, email, password, phoneNumber, address } =
-    req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phoneNumber,
+    address,
+    storeId,
+    createdBy,
+  } = req.body;
   const requiredFields = {
     firstName,
     lastName,
@@ -15,6 +27,8 @@ const signUp = async (req, res) => {
     address,
     email,
     password,
+    storeId,
+    createdBy,
   };
 
   if (requiredFieldHandler(res, requiredFields)) return;
@@ -23,6 +37,11 @@ const signUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const connect = await createConnection();
+    const [userRows] = await connection.query(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [createdBy]
+    );
+    let createdUnder = userRows?.[0]?.createdBy;
 
     const [rows] = await connect.execute(
       "SELECT * FROM users WHERE email = ?",
@@ -40,8 +59,19 @@ const signUp = async (req, res) => {
     }
 
     await connect.execute(
-      "INSERT INTO users (firstName, lastName, email, password, phoneNumber, address) VALUES (?, ?, ?, ?, ?, ?)",
-      [firstName, lastName, email, hashedPassword, phoneNumber, address]
+      "INSERT INTO users (id, firstName, lastName, email, password, phoneNumber, address, storeId, createdUnder, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        uid,
+        firstName,
+        lastName,
+        email,
+        hashedPassword,
+        phoneNumber,
+        address,
+        storeId,
+        createdUnder,
+        createdBy,
+      ]
     );
 
     await connect.end();
@@ -66,7 +96,9 @@ const createUser = async (req, res) => {
     phoneNumber,
     address,
     staffId,
+    storeId,
     payPerHour,
+    role,
     isVerified,
   } = req.body;
 
@@ -74,6 +106,7 @@ const createUser = async (req, res) => {
     firstName,
     lastName,
     phoneNumber,
+    storeId,
     address,
     email,
     password,
@@ -85,6 +118,13 @@ const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const connect = await createConnection();
+
+    const [userRows] = await connection.query(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+    let createdUnder =
+      req?.user?.role !== "Admin" ? userRows?.[0]?.createdBy : req?.user?.id;
 
     const [rows] = await connect.execute(
       "SELECT * FROM users WHERE email = ?",
@@ -104,8 +144,9 @@ const createUser = async (req, res) => {
     }
 
     await connect.execute(
-      "INSERT INTO users (firstName, lastName, email, password, phoneNumber, address, staffId, payPerHour, isVerified) VALUES (?, ?, ?, ?, ?, ? , ?, ?, ?)",
+      "INSERT INTO users (id, firstName, lastName, email, password, phoneNumber, address, staffId, payPerHour, isVerified, storeId, role, createdUnder, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?, ?, ?, ?)",
       [
+        uid,
         firstName,
         lastName,
         email,
@@ -115,6 +156,10 @@ const createUser = async (req, res) => {
         staffId,
         payPerHour,
         isVerified,
+        storeId,
+        role,
+        createdUnder,
+        req?.user?.id,
       ]
     );
 
@@ -145,8 +190,6 @@ const login = async (req, res) => {
     [email]
   );
 
-  console.log("rows", rows?.[0]);
-
   if (!rows?.length && !rowsAdmin?.length) {
     return res.status(400).json({ error: "User not found" });
   }
@@ -170,7 +213,7 @@ const login = async (req, res) => {
         name: userData?.name,
         storeLimit: userData?.storeLimit,
         lastName: userData?.lastName,
-        storeNumber: userData?.storeNumber,
+        storeId: userData?.storeId,
         address: userData?.address,
         role: userData?.role,
       };
@@ -200,30 +243,58 @@ const login = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
-  const { page = 1, pageSize = 10, searchText = "", storeNumber } = req.query;
+  const { page = 1, pageSize = 10, searchText = "", storeId } = req.query;
 
   try {
+    const [userRows] = await connection.query(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+
+    const createdUnder =
+      req?.user?.role !== "Admin" ? userRows?.[0]?.createdBy : req?.user?.id;
+
+    const filters = [];
+    const params = [];
+
+    if (storeId ?? req?.user?.storeId) {
+      filters.push("storeId = ?");
+      params.push(storeId ?? req?.user?.storeId);
+    }
+
+    filters.push("createdUnder = ?");
+    params.push(createdUnder);
+
+    const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+
+    const baseQuery = `
+      SELECT id, firstName, lastName, staffId, role, email, isVerified, phoneNumber, address, storeId, payPerHour, days, shift 
+      FROM users 
+      ${whereClause}
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM users 
+      ${whereClause}
+    `;
     const { rows, pagenation } = await paginateQuery({
       connection,
-      baseQuery: `
-        SELECT id, firstName, lastName, staffId, role, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift 
-        FROM users 
-       ${storeNumber ? `WHERE storeNumber = ${storeNumber}` : "WHERE 1=1"}
-      `,
-      countQuery: `
-        SELECT COUNT(*) as total 
-        FROM users 
-        WHERE 1=1
-      `,
+      baseQuery,
+      countQuery,
       searchText,
       page,
       pageSize,
       searchField: "firstName",
+      queryParams: params,
     });
+    const filterCurrentUser = rows?.filter(
+      (item) => item?.id !== req?.user?.id
+    );
 
     return res.status(200).json({
       success: true,
-      data: rows,
+      data: filterCurrentUser,
       pagenation,
     });
   } catch (err) {
@@ -240,7 +311,7 @@ const getUserDetails = async (req, res) => {
 
   try {
     const [rows] = await connection.query(
-      "SELECT id, firstName, lastName, staffId, role, email, isVerified, phoneNumber, address, storeNumber, payPerHour, days, shift FROM users WHERE email = ?",
+      "SELECT id, firstName, lastName, staffId, role, email, isVerified, phoneNumber, address, storeId, payPerHour, days, shift FROM users WHERE email = ?",
       [email]
     );
 
@@ -294,13 +365,12 @@ const updateUser = async (req, res) => {
     payPerHour,
     shift,
     days,
-    storeNumber,
+    storeId,
     role,
     isVerified,
   } = req.body;
   const query =
-    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, isVerified = ?, payPerHour = ?, shift = ?, days = ?, storeNumber = ?, role = ?  WHERE id = ?";
-  console.log("object", req?.body);
+    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, isVerified = ?, payPerHour = ?, shift = ?, days = ?, storeId = ?, role = ?  WHERE id = ?";
   try {
     const [rows] = await connection.execute(
       "SELECT email, phoneNumber, staffId FROM users WHERE id = ?",
@@ -318,7 +388,7 @@ const updateUser = async (req, res) => {
       payPerHour,
       shift,
       days,
-      storeNumber,
+      storeId,
       role ?? "Staff",
       id,
     ]);

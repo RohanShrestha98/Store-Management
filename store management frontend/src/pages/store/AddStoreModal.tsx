@@ -92,7 +92,8 @@ export default function AddStoreModal({
       toast.success(`Store ${edit ? "updated" : "added"} successfully`);
     } catch (err) {
       console.log("err", err);
-      setError(err?.response?.data?.errors);
+      toast.error(err?.response?.data?.msg);
+      setError(err?.response?.data);
     }
   };
 
@@ -168,11 +169,7 @@ export default function AddStoreModal({
                   : "Add Store"
               }`}
               handleButtonClick={() => {
-                user?.data?.storeLimit >= storeCount?.total
-                  ? toast.error(
-                      "You have reach the limit of maximum store you can create with this package"
-                    )
-                  : setHasSubmittedClick(true);
+                setHasSubmittedClick(true);
               }}
               className={`w-full`}
               icon={""}

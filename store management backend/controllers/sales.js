@@ -3,7 +3,7 @@ const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
 
 const createSales = async (req, res) => {
-  const { sales } = req.body;
+  const { sales, storeId = req?.user?.storeId } = req.body;
 
   const requiredFields = {
     sales,
@@ -13,19 +13,15 @@ const createSales = async (req, res) => {
   try {
     const connect = await createConnection();
 
-    if (!req?.user?.storeNumber) {
+    if (!storeId) {
       return res
         .status(400)
         .json({ success: false, message: "Not login to the store" });
     }
 
     await connect.execute(
-      "INSERT INTO sales (sales, storeNumber, createdBy) VALUES (?, ?, ?)",
-      [
-        sales,
-        req?.user?.storeNumber ?? "",
-        req?.user?.firstName ?? req?.user?.name,
-      ]
+      "INSERT INTO sales (sales, storeId, createdBy) VALUES (?, ?, ?)",
+      [sales, storeId ?? "", req?.user?.firstName ?? req?.user?.name]
     );
 
     await connect.end();
@@ -42,32 +38,48 @@ const getSales = async (req, res) => {
     page = 1,
     pageSize = 10,
     date,
-    storeNumber,
+    storeId = req?.user?.storeId,
     searchText = "",
   } = req.query;
+  console.log("storeId", storeId);
 
+  const userId = req?.user?.id;
+  const isAdmin = req?.user?.role === "Admin";
+  const targetDate = date || new Date().toISOString().split("T")[0];
   const limit = parseInt(pageSize);
   const currentPage = parseInt(page);
   const offset = (currentPage - 1) * limit;
-  const isAdmin = req?.user?.role !== "Staff";
-
-  const targetDate = date || new Date().toISOString().split("T")[0];
 
   try {
     let whereClause = "";
     let salesParams = [];
-    if (isAdmin && storeNumber) {
-      whereClause = "WHERE storeNumber = ? ";
-      salesParams = [storeNumber];
+    if (isAdmin && storeId) {
+      whereClause = `WHERE storeId = ?`;
+      salesParams = [storeId];
     } else if (isAdmin) {
-      whereClause = "";
-      salesParams = [];
-    } else if (storeNumber) {
-      whereClause = "WHERE storeNumber = ? AND DATE(createdAt) = ?";
-      salesParams = [storeNumber, targetDate];
+      // Admin: Get sales from all stores they created
+      const [storeRows] = await connection.query(
+        `SELECT id FROM store WHERE createdBy = ?`,
+        [userId]
+      );
+
+      const storeIds = storeRows.map((store) => store?.id);
+
+      if (!storeIds.length) {
+        return res.status(200).json({
+          success: true,
+          data: [],
+          pagenation: { total: 0, page: currentPage, pageSize: limit },
+        });
+      }
+
+      const placeholders = storeIds.map(() => "?").join(", ");
+      whereClause = `WHERE storeId IN (${placeholders})`;
+      salesParams = [...storeIds];
     } else {
-      whereClause = "WHERE storeNumber = ? AND DATE(createdAt) = ?";
-      salesParams = [req?.user?.storeNumber, targetDate];
+      // Staff: Only see their own store's sales for the selected date
+      whereClause = `WHERE storeId = ? AND DATE(createdAt) = ?`;
+      salesParams = [storeId, targetDate];
     }
 
     const salesQuery = `
@@ -75,22 +87,25 @@ const getSales = async (req, res) => {
       ${whereClause}
       ORDER BY createdAt DESC
     `;
+
     const [rows] = await connection.query(salesQuery, salesParams);
 
-    const flatSales = rows?.flatMap((record) => {
-      const { createdBy, createdAt, storeNumber, sales } = record;
-      const parsedSales = typeof sales === "string" ? JSON.parse(sales) : sales;
+    const flatSales =
+      rows?.flatMap((record) => {
+        const { createdBy, createdAt, storeId, sales } = record;
+        const parsedSales =
+          typeof sales === "string" ? JSON.parse(sales) : sales;
 
-      return parsedSales?.map((sale) => ({
-        ...sale,
-        createdBy,
-        createdAt,
-        storeNumber,
-        quantity: 1,
-        sellingPrice: parseFloat(sale?.sellingPrice),
-        total: parseFloat(sale?.sellingPrice),
-      }));
-    });
+        return parsedSales?.map((sale) => ({
+          ...sale,
+          createdBy,
+          createdAt,
+          storeId,
+          quantity: 1,
+          sellingPrice: parseFloat(sale?.sellingPrice),
+          total: parseFloat(sale?.sellingPrice),
+        }));
+      }) || [];
 
     const filteredSales = searchText
       ? flatSales.filter(
@@ -103,7 +118,7 @@ const getSales = async (req, res) => {
     // Merge similar sales
     const mergedMap = new Map();
     filteredSales?.forEach((item) => {
-      const key = `${item?.barCode}-${item?.createdBy}-${item?.createdAt}-${item?.storeNumber}-${item?.sellingPrice}`;
+      const key = `${item?.barCode}-${item?.createdBy}-${item?.createdAt}-${item?.storeId}-${item?.sellingPrice}`;
       if (mergedMap.has(key)) {
         const existing = mergedMap.get(key);
         mergedMap.set(key, {
@@ -118,7 +133,7 @@ const getSales = async (req, res) => {
 
     const mergedSales = Array.from(mergedMap.values());
 
-    // Apply pagination on the final merged list
+    // Pagination
     const total = mergedSales.length;
     const totalPages = Math.ceil(total / limit);
     const paginatedData = mergedSales.slice(offset, offset + limit);

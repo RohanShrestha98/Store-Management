@@ -22,8 +22,9 @@ export default function AddUserModal({
   editData,
 }) {
   const [selectedStore, setSelectedStore] = useState(
-    edit ? editData?.storeNumber : ""
+    edit ? editData?.storeId : ""
   );
+  const [selectedRole, setSelectedRole] = useState(edit ? editData?.role : "");
   const [open, setOpen] = useState(false);
   const [shift, setShift] = useState([{ start: "9AM", end: "10PM" }]);
   const [selectedDays, setSelectedDays] = useState([2, 3, 4, 5, 6]);
@@ -94,7 +95,8 @@ export default function AddUserModal({
     const postData = {
       ...data,
       isVerified: true,
-      storeNumber: selectedStore,
+      storeId: selectedStore ?? editData?.storeId,
+      role: selectedRole ?? editData?.role,
       shift: shift,
       days: [2, 3, 4, 5, 6],
     };
@@ -118,7 +120,7 @@ export default function AddUserModal({
   const storeOptions = data?.data?.map((item) => {
     return {
       label: item?.name,
-      value: item?.storeNumber,
+      value: item?.id,
     };
   });
 
@@ -145,6 +147,11 @@ export default function AddUserModal({
     { label: "Thu", value: 5 },
     { label: "Fri", value: 6 },
     { label: "Sat", value: 7 },
+  ];
+
+  const roleOptions = [
+    { label: "Staff", value: "Staff" },
+    { label: "Manager", value: "Manager" },
   ];
 
   const toggleDay = (value) => {
@@ -246,7 +253,7 @@ export default function AddUserModal({
                 <CustomSelect
                   options={storeOptions}
                   label={""}
-                  placeholder={edit ? editData?.storeNumber : "Select store"}
+                  placeholder={edit ? editData?.storeId : "Select store"}
                   setSelectedField={setSelectedStore}
                   className={"w-full text-sm text-gray-500"}
                   labelName={"Store"}
@@ -269,6 +276,21 @@ export default function AddUserModal({
                 label="Pay per hour"
                 error={errors?.payPerHour?.message}
               />
+              <div>
+                <CustomSelect
+                  options={roleOptions}
+                  label={""}
+                  placeholder={edit ? editData?.role : "Select role"}
+                  setSelectedField={setSelectedRole}
+                  className={"w-full text-sm text-gray-500"}
+                  labelName={"Role"}
+                  required={true}
+                />
+                <p className="text-red-600 text-xs">
+                  {hasSubmittedClick && !selectedRole && "Required"}
+                  {error?.role}
+                </p>
+              </div>
               <div>
                 <p className="text-[#344054] leading-5 font-medium text-sm mb-1">
                   Shift <span className="text-red-600">*</span>

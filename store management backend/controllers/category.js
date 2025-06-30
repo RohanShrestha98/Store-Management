@@ -16,13 +16,20 @@ const createCategory = async (req, res) => {
       "SELECT * FROM category WHERE name = ?",
       [name]
     );
+    const [userRows] = await connect.execute(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+
+    const createdUnder =
+      req.user.role !== "Admin" ? userRows?.[0]?.createdBy : req.user.id;
     if (rows.length > 0) {
       return statusHandeler(res, 400, false, "Category name already exists");
     }
 
     await connect.execute(
-      "INSERT INTO category (name, specification, brands, createdBy) VALUES (?, ?, ?, ?)",
-      [name, specification, brands, req.user.id]
+      "INSERT INTO category (name, specification, brands, createdUnder, createdBy) VALUES (?, ?, ?, ?, ?)",
+      [name, specification, brands, createdUnder, req.user.id]
     );
 
     await connect.end();
@@ -38,14 +45,24 @@ const getCategory = async (req, res) => {
   const { page = 1, pageSize = 10, searchText = "" } = req.query;
 
   try {
+    const [userRows] = await connection.query(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+    let createdUnder =
+      req?.user?.role !== "Admin" ? userRows?.[0]?.createdBy : req?.user?.id;
+    const whereClause = `WHERE createdUnder = ?`;
+    const queryParams = [createdUnder];
+
     const { rows, pagenation } = await paginateQuery({
       connection,
-      baseQuery: "SELECT * FROM category WHERE 1=1",
-      countQuery: "SELECT COUNT(*) as total FROM category WHERE 1=1",
+      baseQuery: `SELECT * FROM category ${whereClause}`,
+      countQuery: `SELECT COUNT(*) as total FROM category ${whereClause}`,
       searchText,
       page,
       pageSize,
       searchField: "name",
+      queryParams,
     });
 
     return res.status(200).json({
@@ -61,7 +78,7 @@ const getCategory = async (req, res) => {
 
 const getCategoryName = async (req, res) => {
   try {
-    const [rows] = await connection.query("SELECT id, name FROM category");
+    const [rows] = await connection.query("SELECT id, name FROM category ");
     const data = rows;
     return res.status(200).json({ success: true, data });
   } catch (err) {

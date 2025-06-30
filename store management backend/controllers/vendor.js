@@ -10,18 +10,24 @@ const createVendor = async (req, res) => {
 
   try {
     const connect = await createConnection();
+    const [userRows] = await connection.query(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+    let createdBy =
+      req?.user?.role !== "Admin" ? userRows?.[0]?.createdBy : req?.user?.id;
 
     const [rows] = await connect.execute(
-      "SELECT * FROM vendor WHERE name = ?",
-      [name]
+      "SELECT * FROM vendor WHERE name = ? AND createdBy = ?",
+      [name, createdBy]
     );
     const [addressRows] = await connect.execute(
-      "SELECT * FROM vendor WHERE address = ?",
-      [address]
+      "SELECT * FROM vendor WHERE address = ? AND createdBy = ?",
+      [address, createdBy]
     );
     const [storeNameRows] = await connect.execute(
-      "SELECT * FROM vendor WHERE storeName = ?",
-      [storeName]
+      "SELECT * FROM vendor WHERE storeName = ? AND createdBy = ?",
+      [storeName, createdBy]
     );
     if (rows?.length > 0) {
       return statusHandeler(
@@ -32,15 +38,6 @@ const createVendor = async (req, res) => {
         "name"
       );
     }
-    if (addressRows?.length > 0)
-      return statusHandeler(
-        res,
-        400,
-        false,
-        "Already exists try different address",
-        "address"
-      );
-
     if (storeNameRows?.length > 0)
       return statusHandeler(
         res,
@@ -76,8 +73,15 @@ const getVendor = async (req, res) => {
   const keyword = `%${searchText}%`;
 
   try {
-    let whereClause = "WHERE 1=1";
-    let params = [];
+    const [userRows] = await connection.query(
+      "SELECT id, role, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+    let userId =
+      req?.user?.role !== "Admin" ? userRows?.[0]?.createdBy : req?.user?.id;
+
+    let whereClause = `WHERE createdBy = ?`;
+    let params = [userId];
 
     if (searchText) {
       whereClause += " AND (name LIKE ? OR address LIKE ? OR storeName LIKE ?)";

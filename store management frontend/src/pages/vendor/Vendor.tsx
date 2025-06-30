@@ -91,7 +91,6 @@ export default function Vendor() {
       <div className="p-4 bg-white border h-[76vh] overflow-auto">
         <div className="grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-3">
           {data?.data?.map((item) => {
-            console.log("item", item);
             return (
               <div className="border border-gray-300 bg-[#f0edfa] p-2 mb-2 relative">
                 <p className="text-sm flex justify-between items-center font-semibold text-gray-600">

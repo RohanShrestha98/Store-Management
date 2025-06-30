@@ -1,14 +1,15 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import logo from "../../assets/logo.svg";
 import { useAuthSignupMutation } from "@/hooks/useMutateData";
 import Button from "@/ui/Button";
 import LoginInput from "@/ui/LoginInput";
 import toast from "react-hot-toast";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const loginSchema = Yup.object().shape({
   firstName: Yup.string()
@@ -27,6 +28,8 @@ const loginSchema = Yup.object().shape({
 
 const SignUp = () => {
   const authMutation = useAuthSignupMutation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { registerStore, setRegisterStore } = useAuthStore();
   const [error, setError] = useState();
   const navigate = useNavigate();
 
@@ -40,14 +43,23 @@ const SignUp = () => {
     resolver: yupResolver(loginSchema),
   });
 
+  useEffect(() => {
+    setRegisterStore({
+      storeId: searchParams.get("store"),
+      userId: searchParams.get("userId"),
+    });
+  }, []);
+
   const onSubmitHandler = async (data) => {
     const postData = {
       ...data,
       isVerified: false,
+      storeId: registerStore?.storeId,
+      createdBy: registerStore?.userId,
     };
     try {
       await authMutation.mutateAsync(["post", "", postData]);
-      toast.success("Signup successfully");
+      toast.success("Regsiter successfully");
       navigate("/login");
       reset();
     } catch (error) {

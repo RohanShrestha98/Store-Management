@@ -1,23 +1,14 @@
 import { useEffect, useState } from "react";
 import { useProductData } from "@/hooks/useQueryData";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import truncateText from "@/utils/truncateText";
 import Loading from "@/assets/AllSvg";
 import EmptyPage from "@/components/EmptyPage";
-import { FaPlus } from "react-icons/fa";
-import Button from "@/ui/Button";
 import moment from "moment";
 
 export default function VendorProduct() {
   const { id } = useParams();
-  console.log("location", id);
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
   );
