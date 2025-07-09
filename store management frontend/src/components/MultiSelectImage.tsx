@@ -7,6 +7,7 @@ export default function MultiSelectImage({ files = [], setFiles }) {
     setFiles(combined);
     e.target.value = "";
   };
+  console.log("files", files);
 
   const numberImages = Array.from({ length: 1 });
 

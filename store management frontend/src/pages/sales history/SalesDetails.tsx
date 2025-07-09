@@ -11,9 +11,8 @@ import { FiDownload } from "react-icons/fi";
 import CustomSelect from "@/ui/CustomSelect";
 import { useAuthStore } from "@/store/useAuthStore";
 import { RxCross2 } from "react-icons/rx";
-import { TbListDetails } from "react-icons/tb";
 
-export default function SalesHistory() {
+export default function SalesDetails() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
   const [searchText, setSearchText] = useState(
@@ -60,25 +59,50 @@ export default function SalesHistory() {
         footer: (props) => props.column.id,
       },
       {
+        accessorFn: (row) => row?.images?.[0],
+        id: "image",
+        cell: (info) => (
+          <div>
+            <img
+              src={
+                info?.row?.original?.images?.[0] ??
+                "http://localhost:3001/uploads/laptop3.jpg"
+              }
+              alt="product"
+              className="h-6 w-8 object-fill rounded"
+            />
+          </div>
+        ),
+        header: () => <span>Image</span>,
+        footer: (props) => props.column.id,
+      },
+      {
+        accessorFn: (row) => row?.name,
+        id: "name",
+        cell: (info) => {
+          return (
+            <p className="max-w-40 line-clamp-1">
+              {truncateText(info?.row?.original?.name, 60)}
+            </p>
+          );
+        },
+        header: () => <span>Name</span>,
+        footer: (props) => props.column.id,
+      },
+      {
         accessorFn: (row) => row?.createdBy,
         id: "createdBy",
         cell: (info) => {
           return (
             <p className="max-w-40 line-clamp-1 flex">
               {truncateText(info?.row?.original?.createdBy, 20)}
+              {user?.data?.role === "NOT" &&
+                `(
+              ${info?.row?.original?.storeNumber ?? ""})`}
             </p>
           );
         },
         header: () => <span>Staff</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row?.store,
-        id: "store",
-        cell: (info) => {
-          return <p className="max-w-40 line-clamp-1 flex">The North FaceIn</p>;
-        },
-        header: () => <span>Store</span>,
         footer: (props) => props.column.id,
       },
       {
@@ -93,59 +117,46 @@ export default function SalesHistory() {
             </p>
           );
         },
-        header: () => <span>Sales date</span>,
+        header: () => <span>Sales Date</span>,
+        footer: (props) => props.column.id,
+      },
+      {
+        accessorFn: (row) => row?.sellingPrice,
+        id: "isVerified",
+        cell: (info) => {
+          return (
+            <p
+              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-semibold
+                  `}
+            >
+              ${info?.row?.original?.sellingPrice}
+            </p>
+          );
+        },
+        // info.getValue(),
+        header: () => <span>Selling price</span>,
         footer: (props) => props.column.id,
       },
       {
         accessorFn: (row) => row?.quantity,
         id: "quantity",
         header: () => <span>Quantity</span>,
-        cell: (info) => {
-          const data = info?.cell?.row?.original;
-          return <div className="pl-4">{data?.quantity}</div>;
-        },
         footer: (props) => props.column.id,
       },
-      {
-        accessorFn: (row) => row?.subTotal,
-        id: "subTotal",
-        cell: (info) => {
-          return <p>${info?.row?.original?.subTotal}</p>;
-        },
-        header: () => <span>Sub total</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row?.salesTax,
-        id: "salesTax",
-        cell: (info) => {
-          return <p>{info?.row?.original?.salesTax}%</p>;
-        },
-        header: () => <span>Sales tax</span>,
-        footer: (props) => props.column.id,
-      },
-
       {
         accessorFn: (row) => row?.total,
         id: "total",
         cell: (info) => {
-          return <p>${info?.row?.original?.total}</p>;
-        },
-        header: () => <span>Total</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row,
-        id: "action",
-        cell: (info) => {
-          const data = info?.cell?.row?.original;
           return (
-            <div className="pl-4 text-blue-800 cursor-pointer">
-              <TbListDetails size={14} />
-            </div>
+            <p
+              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-semibold
+                  `}
+            >
+              ${info?.row?.original?.total}
+            </p>
           );
         },
-        header: () => <span>Action</span>,
+        header: () => <span>Total</span>,
         footer: (props) => props.column.id,
       },
     ],

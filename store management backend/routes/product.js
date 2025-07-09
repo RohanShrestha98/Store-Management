@@ -27,6 +27,11 @@ router.post(
 );
 // router.patch("/update/:id", productControler.updateCategory);
 router.delete("/delete/:id", productControler.deleteProduct);
+router.patch(
+  "/update/:id",
+  upload.array("images", 5),
+  productControler.updateProduct
+);
 router.get("/bar-code/", productControler.getProductByBarcode);
 
 module.exports = router;

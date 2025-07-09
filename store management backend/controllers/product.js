@@ -327,37 +327,110 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const updateCategory = async (req, res) => {
-  const id = req.params.id;
-  const { name, brands, tags } = req.body;
-  const query =
-    "UPDATE category SET name = ?, brands = ?, tags = ? WHERE id = ?";
+const updateProduct = async (req, res) => {
+  const {
+    id,
+    name,
+    costPrice,
+    sellingPrice,
+    quantity,
+    tax,
+    offer,
+    vendor,
+    description,
+    categoryId,
+    brand,
+    images,
+    storeId,
+    barCode,
+    specification,
+  } = req.body;
+
+  const requiredFields = {
+    id,
+    name,
+    costPrice,
+    sellingPrice,
+    quantity,
+    vendor,
+    description,
+    categoryId,
+    storeId,
+    barCode,
+    specification,
+  };
+  if (requiredFieldHandler(res, requiredFields)) return;
+
+  const categoryError = await nullCheckHandler(
+    res,
+    "category",
+    "id",
+    categoryId
+  );
+
+  console.log("specification", specification);
+  const safeSpecification = JSON.parse(JSON.stringify(specification));
+  if (categoryError)
+    return statusHandeler(res, 400, false, `Category not found`);
+
+  const storeError = await nullCheckHandler(res, "store", "id", storeId);
+  if (storeError) return statusHandeler(res, 400, false, `Store not found`);
 
   try {
+    const connect = await createConnection();
+
     const [rows] = await connection.query(
-      "SELECT * FROM category WHERE id = ?",
+      "SELECT * FROM product WHERE id = ?",
       [id]
     );
     const data = rows?.[0];
-    const [result] = await connection.execute(query, [
-      name ?? data?.name,
-      tags ?? data?.tags,
-      brands ?? data?.brands,
-      id,
-    ]);
 
-    if (result.affectedRows === 0) {
-      return statusHandeler(res, 404, false, "Category not found");
-    }
-
-    statusHandeler(
-      res,
-      200,
-      true,
-      `${name ?? data?.name} updated successfully`
+    await connect.execute(
+      `UPDATE product SET 
+    name = ?, 
+    costPrice = ?, 
+    sellingPrice = ?, 
+    quantity = ?, 
+    tax = ?, 
+    offer = ?, 
+    vendor = ?, 
+    description = ?, 
+    categoryId = ?, 
+    brand = ?, 
+    storeId = ?, 
+    barCode = ?, 
+    specification = ?, 
+    images = ?, 
+    createdUnder = ?, 
+    updatedBy = ?
+  WHERE id = ?`,
+      [
+        name ?? data?.name,
+        costPrice ?? data?.costPrice,
+        sellingPrice ?? data?.sellingPrice,
+        quantity ?? data?.quantity,
+        tax ?? data?.tax ?? 0,
+        offer ?? data?.offer ?? 0,
+        vendor ?? data?.vendor,
+        description ?? data?.description,
+        categoryId ?? data?.categoryId,
+        brand ?? data?.brand ?? "No brand",
+        storeId ?? data?.storeId,
+        barCode ?? data?.barCode,
+        safeSpecification,
+        JSON.stringify(images),
+        data?.createdUnder,
+        req.user?.id,
+        id,
+      ]
     );
-  } catch (err) {
-    statusHandeler(res, 500, false, "Error updating category");
+
+    await connect.end();
+
+    return statusHandeler(res, 201, true, "Product updated successfully");
+  } catch (error) {
+    console.error("Error:", error);
+    return statusHandeler(res, 500, false, "Internal Server error");
   }
 };
 
@@ -366,6 +439,6 @@ module.exports = {
   getProductByBarcode,
   createProduct,
   getProduct,
-  updateCategory,
+  updateProduct,
   deleteProduct,
 };

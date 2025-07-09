@@ -90,12 +90,12 @@ const ReactTable = React.forwardRef(
                           className="px-3 bg-[#eeeeee] py-2 text-left table_header  font-medium text-sm  text-slate-800"
                         >
                           {header.isPlaceholder ? null : (
-                            <>
+                            <div>
                               {flexRender(
                                 header.column.columnDef.header,
                                 header.getContext()
                               )}
-                            </>
+                            </div>
                           )}
                         </th>
                       );

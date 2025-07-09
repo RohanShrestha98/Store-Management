@@ -78,7 +78,7 @@ export default function AddProduct() {
     isError: productDetailsIsError,
   } = useAddProductByBarcodeData(debouncedBarCode, true, done);
 
-  const scannedBarCodeData = productDetsilsData?.data?.[0];
+  let scannedBarCodeData = productDetsilsData?.data?.[0];
 
   const fieldSchema = Yup.object().shape({
     name: Yup.string().required("Required"),
@@ -139,6 +139,31 @@ export default function AddProduct() {
     }
   }, [scannedBarCodeData]);
 
+  useEffect(() => {
+    const specFields = {};
+    const spec = edit?.specification ?? {};
+    Object.keys(spec).forEach((key) => {
+      specFields[`${key}_specification`] = spec[key];
+    });
+    if (edit) {
+      reset({
+        name: edit?.name,
+        costPrice: edit?.costPrice,
+        sellingPrice: edit?.sellingPrice,
+        tax: edit?.tax,
+        quantity: edit?.quantity,
+        ...specFields,
+      });
+
+      setDescription(edit?.description);
+      setSelectedVendor(edit?.vendor);
+      setSelectedStore(edit?.storeId);
+      setSelectedCategory(edit?.categoryId);
+    }
+  }, [edit]);
+
+  console.log("edit", edit);
+
   const productMutation = useProductMutation();
   const editScannedDataImages = edit?.images ?? scannedBarCodeData?.images;
   const onSubmitHandler = async (data) => {
@@ -150,12 +175,14 @@ export default function AddProduct() {
       }
     }
     const formData = new FormData();
-    formData.append("barCode", scannedBarCode);
-    formData.append("description", description);
-    formData.append("vendor", selectedVendor);
-    formData.append("storeId", selectedStore);
+    console.log("formData", formData);
+    formData.append("barCode", scannedBarCode ?? edit?.barCode);
+    edit && formData.append("id", edit?.id);
+    formData.append("description", description ?? edit?.description);
+    formData.append("vendor", selectedVendor ?? edit?.vendor);
+    formData.append("storeId", selectedStore ?? edit?.storeId);
     formData.append("specification", JSON.stringify(specification));
-    formData.append("categoryId", selectedCategory);
+    formData.append("categoryId", selectedCategory ?? edit?.categoryId);
     Object.entries(data).forEach(([key, value]) => {
       if (!key.endsWith("_specification")) {
         formData.append(key, value);
@@ -176,6 +203,11 @@ export default function AddProduct() {
       reset();
       setSelectedCategory("");
       setDebouncedBarCode("");
+      setDescription("");
+      setFiles();
+      !edit && setOpen(true);
+      edit && navigate("/product");
+      scannedBarCodeData = [];
       !edit && setDone(!done);
     } catch (err) {
       console.error("Submit error:", err);
@@ -308,7 +340,7 @@ export default function AddProduct() {
       >
         <div className="flex flex-col gap-2 w-full shadow-[inset_0_-6px_6px_-3px_rgba(0,0,0,0.2)] overflow-auto no-scrollbar">
           <div className="grid grid-cols-2 gap-x-2 sm:grid-cols-1">
-            {edit || scannedBarCodeData ? (
+            {edit || editScannedDataImages ? (
               <div>
                 <p className="text-[#344054] leading-5 font-medium text-sm mb-1">
                   Images

@@ -85,7 +85,7 @@ export default function Dashboard() {
             </p>
           );
         },
-        header: () => <span className="flex justify-center pr-4">Total</span>,
+        header: () => <span>Total</span>,
         footer: (props) => props.column.id,
       },
     ],

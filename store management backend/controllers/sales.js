@@ -2,26 +2,57 @@ const { connection, createConnection } = require("../database");
 const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
 
+const crypto = require("crypto");
+
 const createSales = async (req, res) => {
-  const { sales, storeId = req?.user?.storeId } = req.body;
+  const {
+    sales,
+    storeId = req?.user?.storeId,
+    subTotal,
+    quantity,
+    salesTax,
+    total,
+  } = req.body;
+  const uid = crypto.randomBytes(16).toString("hex");
 
   const requiredFields = {
     sales,
+    total,
   };
   if (requiredFieldHandler(res, requiredFields)) return;
 
   try {
     const connect = await createConnection();
+    const [userRows] = await connect.execute(
+      "SELECT id, createdBy FROM users WHERE id = ?",
+      [req?.user?.id]
+    );
+
+    const createdUnder =
+      req.user.role !== "Admin" ? userRows?.[0]?.createdBy : req.user.id;
 
     if (!storeId) {
       return res
         .status(400)
         .json({ success: false, message: "Not login to the store" });
     }
+    await connect.execute(
+      "INSERT INTO sales (id, storeId, subTotal, salesTax, total, quantity, createdBy, createdUnder) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        uid,
+        storeId ?? "",
+        subTotal,
+        salesTax,
+        total,
+        quantity,
+        req?.user?.firstName ?? req?.user?.name,
+        createdUnder,
+      ]
+    );
 
     await connect.execute(
-      "INSERT INTO sales (sales, storeId, createdBy) VALUES (?, ?, ?)",
-      [sales, storeId ?? "", req?.user?.firstName ?? req?.user?.name]
+      "INSERT INTO salesDetails (salesId, sales, storeId, createdBy) VALUES (?, ?, ?, ?)",
+      [uid, sales, storeId ?? "", req?.user?.firstName ?? req?.user?.name]
     );
 
     await connect.end();
@@ -34,6 +65,28 @@ const createSales = async (req, res) => {
 };
 
 const getSales = async (req, res) => {
+  try {
+    const [rows] = await connection.execute(
+      "SELECT * FROM sales ORDER BY createdAt DESC"
+    );
+    const [detailsRows] = await connection.execute(
+      "SELECT * FROM salesDetails ORDER BY createdAt DESC"
+    );
+    return res.status(200).json({
+      success: true,
+      data: rows,
+      detailsRows,
+    });
+  } catch (err) {
+    console.error("Error retrieving sales:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving users",
+    });
+  }
+};
+
+const getSalesDetails = async (req, res) => {
   const {
     page = 1,
     pageSize = 10,
@@ -41,7 +94,6 @@ const getSales = async (req, res) => {
     storeId = req?.user?.storeId,
     searchText = "",
   } = req.query;
-  console.log("storeId", storeId);
 
   const userId = req?.user?.id;
   const isAdmin = req?.user?.role === "Admin";
@@ -78,8 +130,9 @@ const getSales = async (req, res) => {
       salesParams = [...storeIds];
     } else {
       // Staff: Only see their own store's sales for the selected date
-      whereClause = `WHERE storeId = ? AND DATE(createdAt) = ?`;
-      salesParams = [storeId, targetDate];
+      whereClause = `WHERE storeId = ?`;
+      console.log("storeId", storeId);
+      salesParams = [storeId];
     }
 
     const salesQuery = `
@@ -89,6 +142,7 @@ const getSales = async (req, res) => {
     `;
 
     const [rows] = await connection.query(salesQuery, salesParams);
+    console.log("rows", rows);
 
     const flatSales =
       rows?.flatMap((record) => {

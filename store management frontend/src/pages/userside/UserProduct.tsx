@@ -156,7 +156,11 @@ export default function UserProduct() {
   const onSubmitHandler = async () => {
     const postData = {
       sales: checkoutProduct,
+      quantity: checkoutProduct?.length,
       storeId: selectedStore,
+      subTotal: totalPrice,
+      total: totalPrice,
+      salesTax: 8,
     };
     try {
       await salesMutation.mutateAsync([`post`, "/create", postData]);

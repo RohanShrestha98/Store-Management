@@ -21,8 +21,8 @@ export default function Button({
           danger
             ? "border border-red-600  text-red-600 hover:bg-red-600 hover:text-white"
             : noFill
-            ? "bg-white text-[#121212] hover:bg-[#121212] border border-[#121212] hover:text-white"
-            : "bg-[#121212] text-white  hover:bg-white border border-[#121212] hover:text-[#121212]"
+            ? "bg-white text-[#000080] hover:bg-[#000080] border border-[#000080] hover:text-white"
+            : "bg-[#000080] text-white  hover:bg-white border border-[#000080] hover:text-[#000080]"
         } flex items-center gap-1 h-8   ${className}`}
       >
         {icon}
