@@ -100,6 +100,7 @@ const getProduct = async (req, res) => {
     searchText = "",
     vendor,
     storeId,
+    categoryId,
   } = req.query;
   const userId = req?.user?.id;
 
@@ -109,11 +110,9 @@ const getProduct = async (req, res) => {
       "SELECT id, createdBy FROM users WHERE id = ?",
       [userId]
     );
-    console.log("storeId", storeId);
     const createdUnder =
       req.user.role !== "Admin" ? userRows?.[0]?.createdBy : userId;
-    console.log("createdUnder", createdUnder);
-    console.log("vendor", vendor);
+
     const hasStoreId =
       storeId !== undefined && storeId !== null && storeId.trim() !== "";
 
@@ -121,10 +120,14 @@ const getProduct = async (req, res) => {
       connection,
       baseQuery: `SELECT * FROM product WHERE createdUnder = ?  ${
         hasStoreId ? " AND storeId = ?" : ""
-      } ${vendor ? " AND vendor = ?" : ""}`,
+      } ${vendor ? " AND vendor = ?" : ""} ${
+        categoryId ? " AND categoryId = ?" : ""
+      }`,
       countQuery: `SELECT * FROM product WHERE createdUnder = ?  ${
         hasStoreId ? " AND storeId = ?" : ""
-      } ${vendor ? " AND vendor = ?" : ""}`,
+      } ${vendor ? " AND vendor = ?" : ""} ${
+        categoryId ? " AND categoryId = ?" : ""
+      }`,
       searchText,
       page,
       pageSize,

@@ -1,7 +1,12 @@
 import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
-import { useProductData, useStoreData } from "@/hooks/useQueryData";
+import {
+  useCategoryData,
+  useProductData,
+  useStoreData,
+  useVendorData,
+} from "@/hooks/useQueryData";
 import { FiEdit2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import DeleteModal from "@/components/DeleteModal";
@@ -10,9 +15,11 @@ import { FaPlus } from "react-icons/fa";
 import Button from "@/ui/Button";
 import truncateText from "@/utils/truncateText";
 import InputField from "@/ui/InputField";
-import CustomSelect from "@/ui/CustomSelect";
 import { RxCross2 } from "react-icons/rx";
 import { useAuthStore } from "@/store/useAuthStore";
+import SelectModal from "@/components/SelectModal";
+import { LuSquareUser, LuStore } from "react-icons/lu";
+import { MdOutlineCategory } from "react-icons/md";
 
 export default function Product() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,9 +56,18 @@ export default function Product() {
     isLoading: storeIsLoading,
     isError: storeIsError,
   } = useStoreData();
-  const storeOptions = storeData?.data?.map((item) => {
-    return { value: item?.id, label: item?.name };
-  });
+
+  const {
+    data: vendorData,
+    isLoading: vendorIsLoading,
+    isError: vendorIsError,
+  } = useVendorData();
+
+  const {
+    data: categoryData,
+    isLoading: categoryIsLoading,
+    isError: categoryIsError,
+  } = useCategoryData();
 
   const columns = useMemo(
     () => [
@@ -72,7 +88,7 @@ export default function Product() {
                 "http://localhost:3001/uploads/laptop3.jpg"
               }
               alt="product"
-              className="h-8 w-8 object-contain rounded"
+              className="h-6 w-8 object-fill rounded"
             />
           </div>
         ),
@@ -149,6 +165,33 @@ export default function Product() {
     ],
     []
   );
+
+  const selectModal = [
+    {
+      data: storeData?.data,
+      setSelectedField: setSelectedStore,
+      title: "Store",
+      show: user?.data?.role === "Admin",
+      icon: <LuStore />,
+      className: "",
+    },
+    {
+      data: vendorData?.data,
+      setSelectedField: setSelectedStore,
+      title: "Vendor",
+      icon: <LuSquareUser />,
+      show: user?.data?.role === "Admin",
+      className: "",
+    },
+    {
+      data: categoryData?.data,
+      setSelectedField: setSelectedStore,
+      title: "Category",
+      icon: <MdOutlineCategory />,
+      show: true,
+      className: "",
+    },
+  ];
   useEffect(() => {
     const searchQuery = {
       searchText: searchText,
@@ -163,44 +206,61 @@ export default function Product() {
     <div className="p-4 flex flex-col gap-2">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2  relative">
+          {selectModal?.map((item) => {
+            if (item?.show)
+              return (
+                <SelectModal
+                  data={item?.data}
+                  setSelectedField={item?.setSelectedField}
+                  asChild
+                  title={item?.title}
+                >
+                  <p
+                    className={`border px-3 flex items-center gap-[6px] text-sm justify-center cursor-pointer hover:drop-shadow-lg bg-white h-8 text-center rounded-[6px] border-gray-300 drop-shadow-sm  text-gray-700 focus-visible:border-gray-700 ${item?.className}`}
+                  >
+                    <div className="text-sm text-gray-600">{item?.icon}</div>
+                    Select {item?.title}
+                  </p>
+                </SelectModal>
+              );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2">
           <InputField
             placeholder={"Search product ..."}
-            className={"w-[220px] border text-gray-500 border-gray-300"}
+            className={"w-[220px] text-sm border text-gray-500 border-gray-300"}
             setSearchText={setSearchText}
           />
-          {user?.data?.role === "Admin" && (
-            <CustomSelect
-              options={storeOptions}
-              placeholder={"Select Store"}
-              className={`w-[160px] text-xs text-gray-500 border-gray-300 focus-visible:border-gray-700`}
-              setSelectedField={setSelectedStore}
-            />
-          )}
-
-          {(searchText || selectedStore) && user?.data?.role === "Admin" && (
-            <div
-              onClick={() => {
-                setSearchText("");
-                setSelectedStore("");
-                setPage("1");
-                setPageSize("10");
-                setSearchParams({});
-              }}
-              className="flex border h-[30px] gap-1 border-red-600 rounded-[6px] bg-red-600 text-white cursor-pointer items-center font-semibold px-2 text-xs"
-            >
-              <RxCross2 size={14} />
-              <p>Clear</p>
-            </div>
-          )}
+          <Button
+            buttonName={"Add Product"}
+            icon={<FaPlus />}
+            handleButtonClick={() => navigate("/add-product")}
+          />
         </div>
-        <Button
-          buttonName={"Add Product"}
-          icon={<FaPlus />}
-          handleButtonClick={() => navigate("/add-product")}
-        />
       </div>
-
-      <div>
+      <div className="flex items-center gap-2">
+        <p className="text-sm font-medium">Filter : </p>
+        <p className=" flex items-center gap-2 text-xs bg-white px-2 py-1 drop-shadow rounded-[4px]">
+          The North FaceIn
+          <RxCross2 size={14} />
+        </p>
+        <p className="flex items-center gap-2 text-xs bg-white px-2 py-1 drop-shadow rounded-[4px]">
+          The North FaceIn
+          <RxCross2 size={14} />
+        </p>
+      </div>
+      {/* <DashboardTop /> */}
+      <div className=" bg-white drop-shadow">
+        <ReactTable
+          isLoading={isLoading}
+          isError={isError}
+          columns={columns}
+          data={data?.data ?? []}
+          currentPage={1}
+          totalPage={1}
+          emptyMessage="Oops! No Product available right now."
+        />
         <SearchPagination
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
@@ -210,15 +270,6 @@ export default function Product() {
           searchText={searchText}
           pageSize={pageSize}
           setPageSize={setPageSize}
-        />
-        <ReactTable
-          isLoading={isLoading}
-          isError={isError}
-          columns={columns}
-          data={data?.data ?? []}
-          currentPage={1}
-          totalPage={1}
-          emptyMessage="Oops! No Product available right now."
         />
       </div>
     </div>

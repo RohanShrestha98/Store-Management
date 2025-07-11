@@ -7,8 +7,6 @@ const { paginateQuery } = require("../helper/paginationHelper");
 
 const crypto = require("crypto");
 
-const uid = crypto.randomBytes(16).toString("hex");
-
 const signUp = async (req, res) => {
   const {
     firstName,
@@ -32,6 +30,8 @@ const signUp = async (req, res) => {
   };
 
   if (requiredFieldHandler(res, requiredFields)) return;
+
+  const uid = crypto.randomBytes(16).toString("hex");
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -113,6 +113,7 @@ const createUser = async (req, res) => {
   };
 
   if (requiredFieldHandler(res, requiredFields)) return;
+  const uid = crypto.randomBytes(16).toString("hex");
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -370,7 +371,7 @@ const updateUser = async (req, res) => {
     isVerified,
   } = req.body;
   const query =
-    "UPDATE users SET firstName = ?, lastName = ?, staffId = ?, email = ?, phoneNumber = ?, address = ?, isVerified = ?, payPerHour = ?, shift = ?, days = ?, storeId = ?, role = ?  WHERE id = ?";
+    "UPDATE users SET firstName = ?, lastName = ?,   address = ?, isVerified = ?, payPerHour = ?, shift = ?, days = ?, storeId = ?, role = ?  WHERE id = ?";
   try {
     const [rows] = await connection.execute(
       "SELECT email, phoneNumber, staffId FROM users WHERE id = ?",
@@ -380,9 +381,6 @@ const updateUser = async (req, res) => {
     const [result] = await connection.execute(query, [
       firstName,
       lastName,
-      staffId ?? userData?.staffId,
-      email ?? userData?.email,
-      phoneNumber ?? userData?.phoneNumber,
       address,
       true,
       payPerHour,

@@ -14,7 +14,7 @@ export default function SearchPagination({
     <div
       className={`flex items-center ${
         disabled ? "justify-end" : "justify-between"
-      } border-t border-l border-r bg-white p-2 px-3`}
+      }  border-l border-r bg-white p-2 px-3`}
     >
       {!disabled && (
         <input

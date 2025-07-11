@@ -2,7 +2,7 @@ import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
 import { useSalesData, useStoreData } from "@/hooks/useQueryData";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import truncateText from "@/utils/truncateText";
 import InputField from "@/ui/InputField";
@@ -13,12 +13,13 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { RxCross2 } from "react-icons/rx";
 import { TbListDetails } from "react-icons/tb";
 
-export default function SalesHistory() {
+export default function Sales() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
   );
+  const navigate = useNavigate();
   const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -64,7 +65,7 @@ export default function SalesHistory() {
         id: "createdBy",
         cell: (info) => {
           return (
-            <p className="max-w-40 line-clamp-1 flex">
+            <p className="max-w-40 line-clamp-1 flex py-1">
               {truncateText(info?.row?.original?.createdBy, 20)}
             </p>
           );
@@ -140,12 +141,15 @@ export default function SalesHistory() {
         cell: (info) => {
           const data = info?.cell?.row?.original;
           return (
-            <div className="pl-4 text-blue-800 cursor-pointer">
+            <div
+              onClick={() => navigate(`/sales-details/${data?.id}`)}
+              className="pl-4 text-blue-800 cursor-pointer"
+            >
               <TbListDetails size={14} />
             </div>
           );
         },
-        header: () => <span>Action</span>,
+        header: () => <span>Details</span>,
         footer: (props) => props.column.id,
       },
     ],
@@ -166,7 +170,7 @@ export default function SalesHistory() {
       <div className="flex justify-between items-center px-4 pt-4">
         <div className="flex items-center gap-2  relative">
           <InputField
-            placeholder={"Search sales history ..."}
+            placeholder={"Search sales ..."}
             className={"w-[220px] border text-gray-500 border-gray-300"}
             setSearchText={setSearchText}
           />

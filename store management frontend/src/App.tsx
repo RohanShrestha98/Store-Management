@@ -5,7 +5,6 @@ import Login from "./pages/auth/login";
 import AuthLayout from "./layouts/AuthLayout";
 import Users from "./pages/users/Users";
 import Dashboard from "./pages/dashboard/Dashboard";
-import RiskTable from "./pages/risktable/RiskTable";
 import User from "./pages/user/User";
 import Settings from "./pages/settings/Settings";
 import Notification from "./pages/notification/Notification";
@@ -17,13 +16,15 @@ import AddCategory from "./pages/category/AddCategory";
 import Store from "./pages/store/Store";
 import Vendor from "./pages/vendor/Vendor";
 import UserProduct from "./pages/userside/UserProduct";
-import SalesHistory from "./pages/sales history/SalesHistory";
 import StoreProduct from "./pages/store/StoreProduct";
 import ClockIn from "./pages/auth/ClockIn";
 import { useAuthStore } from "./store/useAuthStore";
 import VendorProduct from "./pages/vendor/VendorProduct";
 import Profile from "./pages/profile/Profile";
 import AdminRegister from "./pages/auth/adminRegsiter";
+import Sales from "./pages/sales history/Sales";
+import SalesDetails from "./pages/sales history/SalesDetails";
+import StoreStaff from "./pages/store/StoreStaff";
 
 function App() {
   const { user } = useAuthStore();
@@ -46,6 +47,7 @@ function App() {
             path="/store-product/:id"
             element={isAdmin && <StoreProduct />}
           />
+          <Route path="/store-staff/:id" element={isAdmin && <StoreStaff />} />
           <Route path="/vendor" element={isAdmin && <Vendor />} />
           <Route
             path="/vendor-product/:id"
@@ -55,7 +57,8 @@ function App() {
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product/:id" element={isAdmin && <AddProduct />} />
           <Route path="/category" element={isAdmin && <Category />} />
-          <Route path="/sales-history" element={<SalesHistory />} />
+          <Route path="/sales" element={<Sales />} />
+          <Route path="/sales-details/:id" element={<SalesDetails />} />
           <Route path="/add-category" element={isAdmin && <AddCategory />} />
           <Route
             path="/edit-category/:id"

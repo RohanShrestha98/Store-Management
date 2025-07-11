@@ -126,6 +126,15 @@ export default function Category() {
         />
       </div>
       <div>
+        <ReactTable
+          isLoading={isLoading}
+          isError={isError}
+          columns={columns}
+          data={data?.data ?? []}
+          currentPage={1}
+          totalPage={1}
+          emptyMessage="Oops! No category to show"
+        />
         <SearchPagination
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
@@ -135,15 +144,6 @@ export default function Category() {
           searchText={searchText}
           pageSize={pageSize}
           setPageSize={setPageSize}
-        />
-        <ReactTable
-          isLoading={isLoading}
-          isError={isError}
-          columns={columns}
-          data={data?.data ?? []}
-          currentPage={1}
-          totalPage={1}
-          emptyMessage="Oops! No category to show"
         />
       </div>
     </div>

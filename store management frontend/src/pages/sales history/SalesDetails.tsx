@@ -1,20 +1,19 @@
 import SearchPagination from "@/components/SearchPagination";
 import { ReactTable } from "../../components/Table";
 import { useEffect, useMemo, useState } from "react";
-import { useSalesData, useStoreData } from "@/hooks/useQueryData";
-import { useSearchParams } from "react-router-dom";
+import { useSalesDetailsData } from "@/hooks/useQueryData";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import truncateText from "@/utils/truncateText";
 import InputField from "@/ui/InputField";
 import Button from "@/ui/Button";
 import { FiDownload } from "react-icons/fi";
-import CustomSelect from "@/ui/CustomSelect";
 import { useAuthStore } from "@/store/useAuthStore";
-import { RxCross2 } from "react-icons/rx";
 
 export default function SalesDetails() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
+  const { id: salesId } = useParams();
   const [searchText, setSearchText] = useState(
     searchParams.get("searchText") ?? ""
   );
@@ -29,26 +28,13 @@ export default function SalesDetails() {
   const [pageSize, setPageSize] = useState(
     searchParams.get("pageSize") ?? "10"
   );
-  const [selectedStore, setSelectedStore] = useState(
-    searchParams.get("store") ?? user?.data?.storeId ?? ""
-  );
   const [page, setPage] = useState(searchParams.get("page") ?? 1);
-  const { data, isLoading, isError } = useSalesData(
-    selectedStore,
+  const { data, isLoading, isError } = useSalesDetailsData(
+    salesId,
     debouncedSearchText,
     pageSize,
     page
   );
-
-  const {
-    data: storeData,
-    isLoading: storeIsLoading,
-    isError: storeIsError,
-  } = useStoreData();
-
-  const storeOptions = storeData?.data?.map((item) => {
-    return { value: item?.id, label: item?.name };
-  });
 
   const columns = useMemo(
     () => [
@@ -144,12 +130,21 @@ export default function SalesDetails() {
         footer: (props) => props.column.id,
       },
       {
+        accessorFn: (row) => row?.salesTax,
+        id: "salesTax",
+        cell: (info) => {
+          return <p>{info?.row?.original?.salesTax}%</p>;
+        },
+        header: () => <span>Sales tax</span>,
+        footer: (props) => props.column.id,
+      },
+      {
         accessorFn: (row) => row?.total,
         id: "total",
         cell: (info) => {
           return (
             <p
-              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-semibold
+              className={`inline-block text-xs  cursor-default rounded-full py-[2px] font-semibold
                   `}
             >
               ${info?.row?.original?.total}
@@ -167,44 +162,19 @@ export default function SalesDetails() {
       searchText: searchText,
       page: page,
       pageSize: pageSize,
-      store: selectedStore,
+      salesId: salesId,
     };
     setSearchParams(searchQuery);
-  }, [page, pageSize, searchText, selectedStore]);
+  }, [page, pageSize, searchText, salesId]);
 
   return (
     <div>
-      <div className="flex justify-between items-center px-4 pt-4">
-        <div className="flex items-center gap-2  relative">
-          <InputField
-            placeholder={"Search sales history ..."}
-            className={"w-[220px] border text-gray-500 border-gray-300"}
-            setSearchText={setSearchText}
-          />
-          {user?.data?.role === "Admin" && (
-            <CustomSelect
-              options={storeOptions}
-              placeholder={"Select Store"}
-              className={`w-[160px] text-xs text-gray-500 border-gray-300 focus-visible:border-gray-700`}
-              setSelectedField={setSelectedStore}
-            />
-          )}
-          {user?.data?.role === "Admin" && (searchText || selectedStore) && (
-            <div
-              onClick={() => {
-                setSearchText("");
-                setSelectedStore("");
-                setPage("1");
-                setPageSize("10");
-                setSearchParams({});
-              }}
-              className="flex border h-[30px] gap-1 border-red-600 rounded-[6px] bg-red-600 text-white cursor-pointer items-center font-semibold px-2 text-xs"
-            >
-              <RxCross2 size={14} />
-              <p>Clear</p>
-            </div>
-          )}
-        </div>
+      <div className="flex justify-end items-center px-4 pt-4">
+        {/* <InputField
+          placeholder={"Search sales history ..."}
+          className={"w-[220px] border text-gray-500 border-gray-300"}
+          setSearchText={setSearchText}
+        /> */}
         <Button
           buttonName={"Download"}
           icon={<FiDownload />}

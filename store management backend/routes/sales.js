@@ -7,6 +7,7 @@ router.use(createUserValidateToken);
 
 router.get("/", salesControler.getSales);
 router.post("/create", salesControler.createSales);
+router.get("/details/:id", salesControler.getSalesDetails);
 router.delete("/delete/:id", salesControler.deleteStore);
 
 module.exports = router;

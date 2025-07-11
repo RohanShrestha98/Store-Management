@@ -71,9 +71,9 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
     },
     {
       id: 8,
-      name: "Sales History",
+      name: "Sales",
       icon: <TbReportSearch />,
-      link: "/sales-history",
+      link: "/sales",
     },
     {
       id: 9,
@@ -104,7 +104,7 @@ export default function Sidebar({ hideSidebar, setHideSidebar }) {
       [
         "Dashboard",
         "Checkout",
-        "Sales History",
+        "Sales",
         "Notification",
         "Profile",
         "Product",

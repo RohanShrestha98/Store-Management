@@ -68,6 +68,17 @@ export const useSalesData = (
     `api/sales/?searchText=${searchText}&pageSize=${pageSize}&page=${page}&storeId=${storeId}`
   );
 
+export const useSalesDetailsData = (
+  salesId = "",
+  searchText = "",
+  pageSize = 10,
+  page = 1
+) =>
+  useQueryData(
+    ["sales-details", searchText, pageSize, page, salesId],
+    `api/sales/details/${salesId}/?searchText=${searchText}&pageSize=${pageSize}&page=${page}`
+  );
+
 export const useProductForUserData = (
   storeId,
   limit,

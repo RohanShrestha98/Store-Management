@@ -317,7 +317,7 @@ export default function UserProduct() {
                 {selectedProduct?.map((item, index) => (
                   <div
                     key={index}
-                    className="border border-gray-300 hover:drop-shadow-lg bg-white relative grid grid-cols-3 cursor-pointer items-center gap-1 px-3"
+                    className="border border-gray-300 hover:drop-shadow-lg bg-white relative grid grid-cols-4 cursor-pointer items-center gap-1 px-3"
                   >
                     <img
                       className="h-10 w-[90%] object-cover"

@@ -66,7 +66,7 @@ export default function User() {
         id: "firstName",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 py-1">
               {" "}
               <p className="flex items-center gap-1">
                 {info?.row?.original?.firstName === ""
@@ -227,7 +227,16 @@ export default function User() {
           </div>
         </AddUserModal>
       </div>
-      <div className="">
+      <div className="drop-shadow">
+        <ReactTable
+          isLoading={isLoading}
+          isError={isError}
+          columns={columns}
+          data={data?.data ?? []}
+          currentPage={1}
+          totalPage={1}
+          emptyMessage="Oops! No user to show"
+        />
         <SearchPagination
           totalPage={data?.pagenation?.totalPages}
           setPage={setPage}
@@ -237,15 +246,6 @@ export default function User() {
           searchText={searchText}
           pageSize={pageSize}
           setPageSize={setPageSize}
-        />
-        <ReactTable
-          isLoading={isLoading}
-          isError={isError}
-          columns={columns}
-          data={data?.data ?? []}
-          currentPage={1}
-          totalPage={1}
-          emptyMessage="Oops! No user to show"
         />
       </div>
     </div>

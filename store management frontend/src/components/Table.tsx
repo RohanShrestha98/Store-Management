@@ -64,7 +64,7 @@ const ReactTable = React.forwardRef(
 
     return (
       <div
-        className={`border overflow-auto  min-h-[70vh] no-scrollbar  bg-white`}
+        className={`border overflow-auto  min-h-[64vh] no-scrollbar  bg-white`}
       >
         {isLoading ? (
           <div className="flex justify-center  mt-20 w-full">

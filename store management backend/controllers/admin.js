@@ -6,8 +6,6 @@ const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { paginateQuery } = require("../helper/paginationHelper");
 const crypto = require("crypto");
 
-const uid = crypto.randomBytes(16).toString("hex");
-
 const createAdmin = async (req, res) => {
   const { name, email, password, phoneNumber, address, storeLimit } = req.body;
   const requiredFields = {
@@ -20,6 +18,7 @@ const createAdmin = async (req, res) => {
   };
 
   if (requiredFieldHandler(res, requiredFields)) return;
+  const uid = crypto.randomBytes(16).toString("hex");
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);

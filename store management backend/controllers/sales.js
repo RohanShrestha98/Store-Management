@@ -24,12 +24,12 @@ const createSales = async (req, res) => {
   try {
     const connect = await createConnection();
     const [userRows] = await connect.execute(
-      "SELECT id, createdBy FROM users WHERE id = ?",
+      "SELECT * FROM users WHERE id = ?",
       [req?.user?.id]
     );
 
     const createdUnder =
-      req.user.role !== "Admin" ? userRows?.[0]?.createdBy : req.user.id;
+      req.user.role !== "Admin" ? userRows?.[0]?.createdUnder : req.user.id;
 
     if (!storeId) {
       return res
@@ -51,8 +51,17 @@ const createSales = async (req, res) => {
     );
 
     await connect.execute(
-      "INSERT INTO salesDetails (salesId, sales, storeId, createdBy) VALUES (?, ?, ?, ?)",
-      [uid, sales, storeId ?? "", req?.user?.firstName ?? req?.user?.name]
+      "INSERT INTO salesDetails (salesId, sales, storeId, subTotal, salesTax, total, quantity, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        uid,
+        sales,
+        storeId ?? "",
+        subTotal,
+        salesTax,
+        total,
+        quantity,
+        req?.user?.firstName ?? req?.user?.name,
+      ]
     );
 
     await connect.end();
@@ -65,28 +74,6 @@ const createSales = async (req, res) => {
 };
 
 const getSales = async (req, res) => {
-  try {
-    const [rows] = await connection.execute(
-      "SELECT * FROM sales ORDER BY createdAt DESC"
-    );
-    const [detailsRows] = await connection.execute(
-      "SELECT * FROM salesDetails ORDER BY createdAt DESC"
-    );
-    return res.status(200).json({
-      success: true,
-      data: rows,
-      detailsRows,
-    });
-  } catch (err) {
-    console.error("Error retrieving sales:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Error retrieving users",
-    });
-  }
-};
-
-const getSalesDetails = async (req, res) => {
   const {
     page = 1,
     pageSize = 10,
@@ -94,7 +81,6 @@ const getSalesDetails = async (req, res) => {
     storeId = req?.user?.storeId,
     searchText = "",
   } = req.query;
-
   const userId = req?.user?.id;
   const isAdmin = req?.user?.role === "Admin";
   const targetDate = date || new Date().toISOString().split("T")[0];
@@ -108,30 +94,11 @@ const getSalesDetails = async (req, res) => {
     if (isAdmin && storeId) {
       whereClause = `WHERE storeId = ?`;
       salesParams = [storeId];
-    } else if (isAdmin) {
-      // Admin: Get sales from all stores they created
-      const [storeRows] = await connection.query(
-        `SELECT id FROM store WHERE createdBy = ?`,
-        [userId]
-      );
-
-      const storeIds = storeRows.map((store) => store?.id);
-
-      if (!storeIds.length) {
-        return res.status(200).json({
-          success: true,
-          data: [],
-          pagenation: { total: 0, page: currentPage, pageSize: limit },
-        });
-      }
-
-      const placeholders = storeIds.map(() => "?").join(", ");
-      whereClause = `WHERE storeId IN (${placeholders})`;
-      salesParams = [...storeIds];
+    } else if (isAdmin && !storeId) {
+      whereClause = `WHERE createdUnder = ?`;
+      salesParams = [userId];
     } else {
-      // Staff: Only see their own store's sales for the selected date
       whereClause = `WHERE storeId = ?`;
-      console.log("storeId", storeId);
       salesParams = [storeId];
     }
 
@@ -142,11 +109,51 @@ const getSalesDetails = async (req, res) => {
     `;
 
     const [rows] = await connection.query(salesQuery, salesParams);
+
+    // Pagination
+    const total = rows.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginatedData = rows.slice(offset, offset + limit);
+
+    return res.status(200).json({
+      success: true,
+      data: paginatedData,
+      pagenation: {
+        total,
+        page: currentPage,
+        pageSize: limit,
+        totalPages,
+      },
+    });
+  } catch (err) {
+    console.error("Error retrieving sales:", err);
+    statusHandeler(res, 500, false, "Error retrieving sales");
+  }
+};
+
+const getSalesDetails = async (req, res) => {
+  const { page = 1, pageSize = 10, date, searchText = "" } = req.query;
+  const { id: salesId } = req.params;
+
+  const targetDate = date || new Date().toISOString().split("T")[0];
+  const limit = parseInt(pageSize);
+  const currentPage = parseInt(page);
+  const offset = (currentPage - 1) * limit;
+
+  try {
+    const salesQuery = `
+      SELECT * FROM salesDetails 
+      where salesId = ? 
+      ORDER BY createdAt DESC
+    `;
+
+    const [rows] = await connection.query(salesQuery, salesId);
     console.log("rows", rows);
 
     const flatSales =
       rows?.flatMap((record) => {
-        const { createdBy, createdAt, storeId, sales } = record;
+        const { createdBy, createdAt, storeId, sales, subTotal, salesTax } =
+          record;
         const parsedSales =
           typeof sales === "string" ? JSON.parse(sales) : sales;
 
@@ -155,6 +162,7 @@ const getSalesDetails = async (req, res) => {
           createdBy,
           createdAt,
           storeId,
+          salesTax,
           quantity: 1,
           sellingPrice: parseFloat(sale?.sellingPrice),
           total: parseFloat(sale?.sellingPrice),
@@ -195,6 +203,7 @@ const getSalesDetails = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: paginatedData,
+      rows,
       pagenation: {
         total,
         page: currentPage,
@@ -230,5 +239,6 @@ const deleteStore = async (req, res) => {
 module.exports = {
   createSales,
   getSales,
+  getSalesDetails,
   deleteStore,
 };

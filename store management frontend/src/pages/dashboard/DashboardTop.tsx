@@ -79,7 +79,7 @@ export default function DashboardTop() {
         {dashboardTopItems?.map((item, index) => (
           <div
             key={index}
-            className="bg-white px-4 py-2 flex justify-between items-end gap-10"
+            className="bg-white px-4 py-2 drop-shadow flex justify-between items-end gap-10"
           >
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-2">

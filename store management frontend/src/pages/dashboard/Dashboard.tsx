@@ -6,6 +6,7 @@ import { useSalesData } from "@/hooks/useQueryData";
 import { useMemo } from "react";
 import truncateText from "@/utils/truncateText";
 import { ReactTable } from "@/components/Table";
+import moment from "moment";
 
 export default function Dashboard() {
   const { data, isLoading, isError } = useSalesData();
@@ -19,71 +20,56 @@ export default function Dashboard() {
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.images?.[0],
-        id: "image",
-        cell: (info) => (
-          <div>
-            <img
-              src={
-                info?.row?.original?.images?.[0] ??
-                "http://localhost:3001/uploads/laptop3.jpg"
-              }
-              alt="product"
-              className="h-6 w-8 object-contain rounded"
-            />
-          </div>
-        ),
-        header: () => <span>Image</span>,
-        footer: (props) => props.column.id,
-      },
-      {
-        accessorFn: (row) => row?.name,
-        id: "name",
+        accessorFn: (row) => row?.createdBy,
+        id: "createdBy",
         cell: (info) => {
           return (
-            <p className="max-w-40 line-clamp-1">
-              {truncateText(info?.row?.original?.name, 60)}
+            <p className="max-w-40 line-clamp-1 flex">
+              {truncateText(info?.row?.original?.createdBy, 20)}
             </p>
           );
         },
-        header: () => <span>Name</span>,
+        header: () => <span>Staff</span>,
         footer: (props) => props.column.id,
       },
       {
-        accessorFn: (row) => row?.sellingPrice,
-        id: "sellingPrice",
+        accessorFn: (row) => row?.store,
+        id: "store",
+        cell: (info) => {
+          return <p className="max-w-40 line-clamp-1 flex">The North FaceIn</p>;
+        },
+        header: () => <span>Store</span>,
+        footer: (props) => props.column.id,
+      },
+      {
+        accessorFn: (row) => row?.createdAt,
+        id: "createdAt",
         cell: (info) => {
           return (
-            <p
-              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-semibold
-                    `}
-            >
-              ${info?.row?.original?.sellingPrice}
+            <p>
+              {moment(info?.row?.original?.createdAt).format("ddd, MM/DD, YY ")}
             </p>
           );
         },
-        // info.getValue(),
-        header: () => <span>Price</span>,
+        header: () => <span>Sales date</span>,
         footer: (props) => props.column.id,
       },
       {
         accessorFn: (row) => row?.quantity,
         id: "quantity",
         header: () => <span>Quantity</span>,
+        cell: (info) => {
+          const data = info?.cell?.row?.original;
+          return <div className="pl-4">{data?.quantity}</div>;
+        },
         footer: (props) => props.column.id,
       },
+
       {
         accessorFn: (row) => row?.total,
         id: "total",
         cell: (info) => {
-          return (
-            <p
-              className={`inline-block text-xs px-4 cursor-default rounded-full py-[2px] font-semibold
-                    `}
-            >
-              ${info?.row?.original?.total}
-            </p>
-          );
+          return <p>${info?.row?.original?.total}</p>;
         },
         header: () => <span>Total</span>,
         footer: (props) => props.column.id,
