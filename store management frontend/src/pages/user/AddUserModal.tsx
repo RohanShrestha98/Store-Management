@@ -98,7 +98,7 @@ export default function AddUserModal({
       storeId: selectedStore ?? editData?.storeId,
       role: selectedRole ?? editData?.role,
       shift: shift,
-      days: [2, 3, 4, 5, 6],
+      days: selectedDays,
     };
     try {
       await userMutation.mutateAsync([

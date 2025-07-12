@@ -3,11 +3,12 @@ const { requiredFieldHandler } = require("../helper/requiredFieldHandler");
 const { statusHandeler } = require("../helper/statusHandler");
 const crypto = require("crypto");
 
-const uid = crypto.randomBytes(16).toString("hex");
 
 const createStore = async (req, res) => {
   const { name, address, storeNumber, open, close } = req.body;
   const requiredFields = { name, address, storeNumber, open, close };
+const uid = crypto.randomBytes(16).toString("hex");
+
 
   if (requiredFieldHandler(res, requiredFields)) return;
   try {

@@ -79,7 +79,7 @@ export default function StoreStaff() {
     <div className="p-4 flex flex-col gap-2">
       <div className="flex justify-end items-center">
         <Button
-          buttonName={"Add Product"}
+          buttonName={"Add Staff"}
           icon={<FaPlus />}
           handleButtonClick={() => navigate("/add-product")}
         />
